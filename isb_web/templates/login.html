@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>iSample Login</title>
     <!-- link css file-->
-    <link rel=stylesheet type="text/css" href="./CSS/login_Styles.css" />
+    <link rel=stylesheet type="text/css" href="{{url_for('static', path='/CSS/login_Styles.css')}}" />
 </head>
 
 <body>
@@ -29,7 +29,7 @@
             <button class="bt_enter">Enter</button>
         </div>
         <div class="otherLogin">
-            <a href="https://github.com/login/oauth/authorize?client_id=e1f28dcbaec464ecb538"><img src="./img/GitHub-img.png"><br>Github</a>
+            <a href="https://github.com/login/oauth/authorize?client_id=e1f28dcbaec464ecb538"><img src="{{url_for('static', path='/img/GitHub-img.png')}}"><br>Github</a>
         </div>
     </div>
 </body>

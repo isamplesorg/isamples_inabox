@@ -7,7 +7,7 @@ body {
     position: relative;
     background-image: url("../img/earth.jpg");
     background-repeat: no-repeat;
-    background-size: 120%;
+    background-size: 150%;
 }
 
 input {
@@ -24,13 +24,12 @@ input {
     font-size: 50px;
     text-align: center;
     padding-bottom: 20px;
-    color: white;
+    color:white;
 }
 
 .Users {
     font-size: 25px;
-    margin: 5px 0px;
-    color: white;
+     color:white;
 }
 
 .NF_users {
