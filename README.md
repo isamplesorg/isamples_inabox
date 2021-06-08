@@ -8,7 +8,7 @@ repositories, placing the content in a postgres database, relations
 in a Solr index, a Fast-API implementation for accessing the content 
 and a simple UI for viewing. 
 
-##Set app url
+## Set app url
 1) isb_web/config: database_url (set it to local database url)
 2) back-end： （isb_web/routers/settings)
    ```
