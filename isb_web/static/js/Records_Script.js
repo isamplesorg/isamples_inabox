@@ -1,3 +1,6 @@
+
+console.log(app_url)
+
 //create split bar for table and content
 Split(["#records_table", "#info"], {
     direction: "vertical",
@@ -13,7 +16,7 @@ var infoSplit = Split(["#InfoLeft", "#InfoRight"], {
 //log out
 var logout = document.getElementById("logout");
 logout.addEventListener('click', function() {
-    location.href = "http://localhost:2400/";
+    location.href = `${app_url}/login`;
 })
 
 //change the raw data and iSample data panels directions
@@ -220,8 +223,17 @@ async function createIssue() {
     if (reportTitle.value == undefined) {
         alert("Please choose a record!");
     } else {
-        const url = `http://localhost:2400/issues?title=${reportTitle.value}&report=${reportBody.value}`
-        fetch(url)
+        const url = `${app_url}/issues`
+        await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type':'application/json'
+            },
+            body: JSON.stringify({
+                "title": reportTitle.value,
+                "report": reportBody.value,
+            })
+        })
             .then(res => { console.log("success") })
 
         reportModel.style.display = "none";

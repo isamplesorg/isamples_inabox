@@ -19,7 +19,7 @@ button:hover {
 pre {
     border-top: 1px solid;
     border-left: 1px solid;
-    height: calc(100%-25px);
+    height: calc(100% - 25px);
     height: -moz-calc(100% - 25x);
     height: -webkit-calc(100% - 25px);
     margin: 0;
@@ -67,7 +67,7 @@ td[scope="header"] {
 }
 
 .content {
-    height: calc(100%-65px);
+    height: calc(100% - 65px);
     height: -moz-calc(100% - 65px);
     height: -webkit-calc(100% - 65px);
     box-sizing: border-box;
@@ -109,7 +109,7 @@ td[scope="header"] {
 .infoContainer {
     display: flex;
     flex-direction: row;
-    height: calc(100%-25px);
+    height: calc(100% - 25px);
     height: -moz-calc(100% - 25px);
     height: -webkit-calc(100% - 25px);
     box-sizing: border-box;

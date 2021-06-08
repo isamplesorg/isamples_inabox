@@ -4,7 +4,6 @@ import datetime
 import typing
 import requests
 from fastapi.logger import logger as fastapi_logger
-from fastapi.responses import HTMLResponse
 import fastapi.staticfiles
 import fastapi.templating
 import fastapi.middleware.cors
@@ -17,6 +16,7 @@ from isb_web import crud
 from isb_web import config
 from isb_web import isb_format
 from isamples_metadata.SESARTransformer import SESARTransformer
+from isb_web.routers.UI_Api import router
 
 import logging
 
@@ -26,6 +26,7 @@ MEDIA_JSON = "application/json"
 MEDIA_NQUADS = "application/n-quads"
 
 app = fastapi.FastAPI(root_path=WEB_ROOT)
+app.include_router(router)
 
 app.add_middleware(
     fastapi.middleware.cors.CORSMiddleware,
@@ -250,9 +251,7 @@ async def get_related_solr(
 async def root(request: fastapi.Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
-@app.get("/login", response_class=HTMLResponse)
-async def login(request: fastapi.Request):
-    return templates.TemplateResponse("login.html", {"request": request})
+
 
 def main():
     logging.basicConfig(level=logging.DEBUG)

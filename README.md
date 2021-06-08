@@ -1,4 +1,4 @@
-# README for isamples_inabox
+# README for isamples_inabox (Front end part)
 
 **Note:** This work is in active development and likely to change 
 considerably, including split / merge to other repositories.
@@ -8,6 +8,20 @@ repositories, placing the content in a postgres database, relations
 in a Solr index, a Fast-API implementation for accessing the content 
 and a simple UI for viewing. 
 
+##Set app url
+1) isb_web/config: database_url (set it to local database url)
+2) back-end： （isb_web/routers/settings)
+   ```
+   app_url: your app url
+   client_id: your Oauth app client id
+   client_secret: your Oauth app client secret
+   github_ower: the github owner that you want to create an issue
+   repository: the github repository to create an issue
+   ```
+3) front-end: (isb_web/static/js/front_setting.js)
+   ```
+   app_url: your app url
+   ```
 ## Installation
 
 Install Postgres and Solr, e.g.:

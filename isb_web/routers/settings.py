@@ -1,0 +1,5 @@
+app_url = "http://0.0.0.0:8000"
+client_id = "e1f28dcbaec464ecb538"
+client_secret = "4d1fe10f043a9841c9a5fe420438e05488b66545"
+github_ower = "qgan7125"
+repository = "testGithubApi"
