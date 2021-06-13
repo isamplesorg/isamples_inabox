@@ -1,6 +1,4 @@
 
-console.log(app_url)
-
 //create split bar for table and content
 Split(["#records_table", "#info"], {
     direction: "vertical",
@@ -16,7 +14,7 @@ var infoSplit = Split(["#InfoLeft", "#InfoRight"], {
 //log out
 var logout = document.getElementById("logout");
 logout.addEventListener('click', function() {
-    location.href = `${app_url}/login`;
+    location.href = `${app_url}/logout`
 })
 
 //change the raw data and iSample data panels directions

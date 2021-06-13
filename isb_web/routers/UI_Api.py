@@ -3,7 +3,7 @@ import fastapi
 import requests
 import isb_web.routers.settings as settings
 from fastapi import APIRouter, HTTPException
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, Response, JSONResponse
 from urllib.parse import urlencode, parse_qsl
 from isb_web.routers import UIschemas
 from github import Github, GithubException
@@ -59,11 +59,13 @@ async def mainPage(code:str = None):
     response: Dict[bytes, bytes] = dict(parse_qsl(token_request.content))
     github_token = response[b"access_token"].decode("utf-8")
 
-    global Code
-    global token
-    token = github_token
-    Code = code
-    return RedirectResponse(f'{settings.app_url}/mainPage')
+    response = RedirectResponse(f'{settings.app_url}/mainPage')
+    response.set_cookie(
+        key="Authorization",
+        value=github_token,
+        httponly= True
+    )
+    return response
 
 
 @router.get("/mainPage", response_class=HTMLResponse, summary="redirect to main page")
@@ -71,8 +73,9 @@ async def mainPage(request: fastapi.Request):
     return templates.TemplateResponse("Records_View.html", {"request":request})
 
 @router.post("/issues", summary="create a github issue")
-async def createIssue(body: UIschemas.report):
+async def createIssue(request: fastapi.Request, body: UIschemas.report):
     try:
+        token = request.cookies['Authorization']
         git = Github(token)
         repo = git.get_repo(f"{settings.github_ower}/{settings.repository}")
         repo.create_issue(title=body.title, body=body.report)
@@ -82,3 +85,10 @@ async def createIssue(body: UIschemas.report):
     except AssertionError as e:
         raise HTTPException(status_code=400, detail="title is None")
 
+
+@router.get("/logout")
+async def logout(request: fastapi.Request, response:Response):
+
+    response = templates.TemplateResponse("login.html", {"request":request})
+    response.delete_cookie("Authorization")
+    return response
