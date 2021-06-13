@@ -1,14 +1,8 @@
 # README for isamples_inabox (Front end part)
 
-**Note:** This work is in active development and likely to change 
-considerably, including split / merge to other repositories.
+**Note:** This branch is to implement connection of front-end and back-end. The lastest UI version is in the develop branch.
 
-Provides implementation of scripts for harvesting content from 
-repositories, placing the content in a postgres database, relations
-in a Solr index, a Fast-API implementation for accessing the content 
-and a simple UI for viewing. 
-
-##Set app url
+## Set app url
 1) isb_web/config: database_url (set it to local database url)
 2) back-end： （isb_web/routers/settings)
    ```
