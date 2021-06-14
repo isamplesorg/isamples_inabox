@@ -12,10 +12,7 @@
    github_ower: the github owner that you want to create an issue
    repository: the github repository to create an issue
    ```
-3) front-end: (isb_web/static/js/front_setting.js)
-   ```
-   app_url: your app url
-   ```
+
 ## Installation
 
 Install Postgres and Solr, e.g.:
