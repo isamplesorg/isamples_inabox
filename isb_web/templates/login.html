@@ -6,12 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>iSample Login</title>
     <!-- link css file-->
-    <link rel=stylesheet type="text/css" href="./CSS/login_Styles.css" />
+    <link rel=stylesheet type="text/css" href="{{url_for('static', path='/CSS/login_styles.css')}}" />
 </head>
 
 <body>
     <div class="container">
-        <a class="about" href="./about.html">About Us</a>
+        <a class="about" href="http://0.0.0.0:8000/about">About Us</a>
         <div class="title">
             <label><b>iSamples</b></label>
         </div>
@@ -19,22 +19,17 @@
         <input class="inputText1" type="text" placeholder="Enter Username" size="30">
         <label class="password"><b><u>Password</u></b></label>
         <input class="inputText2" type="password" placeholder="Enter password" size="30">
-        <img class="locker" src="img/Locker.png">
-        <a class="SignUp" href="./SignUp.html">Sign Up</a>
+        <img class="locker" src="{{url_for('static', path='/img/Locker.png')}}">
+        <a class="SignUp" href="http://0.0.0.0:8000/signUp">Sign Up</a>
         <a class="fgPass" href="#">Forgot Password?</a>
         <button id="enter" class="bt_enter">Enter</button>
         <div class="otherLogin">
-            <a href="https://github.com/login/oauth/authorize?client_id=e1f28dcbaec464ecb538">
-                <img src="./img/GitHub-img.png"><br> Github
+            <a id="Git" href="#">
+                <img src="{{url_for('static', path='/img/GitHub-img.png')}}" width="50px" height="50px">
             </a>
         </div>
     </div>
+    <script type="text/javascript" src="{{url_for('static', path='/js/login_Script.js')}}"></script>
 </body>
-<script>
-    var enter = document.getElementById('enter');
-    enter.addEventListener("click", function() {
-        window.location.href = "./Preview.html"
-    })
-</script>
 
 </html>

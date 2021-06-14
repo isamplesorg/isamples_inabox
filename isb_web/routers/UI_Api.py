@@ -23,6 +23,7 @@ router.mount(
     fastapi.staticfiles.StaticFiles(directory=os.path.join(THIS_PATH, "../static")),
     name="static",
 )
+
 templates = fastapi.templating.Jinja2Templates(
     directory=os.path.join(THIS_PATH, "../templates")
 )
@@ -30,6 +31,15 @@ templates = fastapi.templating.Jinja2Templates(
 @router.get("/login", response_class=HTMLResponse, summary="redirect to login page")
 async def login(request: fastapi.Request):
     return templates.TemplateResponse("login.html", {"request": request})
+
+@router.get("/about", response_class=HTMLResponse, summary="redirect to about page")
+async def login(request: fastapi.Request):
+    return templates.TemplateResponse("about.html", {"request": request})
+
+@router.get("/signUp", response_class=HTMLResponse, summary="redirect to signUp page")
+async def login(request: fastapi.Request):
+    return templates.TemplateResponse("SignUp.html", {"request": request})
+
 
 @router.get("/login/Git", summary="redirect to git login page")
 async def gitLogin() -> UIschemas.Url:
@@ -70,7 +80,7 @@ async def mainPage(code:str = None):
 
 @router.get("/mainPage", response_class=HTMLResponse, summary="redirect to main page")
 async def mainPage(request: fastapi.Request):
-    return templates.TemplateResponse("Records_View.html", {"request":request})
+    return templates.TemplateResponse("Preview.html", {"request":request})
 
 @router.post("/issues", summary="create a github issue")
 async def createIssue(request: fastapi.Request, body: UIschemas.report):
@@ -88,7 +98,6 @@ async def createIssue(request: fastapi.Request, body: UIschemas.report):
 
 @router.get("/logout")
 async def logout(request: fastapi.Request, response:Response):
-
     response = templates.TemplateResponse("login.html", {"request":request})
     response.delete_cookie("Authorization")
     return response

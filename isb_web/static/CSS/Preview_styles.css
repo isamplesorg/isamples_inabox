@@ -87,7 +87,7 @@ CSS for content
 
 .content {
     box-sizing: border-box;
-    height: calc(100%-65px);
+    height: calc(100% - 65px);
     height: -moz-calc(100% - 65px);
     height: -webkit-calc(100% - 65px);
 }
@@ -122,8 +122,8 @@ CSS for content
 pre {
     border: 1px solid;
     box-sizing: border-box;
-    height: calc(100%-23px);
-    height: -moz-calc(100%-23px);
+    height: calc(100% - 23px);
+    height: -moz-calc(100% - 23px);
     height: -webkit-calc(100% - 23px);
     margin: 0;
     padding: 5px;
@@ -353,4 +353,27 @@ pre::-webkit-scrollbar-corner {
 
 hr {
     border: 1px solid black;
+}
+
+/*
+    For accessible row
+*/
+
+.hasBug {
+    display: none;
+    position: absolute;
+    box-sizing: border-box;
+    margin: auto;
+    left: 0;
+    right: 0;
+    top: 100px;
+    height: 200px;
+    width: 450px;
+    border-radius: 15px;
+    background-color: #C8C8C8;
+}
+
+.BugContainer {
+    padding: 40px;
+    font-size: 25px;
 }

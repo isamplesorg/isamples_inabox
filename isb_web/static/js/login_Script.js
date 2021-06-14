@@ -2,7 +2,7 @@
 var link = document.getElementById('Git')
 
 
-const url = `${app_url}/login/Git`
+const url =  `http://0.0.0.0:8000/login/Git`
 
 fetch(url)
     .then(res => res.json())

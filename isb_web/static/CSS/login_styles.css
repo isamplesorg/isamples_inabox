@@ -159,6 +159,10 @@ For main login html
     font-size: 30px;
 }
 
+.otherLogin:hover {
+    box-shadow: 2px 2px #606060;
+}
+
 
 /*
 For about html
