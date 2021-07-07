@@ -7,6 +7,9 @@ import isb_lib.opencontext_adapter
 import igsn_lib.models
 import concurrent.futures
 import heartrate
+import sqlalchemy
+import sqlalchemy.orm
+import sqlalchemy.exc
 
 LOG_LEVELS = {
     "DEBUG": logging.DEBUG,
@@ -25,17 +28,37 @@ BACKLOG_SIZE = 40
 def get_logger():
     return logging.getLogger("main")
 
+def wrap_load_thing(thing_dict, tc):
+    """Return request information to assist future management"""
+    try:
+        return tc, isb_lib.opencontext_adapter.load_thing(thing_dict)
+    except:
+        pass
+    return tc, None
+
 
 async def _load_open_context_entries(session, max_count, start_from):
     L = get_logger()
     futures = []
-    working = {}
     ids = isb_lib.opencontext_adapter.OpenContextIdentifierIterator(
-        max_entries=100, date_start=start_from
+        max_entries=10, date_start=start_from
     )
 
+    num_ids = 0
     for _id in ids:
-        print("got next id from open context %s", _id)
+        L.info("got next id from open context %s", _id)
+        num_ids += 1
+        try:
+            res = (
+                session.query(igsn_lib.models.thing.Thing.id)
+                    .filter_by(id=_id["uri"])
+                    .one()
+            )
+            logging.info("Already have %s", _id["uri"])
+        except sqlalchemy.orm.exc.NoResultFound:
+            wrap_load_thing(_id, None)
+
+    L.info("total num ids %d", num_ids)
 
     # total_requested = 0
     # total_completed = 0
@@ -74,7 +97,7 @@ def getDBSession(db_url):
     "-d", "--db_url", default=None, help="SQLAlchemy database URL for storage"
 )
 @click.option(
-    "-v", "--verbosity", default="INFO", help="Specify logging level", show_default=True
+    "-v", "--verbosity", default="DEBUG", help="Specify logging level", show_default=True
 )
 @click.option(
     "-H", "--heart_rate", is_flag=True, help="Show heartrate diagnositcs on 9999"
@@ -85,7 +108,7 @@ def main(ctx, db_url, verbosity, heart_rate):
     ctx.ensure_object(dict)
     verbosity = verbosity.upper()
     logging.basicConfig(
-        level=LOG_LEVELS.get(verbosity, logging.INFO),
+        level=LOG_LEVELS.get(verbosity, logging.DEBUG),
         format=LOG_FORMAT,
         datefmt=LOG_DATE_FORMAT,
     )
