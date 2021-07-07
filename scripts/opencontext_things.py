@@ -42,7 +42,7 @@ async def _load_open_context_entries(session, max_count, start_from):
     L = get_logger()
     futures = []
     records = isb_lib.opencontext_adapter.OpenContextRecordIterator(
-        max_entries=max_count, date_start=start_from
+        max_entries=max_count, date_start=start_from, page_size=200
     )
 
     num_ids = 0
@@ -144,7 +144,7 @@ def load_records(ctx, max_records):
     session = getDBSession(ctx.obj["db_url"])
     L.info("loadRecords: %s", str(session))
     # ctx.obj["db_url"] = db_url
-    load_open_context_entries(session, 0, None)
+    load_open_context_entries(session, max_records, None)
 
 
 if __name__ == "__main__":

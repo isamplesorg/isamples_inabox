@@ -1,4 +1,6 @@
 import datetime
+import time
+
 import isb_lib.core
 import logging
 import requests
@@ -72,13 +74,14 @@ class OpenContextRecordIterator(isb_lib.core.IdentifierIterator):
             date_end=date_end,
             page_size=page_size
         )
+        self.url = OPENCONTEXT_API
 
     def records_in_page(self):
         L = get_logger()
         L.debug("records_in_page")
-        url = OPENCONTEXT_API
         headers = {
             "Accept": "application/json",
+            "user-agent": "isamplesbot-3000/0.0.1"
         }
         _page_size = self._page_size
         params = {
@@ -87,10 +90,11 @@ class OpenContextRecordIterator(isb_lib.core.IdentifierIterator):
         more_work = True
         num_records = 0
         while more_work:
-            L.info("trying to hit %s", url)
+            L.info("trying to hit %s", self.url)
             response = requests.get(
-                url, params=params, headers=headers, timeout=HTTP_TIMEOUT
+                self.url, params=params, headers=headers, timeout=HTTP_TIMEOUT
             )
+
             if response.status_code != 200:
                 L.error(
                     "Unable to load records; status: %s; reason: %s",
@@ -106,17 +110,17 @@ class OpenContextRecordIterator(isb_lib.core.IdentifierIterator):
                 # raise NotImplementedError
                 yield record
                 num_records += 1
+            self.url = data["next-json"]
             if len(data.get("oc-api:has-results", {})) < _page_size:
                 more_work = False
             elif 0 < self._max_entries <= num_records:
                 more_work = False
             elif num_records == self._page_size:
                 more_work = False
-            else:
-                url = data["next-json"]
 
     def loadEntries(self):
         self._cpage = []
+        self._page_offset = 0
         counter = 0
         for item in self.records_in_page():
             self._cpage.append(item)
@@ -132,7 +136,11 @@ class OpenContextRecordIterator(isb_lib.core.IdentifierIterator):
         are no more pages available, and self._page_offset is set to the first entry (usually 0)
 
         """
-        if self._cpage is None:
+        is_none = self._cpage is None
+        if is_none or self._page_offset >= len(self._cpage):
+            if not is_none:
+                # Work around the rate limiter
+                time.sleep(0.3)
             self.loadEntries()
         if self._coffset >= self._total_records:
             return
