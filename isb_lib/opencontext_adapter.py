@@ -56,19 +56,21 @@ class OpenContextItem(object):
         return _thing
 
 
-class OpenContextIdentifierIterator(isb_lib.core.IdentifierIterator):
+class OpenContextRecordIterator(isb_lib.core.IdentifierIterator):
     def __init__(
         self,
         offset: int = 0,
         max_entries: int = -1,
         date_start: datetime.datetime = None,
         date_end: datetime.datetime = None,
+        page_size: int = 100
     ):
         super().__init__(
             offset=offset,
             max_entries=max_entries,
             date_start=date_start,
             date_end=date_end,
+            page_size=page_size
         )
 
     def records_in_page(self):
@@ -78,7 +80,7 @@ class OpenContextIdentifierIterator(isb_lib.core.IdentifierIterator):
         headers = {
             "Accept": "application/json",
         }
-        _page_size = self._max_entries
+        _page_size = self._page_size
         params = {
             "rows": _page_size,
         }
@@ -106,7 +108,9 @@ class OpenContextIdentifierIterator(isb_lib.core.IdentifierIterator):
                 num_records += 1
             if len(data.get("oc-api:has-results", {})) < _page_size:
                 more_work = False
-            elif num_records >= self._max_entries:
+            elif 0 < self._max_entries <= num_records:
+                more_work = False
+            elif num_records == self._page_size:
                 more_work = False
             else:
                 url = data["next-json"]
@@ -117,7 +121,7 @@ class OpenContextIdentifierIterator(isb_lib.core.IdentifierIterator):
         for item in self.records_in_page():
             self._cpage.append(item)
             counter += 1
-            if counter > self._max_entries:
+            if 0 < self._max_entries < counter:
                 break
         self._total_records = len(self._cpage)
 
@@ -153,5 +157,5 @@ def load_thing(
     id = thing_dict["uri"]
     L.info("loadThing: %s", id)
     item = OpenContextItem(id, thing_dict)
-    thing = item.asThing(t_created, 200, "http://", None, None)
+    thing = item.as_thing(t_created, 200, "http://", None, None)
     return thing

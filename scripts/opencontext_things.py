@@ -1,3 +1,4 @@
+import datetime
 import logging
 import click
 import click_config_file
@@ -40,25 +41,32 @@ def wrap_load_thing(thing_dict, tc):
 async def _load_open_context_entries(session, max_count, start_from):
     L = get_logger()
     futures = []
-    ids = isb_lib.opencontext_adapter.OpenContextIdentifierIterator(
-        max_entries=10, date_start=start_from
+    records = isb_lib.opencontext_adapter.OpenContextRecordIterator(
+        max_entries=max_count, date_start=start_from
     )
 
     num_ids = 0
-    for _id in ids:
-        L.info("got next id from open context %s", _id)
+    for record in records:
+        L.info("got next id from open context %s", record)
         num_ids += 1
+        id = record["uri"]
         try:
             res = (
                 session.query(igsn_lib.models.thing.Thing.id)
-                    .filter_by(id=_id["uri"])
+                    .filter_by(id=id)
                     .one()
             )
-            logging.info("Already have %s", _id["uri"])
+            logging.info("Already have %s", id)
         except sqlalchemy.orm.exc.NoResultFound:
-            wrap_load_thing(_id, None)
+            thing = isb_lib.opencontext_adapter.load_thing(record, datetime.datetime.now())
+            try:
+                session.add(thing)
+                session.commit()
+            except sqlalchemy.exc.IntegrityError as e:
+                session.rollback()
+                logging.error("Item already exists: %s", record)
 
-    L.info("total num ids %d", num_ids)
+    L.info("total num records %d", num_ids)
 
     # total_requested = 0
     # total_completed = 0
@@ -73,8 +81,8 @@ async def _load_open_context_entries(session, max_count, start_from):
     #             and total_requested < max_count
     #             and num_prepared > 0
     #         ):
-    #             _id = next(ids)
-    #             print("got next id from open context %s", _id)
+    #             record = next(records)
+    #             print("got next id from open context %s", record)
 
 
 def load_open_context_entries(session, max_count, start_from=None):
