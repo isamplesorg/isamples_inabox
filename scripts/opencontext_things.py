@@ -29,6 +29,7 @@ BACKLOG_SIZE = 40
 def get_logger():
     return logging.getLogger("main")
 
+
 def wrap_load_thing(thing_dict, tc):
     """Return request information to assist future management"""
     try:
@@ -40,7 +41,6 @@ def wrap_load_thing(thing_dict, tc):
 
 async def _load_open_context_entries(session, max_count, start_from):
     L = get_logger()
-    futures = []
     records = isb_lib.opencontext_adapter.OpenContextRecordIterator(
         max_entries=max_count, date_start=start_from, page_size=200
     )
@@ -51,14 +51,12 @@ async def _load_open_context_entries(session, max_count, start_from):
         num_ids += 1
         id = record["uri"]
         try:
-            res = (
-                session.query(igsn_lib.models.thing.Thing.id)
-                    .filter_by(id=id)
-                    .one()
-            )
+            res = session.query(igsn_lib.models.thing.Thing.id).filter_by(id=id).one()
             logging.info("Already have %s", id)
         except sqlalchemy.orm.exc.NoResultFound:
-            thing = isb_lib.opencontext_adapter.load_thing(record, datetime.datetime.now())
+            thing = isb_lib.opencontext_adapter.load_thing(
+                record, datetime.datetime.now(), records.last_url_str()
+            )
             try:
                 session.add(thing)
                 session.commit()
@@ -105,12 +103,18 @@ def getDBSession(db_url):
     "-d", "--db_url", default=None, help="SQLAlchemy database URL for storage"
 )
 @click.option(
-    "-v", "--verbosity", default="DEBUG", help="Specify logging level", show_default=True
+    "-v",
+    "--verbosity",
+    default="DEBUG",
+    help="Specify logging level",
+    show_default=True,
 )
 @click.option(
     "-H", "--heart_rate", is_flag=True, help="Show heartrate diagnositcs on 9999"
 )
-@click_config_file.configuration_option(config_file_name="/Users/mandeld/iSamples/isamples_inabox/isb.cfg")
+@click_config_file.configuration_option(
+    config_file_name="/Users/mandeld/iSamples/isamples_inabox/isb.cfg"
+)
 @click.pass_context
 def main(ctx, db_url, verbosity, heart_rate):
     ctx.ensure_object(dict)

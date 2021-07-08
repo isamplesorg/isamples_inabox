@@ -6,10 +6,11 @@ import logging
 import requests
 import igsn_lib.models.thing
 import typing
+import dateparser
 
 HTTP_TIMEOUT = 10.0  # seconds
 OPENCONTEXT_API = "https://opencontext.org/subjects-search/.json?add-attribute-uris=1&attributes=obo-foodon-00001303%2Coc-zoo-has-anat-id%2Ccidoc-crm-p2-has-type%2Ccidoc-crm-p45-consists-of%2Ccidoc-crm-p49i-is-former-or-current-keeper-of%2Ccidoc-crm-p55-has-current-location%2Cdc-terms-temporal%2Cdc-terms-creator%2Cdc-terms-contributor&prop=oc-gen-cat-sample-col%7C%7Coc-gen-cat-bio-subj-ecofact%7C%7Coc-gen-cat-object&response=metadata%2Curi-meta&sort=updated--desc"
-MEDIA_JSON_LD = "application/ld+json"
+MEDIA_JSON = "application/json"
 
 
 def get_logger():
@@ -33,10 +34,10 @@ class OpenContextItem(object):
         media_type: str = None,
     ) -> igsn_lib.models.thing.Thing:
         L = get_logger()
-        L.debug("SESARItem.asThing")
+        L.debug("OpenContextItem.asThing")
         # Note: SESAR incorrectly returns "application/json;charset=UTF-8" for json-ld content
         if media_type is None:
-            media_type = MEDIA_JSON_LD
+            media_type = MEDIA_JSON
         _thing = igsn_lib.models.thing.Thing(
             id=self.identifier,
             tcreated=t_created,
@@ -65,24 +66,21 @@ class OpenContextRecordIterator(isb_lib.core.IdentifierIterator):
         max_entries: int = -1,
         date_start: datetime.datetime = None,
         date_end: datetime.datetime = None,
-        page_size: int = 100
+        page_size: int = 100,
     ):
         super().__init__(
             offset=offset,
             max_entries=max_entries,
             date_start=date_start,
             date_end=date_end,
-            page_size=page_size
+            page_size=page_size,
         )
         self.url = OPENCONTEXT_API
 
     def records_in_page(self):
         L = get_logger()
         L.debug("records_in_page")
-        headers = {
-            "Accept": "application/json",
-            "user-agent": "isamplesbot-3000/0.0.1"
-        }
+        headers = {"Accept": "application/json", "user-agent": "isamplesbot-3000/0.0.1"}
         _page_size = self._page_size
         params = {
             "rows": _page_size,
@@ -146,8 +144,12 @@ class OpenContextRecordIterator(isb_lib.core.IdentifierIterator):
             return
         self._page_offset = 0
 
+    def last_url_str(self) -> typing.AnyStr:
+        return self.url
+
+
 def load_thing(
-    thing_dict: typing.Dict, t_created: datetime.datetime
+    thing_dict: typing.Dict, t_resolved: datetime.datetime, url: typing.AnyStr
 ) -> igsn_lib.models.thing.Thing:
     """
     Load a thing from its source.
@@ -156,14 +158,18 @@ def load_thing(
 
     Args:
         thing_dict: Dictionary representing the thing
-        t_created: Hint as to when the thing was created, according to the source.
+        t_resolved: When the item was resolved from the source
 
     Returns:
         Instance of Thing
     """
     L = get_logger()
     id = thing_dict["uri"]
+    t_created = dateparser.parse(thing_dict.get("published"))
     L.info("loadThing: %s", id)
     item = OpenContextItem(id, thing_dict)
-    thing = item.as_thing(t_created, 200, "http://", None, None)
+    # TODO, unlike the other collections, we are fetching these via a pre-paginated API, so we can't put anything in the
+    # db if we fail looking up an identifier because we won't have an identifier if the lookup fails.  Maybe there is
+    # nothing to do here, but it's a difference between collections.
+    thing = item.as_thing(t_created, 200, url, t_resolved, None)
     return thing
