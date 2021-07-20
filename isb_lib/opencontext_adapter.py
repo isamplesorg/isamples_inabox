@@ -35,7 +35,6 @@ class OpenContextItem(object):
     ) -> igsn_lib.models.thing.Thing:
         L = get_logger()
         L.debug("OpenContextItem.asThing")
-        # Note: SESAR incorrectly returns "application/json;charset=UTF-8" for json-ld content
         if media_type is None:
             media_type = MEDIA_JSON
         _thing = igsn_lib.models.thing.Thing(
@@ -54,6 +53,8 @@ class OpenContextItem(object):
         _thing.item_type = "sample"
         _thing.related = None
         _thing.resolved_media_type = media_type
+        # Note that we can't use this field in opencontext as the information is batched and we don't have access
+        # to the raw http response here.
         # _thing.resolve_elapsed = resolve_elapsed
         _thing.resolved_content = self.item
         return _thing
@@ -136,9 +137,6 @@ class OpenContextRecordIterator(isb_lib.core.IdentifierIterator):
         """
         is_none = self._cpage is None
         if is_none or self._page_offset >= len(self._cpage):
-            if not is_none:
-                # Work around the rate limiter
-                time.sleep(0.3)
             self.loadEntries()
         if self._coffset >= self._total_records:
             return

@@ -112,9 +112,7 @@ def getDBSession(db_url):
 @click.option(
     "-H", "--heart_rate", is_flag=True, help="Show heartrate diagnositcs on 9999"
 )
-@click_config_file.configuration_option(
-    config_file_name="/Users/mandeld/iSamples/isamples_inabox/isb.cfg"
-)
+@click_config_file.configuration_option(config_file_name="opencontext.cfg")
 @click.pass_context
 def main(ctx, db_url, verbosity, heart_rate):
     ctx.ensure_object(dict)
