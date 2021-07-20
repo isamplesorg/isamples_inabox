@@ -109,8 +109,11 @@ class OpenContextRecordIterator(isb_lib.core.IdentifierIterator):
                 # raise NotImplementedError
                 yield record
                 num_records += 1
-            self.url = data["next-json"]
+            self.url = data.get("next-json")
             if len(data.get("oc-api:has-results", {})) < _page_size:
+                more_work = False
+            elif self.url is None:
+                # If we hit the last page, there won't be a 'next-json' key
                 more_work = False
             elif 0 < self._max_entries <= num_records:
                 more_work = False
