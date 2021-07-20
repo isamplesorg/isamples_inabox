@@ -54,12 +54,16 @@ async def _load_open_context_entries(session, max_count, start_from):
             res = session.query(igsn_lib.models.thing.Thing.id).filter_by(id=id).one()
             logging.info("Already have %s", id)
         except sqlalchemy.orm.exc.NoResultFound:
+            logging.debug("Don't have %s", id)
             thing = isb_lib.opencontext_adapter.load_thing(
                 record, datetime.datetime.now(), records.last_url_str()
             )
             try:
+                logging.debug("Going to add thing to session")
                 session.add(thing)
+                logging.debug("Added thing to session")
                 session.commit()
+                logging.debug("committed session")
             except sqlalchemy.exc.IntegrityError as e:
                 session.rollback()
                 logging.error("Item already exists: %s", record)
