@@ -402,6 +402,7 @@ class CoreSolrImporter:
         db_batch_size: int,
         solr_batch_size: int,
         solr_url: typing.AnyStr,
+        offset: int = 0
     ):
         engine = igsn_lib.models.getEngine(db_url)
         igsn_lib.models.createAll(engine)
@@ -411,6 +412,7 @@ class CoreSolrImporter:
             self._db_session,
             authority_id=self._authority_id,
             page_size=db_batch_size,
+            offset=offset
         )
         self._db_batch_size = db_batch_size
         self._solr_batch_size = solr_batch_size
