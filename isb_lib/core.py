@@ -68,11 +68,12 @@ def _shouldAddMetadataValueToSolrDoc(metadata: typing.Dict, key: typing.AnyStr) 
     value = metadata.get(key)
     if value is not None:
         if key == "latitude":
-            shouldAdd = -90.0 <= value <= 90.0
+            # Explicitly disallow bools as they'll pass the logical test otherwise and solr will choke downstream
+            shouldAdd = type(value) is not bool and -90.0 <= value <= 90.0
             if not shouldAdd:
                 getLogger().error("Invalid latitude %f", value)
         elif key == "longitude":
-            shouldAdd = -180.0 <= value <= 180
+            shouldAdd = type(value) is not bool and -180.0 <= value <= 180
             if not shouldAdd:
                 getLogger().error("Invalid longitude %f", value)
         elif type(value) is list:
