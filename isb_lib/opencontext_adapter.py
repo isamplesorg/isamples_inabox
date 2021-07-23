@@ -157,8 +157,13 @@ def _validate_resolved_content(thing: igsn_lib.models.thing.Thing):
 
 def reparse_as_core_record(thing: igsn_lib.models.thing.Thing) -> typing.Dict:
     _validate_resolved_content(thing)
-    transformer = isamples_metadata.OpenContextTransformer.OpenContextTransformer(thing.resolved_content)
-    return isb_lib.core.coreRecordAsSolrDoc(transformer.transform())
+    try:
+        transformer = isamples_metadata.OpenContextTransformer.OpenContextTransformer(thing.resolved_content)
+        return isb_lib.core.coreRecordAsSolrDoc(transformer.transform())
+    except Exception as e:
+        get_logger().fatal("Failed trying to run transformer on %s", str(thing.resolved_content))
+        raise
+
 
 def load_thing(
     thing_dict: typing.Dict, t_resolved: datetime.datetime, url: typing.AnyStr
