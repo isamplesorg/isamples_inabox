@@ -36,6 +36,43 @@ ELEVATION_PATTERN = re.compile(r"\s*(-?\d+\.?\d*)\s*m?", re.IGNORECASE)
 def getLogger():
     return logging.getLogger("isb_lib.core")
 
+LOG_LEVELS = {
+    "DEBUG": logging.DEBUG,
+    "INFO": logging.INFO,
+    "WARNING": logging.WARNING,
+    "WARN": logging.WARNING,
+    "ERROR": logging.ERROR,
+    "FATAL": logging.CRITICAL,
+    "CRITICAL": logging.CRITICAL,
+}
+LOG_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S"
+LOG_FORMAT = "%(asctime)s %(name)s:%(levelname)s: %(message)s"
+
+def initialize_logging(verbosity: typing.AnyStr):
+    logging.basicConfig(
+        level=LOG_LEVELS.get(verbosity, logging.INFO),
+        format=LOG_FORMAT,
+        datefmt=LOG_DATE_FORMAT,
+    )
+    L = getLogger()
+    verbosity = verbosity.upper()
+    if verbosity not in LOG_LEVELS.keys():
+        L.warning("%s is not a log level, set to INFO", verbosity)
+
+def things_main(ctx, db_url, verbosity, heart_rate):
+    ctx.ensure_object(dict)
+    initialize_logging(verbosity)
+
+    getLogger().info("Using database at: %s", db_url)
+    ctx.obj["db_url"] = db_url
+    if heart_rate:
+        heartrate.trace(browser=True)
+
+def get_db_session(db_url):
+    engine = igsn_lib.models.getEngine(db_url)
+    igsn_lib.models.createAll(engine)
+    session = igsn_lib.models.getSession(engine)
+    return session
 
 def datetimeToSolrStr(dt):
     if dt is None:
