@@ -35,9 +35,9 @@ def main(directory):
     if not os.path.exists(material_file):
         sys.exit(f"{material_file} doesn't exist")
 
-    occurrences = pandas.read_table(occurence_file, low_memory=False, index_col="id")
-    preparations = pandas.read_table(preparation_file, index_col="id")
-    materials = pandas.read_table(material_file, index_col="id")
+    occurrences = pandas.read_table(occurence_file, low_memory=False, index_col="id", dtype=object)
+    preparations = pandas.read_table(preparation_file, index_col="id", dtype=object)
+    materials = pandas.read_table(material_file, index_col="id", dtype=object)
 
     occurrences = occurrences.merge(
         preparations, how="left", left_on="id", right_on="id", suffixes=(False, False)
