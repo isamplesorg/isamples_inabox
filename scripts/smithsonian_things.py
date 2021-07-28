@@ -9,6 +9,7 @@ import sqlalchemy
 import igsn_lib.models.thing
 import datetime
 
+
 def _save_record_to_db(session, file_path, record):
     id = record["id"]
     logging.info("got next id from smithsonian %s", id)
@@ -43,7 +44,12 @@ def load_smithsonian_entries(session, max_count, file_path, start_from=None):
             # Otherwise iterate over the keys and make source JSON
             current_record = {}
             for index, key in enumerate(column_headers):
-                current_record[key] = current_values[index]
+                try:
+                    current_record[key] = current_values[index]
+                except IndexError as e:
+                    # This is expected, as the file we're processing is a join of multiple data sources.  Log it and
+                    # move on
+                    isb_lib.core.getLogger().info("Ran into an index error processing input: %s", e)
             _save_record_to_db(session, file_path, current_record)
             if i % 1000 == 0:
                 isb_lib.core.getLogger().info("\n\nNum records=%d\n\n", i)
@@ -80,7 +86,9 @@ def main(ctx, db_url, verbosity, heart_rate):
 @click.option(
     "-f",
     "--file",
-    help="The path to the Darwin Core dump file containing the records to import",
+    help="""
+    The path to the Darwin Core dump file containing the records to import.  This should be manually downloaded, 
+    then preprocessed with preprocess_smithsonian.py before importing here.""",
 )
 @click.pass_context
 def load_records(ctx, max_records, file):
