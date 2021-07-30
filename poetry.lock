@@ -564,7 +564,7 @@ test = ["pytest (>=3.6.0)", "pytest-cov", "mock"]
 
 [[package]]
 name = "isamples-metadata"
-version = "0.2.2"
+version = "0.2.3"
 description = ""
 category = "main"
 optional = false
@@ -579,7 +579,7 @@ requests = "^2.25.1"
 type = "git"
 url = "https://github.com/isamplesorg/metadata.git"
 reference = "develop"
-resolved_reference = "1b7e0831b82cc2ea6eabb00ee91fed6113d4a523"
+resolved_reference = "16173d0fa760d4a1c7510b9908679810c5252de3"
 
 [[package]]
 name = "itsdangerous"
