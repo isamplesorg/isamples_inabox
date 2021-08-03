@@ -11,6 +11,7 @@ import isamples_metadata.Transformer
 
 import igsn_lib.time
 import igsn_lib.models
+import igsn_lib.models.thing
 from isamples_metadata.Transformer import Transformer
 import dateparser
 import re
@@ -99,6 +100,11 @@ def relationAsSolrDoc(
     doc["tstamp"] = datetimeToSolrStr(ts)
     return doc
 
+def validate_resolved_content(authority_id: typing.AnyStr, thing: igsn_lib.models.thing.Thing):
+    if not isinstance(thing.resolved_content, dict):
+        raise ValueError("Thing.resolved_content is not an object")
+    if not thing.authority_id == authority_id:
+        raise ValueError(f"Mismatched authority_id on Thing, expecting {authority_id}, received {thing.authority_id}")
 
 def _shouldAddMetadataValueToSolrDoc(metadata: typing.Dict, key: typing.AnyStr) -> bool:
     shouldAdd = False

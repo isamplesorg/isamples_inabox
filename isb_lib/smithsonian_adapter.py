@@ -1,5 +1,8 @@
 import typing
 import datetime
+
+import isamples_metadata.SmithsonianTransformer
+
 import isb_lib.core
 import igsn_lib.models.thing
 import logging
@@ -9,9 +12,7 @@ class SmithsonianItem(object):
     AUTHORITY_ID = "SMITHSONIAN"
     TEXT_CSV = "text/csv"
 
-    def __init__(
-        self, identifier: str, source_dict: typing.Dict
-    ):
+    def __init__(self, identifier: str, source_dict: typing.Dict):
         self.identifier = identifier
         self.source_item = source_dict
 
@@ -44,6 +45,7 @@ class SmithsonianItem(object):
         _thing.resolved_content = self.source_item
         return _thing
 
+
 def load_thing(
     thing_dict: typing.Dict, t_resolved: datetime.datetime, file_path: typing.AnyStr
 ) -> igsn_lib.models.thing.Thing:
@@ -62,7 +64,11 @@ def load_thing(
     L = isb_lib.core.getLogger()
     id = thing_dict["id"]
     try:
-        t_created = datetime.datetime(year=int(thing_dict["year"]), month=int(thing_dict["month"]), day=int(thing_dict["day"]))
+        t_created = datetime.datetime(
+            year=int(thing_dict["year"]),
+            month=int(thing_dict["month"]),
+            day=int(thing_dict["day"]),
+        )
     except ValueError as e:
         # In many cases, these don't seem to be populated.  There's nothing we can do if they aren't there, so just
         # leave it as None.
@@ -71,3 +77,21 @@ def load_thing(
     item = SmithsonianItem(id, thing_dict)
     thing = item.as_thing(t_created, 200, file_path, t_resolved)
     return thing
+
+
+def _validate_resolved_content(thing: igsn_lib.models.thing.Thing):
+    isb_lib.core.validate_resolved_content(SmithsonianItem.AUTHORITY_ID, thing)
+
+
+def reparse_as_core_record(thing: igsn_lib.models.thing.Thing) -> typing.Dict:
+    _validate_resolved_content(thing)
+    try:
+        transformer = isamples_metadata.SmithsonianTransformer.SmithsonianTransformer(
+            thing.resolved_content
+        )
+        return isb_lib.core.coreRecordAsSolrDoc(transformer.transform())
+    except Exception as e:
+        logging.fatal(
+            "Failed trying to run transformer on %s", str(thing.resolved_content)
+        )
+        raise

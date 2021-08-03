@@ -49,7 +49,9 @@ def load_smithsonian_entries(session, max_count, file_path, start_from=None):
                 except IndexError as e:
                     # This is expected, as the file we're processing is a join of multiple data sources.  Log it and
                     # move on
-                    isb_lib.core.getLogger().info("Ran into an index error processing input: %s", e)
+                    isb_lib.core.getLogger().info(
+                        "Ran into an index error processing input: %s", e
+                    )
             _save_record_to_db(session, file_path, current_record)
             if i % 1000 == 0:
                 isb_lib.core.getLogger().info("\n\nNum records=%d\n\n", i)
@@ -95,6 +97,24 @@ def load_records(ctx, max_records, file):
     session = isb_lib.core.get_db_session(ctx.obj["db_url"])
     logging.info("loadRecords: %s", str(session))
     load_smithsonian_entries(session, max_records, file, None)
+
+
+@main.command("populate_isb_core_solr")
+@click.pass_context
+def populate_isb_core_solr(ctx):
+    L = isb_lib.core.getLogger()
+    db_url = ctx.obj["db_url"]
+    solr_importer = isb_lib.core.CoreSolrImporter(
+        db_url=db_url,
+        authority_id=isb_lib.smithsonian_adapter.SmithsonianItem.AUTHORITY_ID,
+        db_batch_size=1000,
+        solr_batch_size=1000,
+        solr_url="http://localhost:8983/api/collections/isb_core_records/",
+    )
+    allkeys = solr_importer.run_solr_import(
+        isb_lib.smithsonian_adapter.reparse_as_core_record
+    )
+    L.info(f"Total keys= {len(allkeys)}")
 
 
 if __name__ == "__main__":
