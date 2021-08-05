@@ -15,6 +15,8 @@ from isamples_metadata.Transformer import Transformer
 import dateparser
 import re
 import requests
+import shapely.wkt
+import shapely.geometry
 
 RECOGNIZED_DATE_FORMATS = [
     "%Y",  # e.g. 1985
@@ -144,6 +146,18 @@ def handle_curation_fields(coreMetadata: typing.Dict, doc: typing.Dict):
     if _shouldAddMetadataValueToSolrDoc(curation, "responsibility"):
         doc["curation_responsibility"] = curation["responsibility"]
 
+def shapely_to_solr(shape: shapely.shape):
+    centroid = shape.centroid
+    bb = shape.bounds
+    res = {
+        "producedBy_samplingSite_location_ll": f"{centroid.y},{centroid.x}",
+        "producedBy_samplingSite_location_bb": f"ENVELOPE({bb[0]}, {bb[2]}, {bb[3]}, {bb[1]})",
+        "producedBy_samplingSite_location_rpt": shape.wkt
+    }
+    return res
+
+def lat_lon_to_solr(coreMetadata: typing.Dict, latitude: typing.SupportsFloat, longitude: typing.SupportsFloat):
+    return shapely_to_solr(shapely.geometry.Point(lon, lat))
 
 def handle_produced_by_fields(coreMetadata: typing.Dict, doc: typing.Dict):
     # The solr index flattens subdictionaries, so check the keys explicitly in the subdictionary to see if they should be added to the index
@@ -185,7 +199,7 @@ def handle_produced_by_fields(coreMetadata: typing.Dict, doc: typing.Dict):
                 location, "latitude"
             ) and _shouldAddMetadataValueToSolrDoc(location, "longitude"):
                 doc[
-                    "producedBy_samplingSite_location_latlon"
+                    "producedBy_samplingSite_location_ll"
                 ] = f"{location['latitude']},{location['longitude']}"
 
 
