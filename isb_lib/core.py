@@ -489,7 +489,7 @@ class CoreSolrImporter:
                 try:
                     core_record = core_record_function(thing)
                 except Exception as e:
-                    get_logger().error("Failed trying to run transformer, skipping record %s", str(thing.resolved_content))
+                    getLogger().error("Failed trying to run transformer, skipping record %s", str(thing.resolved_content))
                     continue
 
                 core_record["source"] = self._authority_id
