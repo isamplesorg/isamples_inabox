@@ -207,7 +207,7 @@ def reparseThing(thing: igsn_lib.models.thing.Thing) -> igsn_lib.models.thing.Th
 def reparseAsCoreRecord(thing: igsn_lib.models.thing.Thing) -> typing.Dict:
     _validateResolvedContent(thing)
     transformer = isamples_metadata.SESARTransformer.SESARTransformer(thing.resolved_content)
-    return isb_lib.core.coreRecordAsSolrDoc(transformer.transform())
+    return isb_lib.core.coreRecordAsSolrDoc(transformer)
 
 def loadThing(
     identifier: str, t_created: datetime.datetime

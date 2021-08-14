@@ -174,7 +174,9 @@ def loadRecords(ctx, max_records):
     try:
         oldest_record = None
         res = (
-            session.query(igsn_lib.models.thing.Thing)
+            session.query(igsn_lib.models.thing.Thing).filter(
+            igsn_lib.models.thing.Thing.authority_id == isb_lib.sesar_adapter.SESARItem.AUTHORITY_ID
+            )
             .order_by(igsn_lib.models.thing.Thing.tcreated.desc())
             .first()
         )

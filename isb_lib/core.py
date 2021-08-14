@@ -129,16 +129,7 @@ def _shouldAddMetadataValueToSolrDoc(metadata: typing.Dict, key: typing.AnyStr) 
             shouldAdd = True
     return shouldAdd
 
-
-def coreRecordAsSolrDoc(coreMetadata: typing.Dict) -> typing.Dict:
-    """
-    Args:
-        coreMetadata: the iSamples Core metadata dictionary
-
-    Returns: The coreMetadata in solr document format, suitable for posting to the solr JSON api
-    (https://solr.apache.org/guide/8_1/json-request-api.html)
-    """
-
+def _coreRecordAsSolrDoc(coreMetadata: typing.Dict) -> typing.Dict:
     # Before preparing the document in solr format, strip out any whitespace in string values
     for k, v in coreMetadata.items():
         if type(v) is str:
@@ -147,7 +138,10 @@ def coreRecordAsSolrDoc(coreMetadata: typing.Dict) -> typing.Dict:
     doc = {
         "id": coreMetadata["sampleidentifier"],
         "isb_core_id": coreMetadata["@id"],
+        "indexUpdatedTime": datetimeToSolrStr(igsn_lib.time.dtnow())
     }
+    if _shouldAddMetadataValueToSolrDoc(coreMetadata, "sourceUpdatedTime"):
+        doc["sourceUpdatedTime"] = coreMetadata["sourceUpdatedTime"]
     if _shouldAddMetadataValueToSolrDoc(coreMetadata, "label"):
         doc["label"] = coreMetadata["label"]
     if _shouldAddMetadataValueToSolrDoc(coreMetadata, "description"):
@@ -174,6 +168,24 @@ def coreRecordAsSolrDoc(coreMetadata: typing.Dict) -> typing.Dict:
         handle_related_resources(coreMetadata, doc)
 
     return doc
+
+
+def coreRecordAsSolrDoc(transformer: Transformer) -> typing.Dict:
+    """
+    Args:
+        transformer: A Transformer instance containing the document to transform
+
+    Returns: The coreMetadata in solr document format, suitable for posting to the solr JSON api
+    (https://solr.apache.org/guide/8_1/json-request-api.html)
+    """
+    coreMetadata = transformer.transform()
+
+    last_updated = transformer.last_updated_time()
+    if last_updated is not None:
+        date_time = parsed_date(last_updated)
+        if date_time is not None:
+            coreMetadata["sourceUpdatedTime"] = datetimeToSolrStr(date_time)
+    return _coreRecordAsSolrDoc(coreMetadata)
 
 
 def handle_curation_fields(coreMetadata: typing.Dict, doc: typing.Dict):

@@ -156,7 +156,7 @@ def reparse_as_core_record(thing: igsn_lib.models.thing.Thing) -> typing.Dict:
     _validate_resolved_content(thing)
     try:
         transformer = isamples_metadata.OpenContextTransformer.OpenContextTransformer(thing.resolved_content)
-        return isb_lib.core.coreRecordAsSolrDoc(transformer.transform())
+        return isb_lib.core.coreRecordAsSolrDoc(transformer)
     except Exception as e:
         get_logger().error("Failed trying to run transformer on %s", str(thing.resolved_content))
         raise
