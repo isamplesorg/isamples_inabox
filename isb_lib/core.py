@@ -80,17 +80,28 @@ def get_db_session(db_url):
     return session
 
 
-def last_time_thing_created(session, authority_id: typing.AnyStr) -> datetime.datetime:
-    return (
-        session.execute(
-            select(igsn_lib.models.thing.Thing.tcreated)
-            .where(igsn_lib.models.thing.Thing.authority_id == authority_id)
-            .limit(1)
-            .order_by(igsn_lib.models.thing.Thing.tcreated.desc())
+def last_time_thing_created(
+    session, authority_id: typing.AnyStr
+) -> typing.Optional[datetime.datetime]:
+    try:
+        return (
+            session.execute(
+                select(igsn_lib.models.thing.Thing.tcreated)
+                .where(igsn_lib.models.thing.Thing.authority_id == authority_id)
+                .limit(1)
+                .order_by(igsn_lib.models.thing.Thing.tcreated.desc())
+            )
+            .fetchone()
+            ._asdict()["tcreated"]
         )
-        .fetchone()
-        ._asdict()["tcreated"]
-    )
+    except:
+        e = sys.exc_info()[0]
+        getLogger().error(
+            "Exception trying to fetch the last time a thing was created for authority_id %s:\n\n%s",
+            authority_id,
+            e,
+        )
+        return None
 
 
 def datetimeToSolrStr(dt):
