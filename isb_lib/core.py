@@ -330,6 +330,25 @@ def solrCommit(rsession, url):
     L.debug("Solr commit: %s", res.text)
 
 
+def solr_max_source_updated_time(
+    url: typing.AnyStr, authority_id: typing.AnyStr, rsession=requests.session()
+) -> typing.Optional[datetime.datetime]:
+    headers = {"Content-Type": "application/json"}
+    params = {
+        "q": f"source:{authority_id}",
+        "sort": "sourceUpdatedTime desc",
+        "rows": 1,
+    }
+    _url = f"{url}select"
+    res = rsession.get(_url, headers=headers, params=params)
+    dict = res.json()
+    docs = dict["response"]["docs"]
+    if docs is not None and len(docs) > 0:
+        return dateparser.parse(docs[0]["sourceUpdatedTime"])
+    else:
+        return None
+
+
 class IdentifierIterator:
     def __init__(
         self,
@@ -450,6 +469,7 @@ class ThingRecordIterator:
         status: int = 200,
         page_size: int = 5000,
         offset: int = 0,
+        min_time_created: datetime.datetime = None,
     ):
         self._session = session
         sql = "SELECT * FROM thing WHERE resolved_status=:status"
@@ -459,6 +479,9 @@ class ThingRecordIterator:
         if authority_id is not None:
             sql = sql + " AND authority_id=:authority_id"
             params["authority_id"] = authority_id
+        if min_time_created is not None:
+            sql = sql + " AND tcreated>=:tcreated"
+            params["tcreated"] = min_time_created
         self._sql = sql + " ORDER BY _id OFFSET :offset FETCH NEXT :limit ROWS ONLY"
         params["offset"] = offset
         params["limit"] = page_size
@@ -485,17 +508,20 @@ class CoreSolrImporter:
         db_batch_size: int,
         solr_batch_size: int,
         solr_url: typing.AnyStr,
-        offset: int = 0
+        offset: int = 0,
+        min_time_created: datetime.datetime = None,
     ):
         engine = igsn_lib.models.getEngine(db_url)
         igsn_lib.models.createAll(engine)
         self._db_session = igsn_lib.models.getSession(engine)
         self._authority_id = authority_id
+        self._min_time_created = min_time_created
         self._thing_iterator = ThingRecordIterator(
             self._db_session,
             authority_id=self._authority_id,
             page_size=db_batch_size,
-            offset=offset
+            offset=offset,
+            min_time_created=min_time_created,
         )
         self._db_batch_size = db_batch_size
         self._solr_batch_size = solr_batch_size
