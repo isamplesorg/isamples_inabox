@@ -27,26 +27,32 @@ import dateparser
 def main(ctx, db_url, verbosity, heart_rate):
     isb_lib.core.things_main(ctx, db_url, verbosity, heart_rate)
     session = isb_lib.core.get_db_session(db_url)
-    iterator = session.execute(
-        select(
-            igsn_lib.models.thing.Thing._id,
-            igsn_lib.models.thing.Thing.resolved_content,
-        ).where(igsn_lib.models.thing.Thing.authority_id == "OPENCONTEXT")
-    )
+    index = 0
+    page_size = 10000
+    max_index = 850000
     count = 0
-    for row in iterator:
-        dict = row._asdict()
-        id = dict["_id"]
-        resolved_content = dict["resolved_content"]
-        updated = dateparser.parse(resolved_content["updated"])
-        print(f"row is {dict}")
-        count += 1
-        session.execute(
-            update(igsn_lib.models.thing.Thing)
-            .where(igsn_lib.models.thing.Thing._id == id)
-            .values(tcreated=updated)
+    while index < max_index:
+        iterator = session.execute(
+            select(
+                igsn_lib.models.thing.Thing._id,
+                igsn_lib.models.thing.Thing.resolved_content,
+            ).where(igsn_lib.models.thing.Thing.authority_id == "OPENCONTEXT")
+            .slice(index, index + page_size)
         )
-    session.commit()
+        for row in iterator:
+            dict = row._asdict()
+            id = dict["_id"]
+            resolved_content = dict["resolved_content"]
+            updated = dateparser.parse(resolved_content["updated"])
+            print(f"row is {dict}")
+            count += 1
+            session.execute(
+                update(igsn_lib.models.thing.Thing)
+                .where(igsn_lib.models.thing.Thing._id == id)
+                .values(tcreated=updated)
+            )
+        session.commit()
+        index += page_size
     print(f"num records is {count}")
 
 """
