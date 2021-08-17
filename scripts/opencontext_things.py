@@ -116,9 +116,12 @@ def main(ctx, db_url, verbosity, heart_rate):
 def load_records(ctx, max_records):
     L = get_logger()
     session = isb_lib.core.get_db_session(ctx.obj["db_url"])
+    max_created = isb_lib.core.last_time_thing_created(
+        session, isb_lib.opencontext_adapter.OpenContextItem.AUTHORITY_ID
+    )
     L.info("loadRecords: %s", str(session))
     # ctx.obj["db_url"] = db_url
-    load_open_context_entries(session, max_records, None)
+    load_open_context_entries(session, max_records, max_created)
 
 
 @main.command("populate_isb_core_solr")

@@ -18,6 +18,7 @@ import re
 import requests
 import shapely.wkt
 import shapely.geometry
+from sqlalchemy import select
 
 RECOGNIZED_DATE_FORMATS = [
     "%Y",  # e.g. 1985
@@ -71,11 +72,26 @@ def things_main(ctx, db_url, verbosity, heart_rate):
     if heart_rate:
         heartrate.trace(browser=True)
 
+
 def get_db_session(db_url):
     engine = igsn_lib.models.getEngine(db_url)
     igsn_lib.models.createAll(engine)
     session = igsn_lib.models.getSession(engine)
     return session
+
+
+def last_time_thing_created(session, authority_id: typing.AnyStr) -> datetime.datetime:
+    return (
+        session.execute(
+            select(igsn_lib.models.thing.Thing.tcreated)
+            .where(igsn_lib.models.thing.Thing.authority_id == authority_id)
+            .limit(1)
+            .order_by(igsn_lib.models.thing.Thing.tcreated.desc())
+        )
+        .fetchone()
+        ._asdict()["tcreated"]
+    )
+
 
 def datetimeToSolrStr(dt):
     if dt is None:

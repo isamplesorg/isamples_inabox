@@ -106,6 +106,15 @@ class OpenContextRecordIterator(isb_lib.core.IdentifierIterator):
             data = response.json()
             for record in data.get("oc-api:has-results", {}):
                 L.info("records_in_page Record id: %s", record.get("uri", None))
+                record_updated = dateparser.parse(record["updated"])
+                if record_updated < self._date_start:
+                    L.info(
+                        "Iterated record with updated date %s earlier than previous max %s. Update is complete.",
+                        record_updated,
+                        self._date_start
+                    )
+                    data = {}
+                    break
                 # print(json.dumps(record, indent=2))
                 # raise NotImplementedError
                 yield record
@@ -179,7 +188,7 @@ def load_thing(
     """
     L = get_logger()
     id = thing_dict["uri"]
-    t_created = dateparser.parse(thing_dict.get("published"))
+    t_created = dateparser.parse(thing_dict.get("updated"))
     L.info("loadThing: %s", id)
     item = OpenContextItem(id, thing_dict)
     # TODO, unlike the other collections, we are fetching these via a pre-paginated API, so we can't put anything in the
