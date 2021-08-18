@@ -11,12 +11,13 @@ import dateparser
 
 
 def _sesar_last_updated(dict: typing.Dict) -> typing.Optional[datetime.datetime]:
-    description = dict["description"]
-    log = description.get("log")
-    if log is not None:
-        for record in log:
-            if "lastUpdated" == record.get("type"):
-                return dateparser.parse(record["timestamp"])
+    description = dict.get("description")
+    if description is not None:
+        log = description.get("log")
+        if log is not None:
+            for record in log:
+                if "lastUpdated" == record.get("type"):
+                    return dateparser.parse(record["timestamp"])
     return None
 
 @click.command()
@@ -38,7 +39,7 @@ def _sesar_last_updated(dict: typing.Dict) -> typing.Optional[datetime.datetime]
 def main(ctx, db_url, verbosity, heart_rate):
     isb_lib.core.things_main(ctx, db_url, verbosity, heart_rate)
     session = isb_lib.core.get_db_session(db_url)
-    index = 0
+    index = 430000
     page_size = 10000
     max_index = 4700000
     count = 0
@@ -55,15 +56,18 @@ def main(ctx, db_url, verbosity, heart_rate):
             id = dict["_id"]
             resolved_content = dict["resolved_content"]
             updated = _sesar_last_updated(resolved_content)
-            print(f"row is {dict}")
-            count += 1
-            session.execute(
-                update(igsn_lib.models.thing.Thing)
-                .where(igsn_lib.models.thing.Thing._id == id)
-                .values(tcreated=updated)
-            )
+            if updated is not None:
+                count += 1
+                session.execute(
+                    update(igsn_lib.models.thing.Thing)
+                    .where(igsn_lib.models.thing.Thing._id == id)
+                    .values(tcreated=updated)
+                )
+            else:
+                print("updated is None, skipping")
         session.commit()
         index += page_size
+        print(f"going to next page, index is {index}")
     print(f"num records is {count}")
 
 """
