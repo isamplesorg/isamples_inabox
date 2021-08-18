@@ -26,10 +26,10 @@ def getLogger():
     return logging.getLogger("main")
 
 
-def wrapLoadThing(igsn, tc):
+def wrapLoadThing(igsn, tc, existing_thing: igsn_lib.models.thing.Thing = None):
     """Return request information to assist future management"""
     try:
-        return igsn, tc, isb_lib.sesar_adapter.loadThing(igsn, tc)
+        return igsn, tc, isb_lib.sesar_adapter.loadThing(igsn, tc, existing_thing)
     except:
         pass
     return igsn, tc, None
@@ -68,16 +68,17 @@ async def _loadSesarEntries(session, max_count, start_from=None):
                     igsn = igsn_lib.normalize(_id[0])
                     try:
                         res = (
-                            session.query(igsn_lib.models.thing.Thing.id)
+                            session.query(igsn_lib.models.thing.Thing)
                             .filter_by(id=isb_lib.sesar_adapter.fullIgsn(igsn))
                             .one()
                         )
                         logging.info("Already have %s at %s", igsn, _id[1])
+                        future = executor.submit(wrapLoadThing, igsn, _id[1], res)
                     except sqlalchemy.orm.exc.NoResultFound:
                         future = executor.submit(wrapLoadThing, igsn, _id[1])
-                        futures.append(future)
-                        working[igsn] = 0
-                        total_requested += 1
+                    futures.append(future)
+                    working[igsn] = 0
+                    total_requested += 1
                 except StopIteration as e:
                     L.info("Reached end of identifier iteration.")
                     num_prepared = 0
