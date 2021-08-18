@@ -40,8 +40,13 @@ async def _load_open_context_entries(session, max_count, start_from):
         num_ids += 1
         id = record["uri"]
         try:
-            res = session.query(igsn_lib.models.thing.Thing.id).filter_by(id=id).one()
+            res = session.query(igsn_lib.models.thing.Thing).filter_by(id=id).one()
             logging.info("Already have %s", id)
+            isb_lib.opencontext_adapter.update_thing(
+                res, record, datetime.datetime.now(), records.last_url_str()
+            )
+            session.commit()
+            logging.info("Just saved existing thing")
         except sqlalchemy.orm.exc.NoResultFound:
             logging.debug("Don't have %s", id)
             thing = isb_lib.opencontext_adapter.load_thing(
