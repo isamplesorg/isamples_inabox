@@ -7,7 +7,6 @@ from sqlalchemy import select
 from sqlalchemy import update
 import igsn_lib.models
 import igsn_lib.models.thing
-import dateparser
 
 
 def _sesar_last_updated(dict: typing.Dict) -> typing.Optional[datetime.datetime]:
@@ -17,7 +16,7 @@ def _sesar_last_updated(dict: typing.Dict) -> typing.Optional[datetime.datetime]
         if log is not None:
             for record in log:
                 if "lastUpdated" == record.get("type"):
-                    return dateparser.parse(record["timestamp"])
+                    return record["timestamp"]
     return None
 
 @click.command()
@@ -39,7 +38,7 @@ def _sesar_last_updated(dict: typing.Dict) -> typing.Optional[datetime.datetime]
 def main(ctx, db_url, verbosity, heart_rate):
     isb_lib.core.things_main(ctx, db_url, verbosity, heart_rate)
     session = isb_lib.core.get_db_session(db_url)
-    index = 430000
+    index = 1850000
     page_size = 10000
     max_index = 4700000
     count = 0
