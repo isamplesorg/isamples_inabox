@@ -1,3 +1,5 @@
+import datetime
+import typing
 import click
 import click_config_file
 import isb_lib.core
@@ -7,6 +9,15 @@ import igsn_lib.models
 import igsn_lib.models.thing
 import dateparser
 
+
+def _sesar_last_updated(dict: typing.Dict) -> typing.Optional[datetime.datetime]:
+    description = dict["description"]
+    log = description.get("log")
+    if log is not None:
+        for record in log:
+            if "lastUpdated" == record.get("type"):
+                return dateparser.parse(record["timestamp"])
+    return None
 
 @click.command()
 @click.option(
@@ -29,21 +40,21 @@ def main(ctx, db_url, verbosity, heart_rate):
     session = isb_lib.core.get_db_session(db_url)
     index = 0
     page_size = 10000
-    max_index = 850000
+    max_index = 4700000
     count = 0
     while index < max_index:
         iterator = session.execute(
             select(
                 igsn_lib.models.thing.Thing._id,
                 igsn_lib.models.thing.Thing.resolved_content,
-            ).where(igsn_lib.models.thing.Thing.authority_id == "OPENCONTEXT")
+            ).where(igsn_lib.models.thing.Thing.authority_id == "SESAR")
             .slice(index, index + page_size)
         )
         for row in iterator:
             dict = row._asdict()
             id = dict["_id"]
             resolved_content = dict["resolved_content"]
-            updated = dateparser.parse(resolved_content["updated"])
+            updated = _sesar_last_updated(resolved_content)
             print(f"row is {dict}")
             count += 1
             session.execute(
