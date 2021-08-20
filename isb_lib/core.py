@@ -483,9 +483,10 @@ class ThingRecordIterator:
         min_time_created: datetime.datetime = None,
     ):
         self._session = session
-        sql = "SELECT * FROM thing WHERE resolved_status=:status"
+        sql = "SELECT * FROM thing WHERE resolved_status=:status and _id > :_id"
         params = {
             "status": status,
+            "_id": offset
         }
         if authority_id is not None:
             sql = sql + " AND authority_id=:authority_id"
@@ -493,8 +494,7 @@ class ThingRecordIterator:
         if min_time_created is not None:
             sql = sql + " AND tcreated>=:tcreated"
             params["tcreated"] = min_time_created
-        self._sql = sql + " ORDER BY _id OFFSET :offset FETCH NEXT :limit ROWS ONLY"
-        params["offset"] = offset
+        self._sql = sql + " ORDER BY _id asc limit :limit"
         params["limit"] = page_size
         self._params = params
 
@@ -502,13 +502,15 @@ class ThingRecordIterator:
         while True:
             n = 0
             qry = self._session.execute(self._sql, self._params)
+            max_id_in_page = 0
             for rec in qry:
                 n += 1
                 yield rec
+                max_id_in_page = rec["_id"]
             if n == 0:
                 break
-            # Set up to fetch the next 'limit' records
-            self._params["offset"] = self._params["offset"] + self._params["limit"]
+            # Grab the next page, by only selecting records with _id > than the last one we fetched
+            self._params["_id"] = max_id_in_page
 
 
 class CoreSolrImporter:

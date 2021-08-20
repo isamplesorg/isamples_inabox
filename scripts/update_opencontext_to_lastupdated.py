@@ -1,4 +1,5 @@
 import datetime
+import logging
 import typing
 import click
 import click_config_file
@@ -66,7 +67,7 @@ def main(ctx, db_url, verbosity, heart_rate):
                 print("updated is None, skipping")
         session.commit()
         index += page_size
-        print(f"going to next page, index is {index}")
+        logging.info(f"going to next page, index is {index}")
     print(f"num records is {count}")
 
 """
