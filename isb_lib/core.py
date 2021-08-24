@@ -84,10 +84,14 @@ def last_time_thing_created(
     session, authority_id: typing.AnyStr
 ) -> typing.Optional[datetime.datetime]:
     try:
+        # A bit of a hack to work around postgres perf issues.  Limit the number of records to examine by including a
+        # time created date in the qualifier.
+        current_year = datetime.datetime(year=datetime.date.today().year - 1, month=1, day=1).strftime("%Y-%m-%d")
         return (
             session.execute(
                 select(igsn_lib.models.thing.Thing.tcreated)
                 .where(igsn_lib.models.thing.Thing.authority_id == authority_id)
+                .where(igsn_lib.models.thing.Thing.tcreated >= current_year)
                 .limit(1)
                 .order_by(igsn_lib.models.thing.Thing.tcreated.desc())
             )

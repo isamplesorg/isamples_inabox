@@ -173,16 +173,9 @@ def loadRecords(ctx, max_records):
         max_records = 999999999
     session = isb_lib.core.get_db_session(ctx.obj["db_url"])
     try:
-        oldest_record = None
-        res = (
-            session.query(igsn_lib.models.thing.Thing).filter(
-            igsn_lib.models.thing.Thing.authority_id == isb_lib.sesar_adapter.SESARItem.AUTHORITY_ID
-            )
-            .order_by(igsn_lib.models.thing.Thing.tcreated.desc())
-            .first()
+        oldest_record = isb_lib.core.last_time_thing_created(
+            session, isb_lib.sesar_adapter.SESARItem.AUTHORITY_ID
         )
-        if not res is None:
-            oldest_record = res.tcreated
         logging.info("Oldest = %s", oldest_record)
         time.sleep(1)
         loadSesarEntries(session, max_records, start_from=oldest_record)
