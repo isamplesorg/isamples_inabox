@@ -62,7 +62,7 @@ def load_thing(
         Instance of Thing
     """
     L = isb_lib.core.getLogger()
-    id = thing_dict["id"]
+    id = thing_dict["id"].removeprefix("http://n2t.net/")
     try:
         t_created = datetime.datetime(
             year=int(thing_dict["year"]),
