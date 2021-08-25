@@ -62,6 +62,10 @@ def load_thing(
         Instance of Thing
     """
     L = isb_lib.core.getLogger()
+
+    # For the purposes of the Things db, we want to use a normalized form of the identifier.  Note that there is one
+    # other column in the Smithsonian dump that we'd need to transform to the normalized form if we wanted to use it,
+    # that is occurrenceID.  Currently it is unused in our Transformer codebase.
     id = thing_dict["id"].removeprefix("http://n2t.net/")
     try:
         t_created = datetime.datetime(
