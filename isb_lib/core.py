@@ -311,11 +311,10 @@ def solr_delete_records(rsession, ids_to_delete: typing.List[typing.AnyStr], url
         dicts_to_delete.append({"id": id})
     params = {
         "delete": dicts_to_delete,
-        "commit": {},
     }
     data = json.dumps(params).encode("utf-8")
     _url = f"{url}update?commit=true"
-    res = rsession.post(_url, headers=headers, data=data, params=params)
+    res = rsession.post(_url, headers=headers, data=data)
     L.debug("post status: %s", res.status_code)
     L.debug("Solr update: %s", res.text)
     if res.status_code != 200:
@@ -344,8 +343,8 @@ def solrAddRecords(rsession, records, url):
     L = getLogger()
     headers = {"Content-Type": "application/json"}
     data = json.dumps(records).encode("utf-8")
-    params = {"overwrite": "true", "commit": "true"}
-    _url = f"{url}update?commit=true"
+    params = {"overwrite": "true"}
+    _url = f"{url}update"
     L.debug("Going to post data %s to url %s", str(data), str(_url))
     res = rsession.post(_url, headers=headers, data=data, params=params)
     L.debug("post status: %s", res.status_code)
@@ -385,13 +384,12 @@ def solr_max_source_updated_time(
     else:
         return None
 
-def solr_fetch_records(
-    url: typing.AnyStr, authority_id: typing.AnyStr, start: int, rows: int, rsession=requests.session()
+def sesar_fetch_lowercase_igsn_records(
+    url: typing.AnyStr, rows: int, rsession=requests.session()
 ) -> typing.List[typing.Dict]:
     headers = {"Content-Type": "application/json"}
     params = {
-        "q": f"source:{authority_id}",
-        "start": start,
+        "q": f"source:SESAR AND id:*igsn*",
         "rows": rows,
     }
     _url = f"{url}select"

@@ -36,13 +36,11 @@ def _fixed_sesar_id(id: typing.AnyStr) -> typing.AnyStr:
 @click.pass_context
 def main(ctx, db_url, verbosity, heart_rate):
     isb_lib.core.things_main(ctx, db_url, verbosity, heart_rate)
-    index = 0
-    page_size = 500
-    max_index = 4800000
+    page_size = 5000
     count = 0
     rsession = requests.session()
-    while index < max_index:
-        records = isb_lib.core.solr_fetch_records(url, "SESAR", index, page_size, rsession)
+    records = isb_lib.core.sesar_fetch_lowercase_igsn_records(url, page_size, rsession)
+    while len(records) > 0:
         copies = []
         ids_to_delete = []
         for record in records:
@@ -57,10 +55,12 @@ def main(ctx, db_url, verbosity, heart_rate):
             record_copy.pop("producedBy_samplingSite_location_bb__maxX", None)
             copies.append(record_copy)
         isb_lib.core.solr_delete_records(rsession, ids_to_delete, url)
-        isb_lib.core.solrAddRecords(requests.session(), copies, url)
-        index += page_size
-        logging.info(f"going to next page, index is {index}")
+        isb_lib.core.solrAddRecords(rsession, copies, url)
+        count += page_size
+        logging.info(f"going to next page, count is {count}")
+        records = isb_lib.core.sesar_fetch_lowercase_igsn_records(url, page_size, rsession)
     print(f"num records is {count}")
+    isb_lib.core.solrCommit(rsession, url)
 
 """
 Updates existing Smithsonian records in a Things db to have their id column stripped of the n2t prefix.
