@@ -8,6 +8,8 @@ const DEFAULT_FACETS = [
     "hasContextCategory",
 ];
 
+var index_state = new IndexState();
+
 // Get a value from the solr pivot table list of lists
 function getPivotValue(pdata, f0, f1) {
     for (var p = 0; p < pdata.length; p++) {
@@ -29,7 +31,7 @@ function getPivotValue(pdata, f0, f1) {
 
 // Get a pivot total value from a solr pivot table
 function getPivotTotal(pdata, f0) {
-    for (var p = 0; p < pdata.length; p++) {
+    for (let p = 0; p < pdata.length; p++) {
         if (pdata[p].value === f0) {
             return pdata[p].count;
         }
@@ -37,9 +39,42 @@ function getPivotTotal(pdata, f0) {
     return 0;
 }
 
+
+async function refreshDateHistogram(ele_id) {
+    let ele = document.getElementById(ele_id);
+    let data = await index_state.getTemporalHistogram();
+    data["type"] = "bar";
+    console.log(data);
+    const layout = {
+        title: "produced_by time",
+        showLegend: false,
+        yaxis: {
+            type:'log',
+            autorange: true
+        }
+    }
+    Plotly.newPlot(ele_id, [data], layout, {scrollZoom: true});
+    ele.on('plotly_relayout', onDateRangeZoom);
+}
+
+async function onDateRangeZoom(ev) {
+    console.log(ev);
+    if (ev["xaxis.range[0]"]) {
+        const d0 = new Date(Date.parse(ev["xaxis.range[0]"]));
+        const d1 = new Date(Date.parse(ev["xaxis.range[1]"]));
+        index_state.setTemporalBounds(d0.toISOString(), d1.toISOString())
+            .then(refreshDateHistogram("dates_id"));
+    }
+}
+
+
+async function refreshDisplay() {
+    refreshDateHistogram("dates_id");
+}
+
 async function getSolrRecordSummary(query = DEFAULT_Q, facets = DEFAULT_FACETS, fq=null) {
     const TOTAL = "Total";
-    var _url = new URL("/thing/select", document.location);
+    let _url = new URL("/thing/select", document.location);
     let params = _url.searchParams;
     params.append("q", query);
     params.append("facet", "on");
@@ -47,7 +82,7 @@ async function getSolrRecordSummary(query = DEFAULT_Q, facets = DEFAULT_FACETS, 
     params.append("wt", "json");
     params.append("rows", 0);
     params.append("facet.field", SOURCE);
-    for (var i = 0; i < facets.length; i++) {
+    for (let i = 0; i < facets.length; i++) {
         params.append("facet.field", facets[i]);
         params.append("facet.pivot", SOURCE + "," + facets[i]);
     }
@@ -151,11 +186,18 @@ function dataSummary() {
             this.query = _params.q || this.query;
             this.update();
         },
-        setFQ(query) {
+        setFQ(ev, query) {
             clearTimeout(this._q_debounce);
             let _this = this;
             this._q_debounce = setTimeout(function() {
                 _this.fquery = query;
+                let elements = document.getElementsByClassName("fqsrc");
+                for (let i=0; i < elements.length; i++) {
+                    elements[i].classList.remove("active");
+                }
+                ev.target.classList.add("active");
+                index_state.setQueries(_this.query, _this.fquery);
+                refreshDisplay();
                 broadcastQuery(_this.query, _this.fquery);
             }, HOVER_TIME);
         },
@@ -167,5 +209,8 @@ function dataSummary() {
 
 
 function onLoad() {
-    //place holder to call when body is loaded
+    window.name="overview";
+    routeMessages();
+    index_state.setTemporalBounds("1800-01-01T00:00:00Z","2100-01-01T00:00:00Z")
+            .then(refreshDateHistogram("dates_id"));
 }

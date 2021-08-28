@@ -1,0 +1,86 @@
+/* https://simplecss.org/ */
+@import 'https://cdn.simplecss.org/simple.min.css';
+
+:root {
+    --bg: #ffffff;
+    --accent-bg: #fcfcfd;
+    --base-fontsize: 14px;
+    --mono-font: "Cousine", "Monaco", Consolas, Menlo, "Andale Mono", "Ubuntu Mono", monospace;
+}
+
+/**
+ Be a bit more demanding of screen space and set the base font size
+ */
+body {
+    max-width: 95%;
+}
+
+h1 {
+    font-size: 2rem;
+}
+
+h2 {
+    font-size: 1.8rem;
+}
+
+h3 {
+    font-size: 1.6rem;
+}
+
+header {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+
+code, kbd, pre, pre span, samp {
+    font-size: 0.8rem;
+}
+
+.active {
+    background: #BAEFBA !important;
+}
+
+.data {
+    font-family: var(--mono-font);
+}
+
+.query {
+   width: 95%;
+}
+
+.github-corner:hover .octo-arm {
+    animation: octocat-wave 560ms ease-in-out;
+}
+
+@keyframes octocat-wave {
+    0%,
+    100% {
+        transform: rotate(0);
+    }
+
+    20%,
+    60% {
+        transform: rotate(-25deg);
+    }
+
+    40%,
+    80% {
+        transform: rotate(10deg);
+    }
+}
+
+@media (max-width: 500px) {
+    .github-corner .octo-arm {
+        animation: octocat-wave 560ms ease-in-out;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: none;
+    }
+}
+
+@media print {
+    body {
+        font-size: 10px;
+    }
+}

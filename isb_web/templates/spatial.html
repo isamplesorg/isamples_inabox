@@ -6,8 +6,6 @@
     <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css">
     <style >
         body {
-            font-family: "Cousine", "Monaco", monospace;
-            font-size: 14px;
             max-width: 95%;
         }
     </style>
@@ -28,21 +26,29 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.0/MarkerCluster.min.css" integrity="sha512-ENrTWqddXrLJsQS2A86QmvA17PkJ0GVm1bqj5aTgpeMAfDKN2+SIOLpKG8R/6KkimnhTb+VW5qqUHB/r1zaRgg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.0/MarkerCluster.Default.css" integrity="sha512-6ZCLMiYwTeli2rVh3XAPxy3YoR5fVxGdH/pz+KMCzRY2M65Emgkw00Yqmhh8qLGeYQ3LbVZGdmOX9KUjSKr0TA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.0/leaflet.markercluster.js" integrity="sha512-pWPELjRaw2ZdoT0PDi7iRpRlk1XX3rtnfejJ/HwskyojpHei+9hKpwdphC4yssNt4FM0TjMQOmMrk6ZYSn274w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="/static/js/leaflet-heat.js"></script>
     <script type="text/javascript" src="/static/js/common.js"></script>
     <script type="text/javascript" src="/static/js/spatial.js"></script>
 
     <!-- enough styling to make a full-page map -->
     <style>
     #map {
-        height: 600px;
+        height: 70vh;
+        min-height: 300px;
     }
-    #query {
-        width: 100%;
+    .data {
+       font-family: "Cousine", "Monaco", monospace;
+       font-size: 0.9rem;
+    }
+    .query {
+       width: 95%;
+    }
+    .leaflet-heatmap-layer {
+        opacity: 0.7;
     }
     </style>
     <script type="text/javascript">
     const FIELD = "producedBy_samplingSite_location_rpt";
-    const PT_FIELD = "producedBy_samplingSite_location_ll";
     const MAX_ROWS = 5000;
     const DEFAULT_FACETS = [
         "source",
@@ -50,6 +56,8 @@
         "hasSpecimenCategory",
         "hasContextCategory",
     ]
+    // "heat" | "geojson"
+    const HEATMAP_STYLE = "heat";
 
     var map = null;
     var _debounce;
@@ -62,16 +70,6 @@
     };
     var facet_info = {};
 
-    function updateUiMeta() {
-        document.getElementById("total_docs").innerText = collection_metadata.total_docs;
-    }
-
-    function updateCurrentMeta() {
-        document.getElementById("match_docs").innerText = collection_metadata.match_docs;
-        document.getElementById("show_docs").innerText = collection_metadata.show_docs;
-    }
-
-
     function getCollectionMetadata(){
         var url = "/thing/select/info";
         fetch(url).then(response => response.json()).then(data => {
@@ -82,7 +80,7 @@
                 fields.push(key);
             }
             collection_metadata.field_names = fields;
-            updateUiMeta();
+            notifyMetadataChanged();
         });
     }
 
@@ -95,6 +93,7 @@
     }
 
     function recordDetail(_id) {
+        console.log(`recordDetail called for ${_id}`);
         const params = {
             "q":"id:" + escapeLucene(_id),
             "fl":"*",
@@ -153,15 +152,17 @@
             .then(response =>response.json())
             .then(data => {
                 var cluster = L.markerClusterGroup({ chunkedLoading: true });
-                for (var i=0; i<data.response.docs.length; i++) {
-                    var _doc = data.response.docs[i];
-                    var pt = _doc[PT_FIELD].split(",");
-                    pt[0] = parseFloat(pt[0]);
-                    pt[1] = parseFloat(pt[1]);
-                    var m = L.marker(new L.LatLng(pt[0], pt[1]), {title:_doc["id"]});
-                    m.bindPopup(_doc["id"]).openPopup();
-                    m.bindPopup(recordDetail(_doc["id"])).openPopup();
-                    cluster.addLayer(m);
+                if (data.response.docs !== undefined) {
+                    for (var i = 0; i < data.response.docs.length; i++) {
+                        var _doc = data.response.docs[i];
+                        var pt = _doc[PT_FIELD].split(",");
+                        pt[0] = parseFloat(pt[0]);
+                        pt[1] = parseFloat(pt[1]);
+                        var m = L.marker(new L.LatLng(pt[0], pt[1]), {title: _doc["id"]});
+                        m.bindPopup(_doc["id"]).openPopup();
+                        m.bindPopup(recordDetail(_doc["id"])).openPopup();
+                        cluster.addLayer(m);
+                    }
                 }
                 removeLayer("hmcluster");
                 cluster._tag = "hmcluster";
@@ -176,8 +177,9 @@
     }
 
 
-    function updateHeatmapLayer(q, fq) {
+    function updateGHeatmapLayer(q, fq) {
         var bb = map.getBounds();
+        broadcastBoundingBox(bb);
         var params = {
             query: q,
             min_lat: bb.getSouth(),
@@ -193,14 +195,15 @@
         fetch(hm_url)
             .then(response => response.json())
             .then(data => {
-                var count_max = Math.log10(data.max_count+1);
-                var cscale = chroma.scale(["blue","yellow","red"]).domain([0,count_max]);
+                let count_max = Math.log10(data.max_count+1);
+                let cscale = chroma.scale(["#0000ff","yellow", "red"]).domain([0,count_max]);
+                //var cscale = chroma.scale("spectral").domain([count_max,0]).padding(-0.15);
                 heatmap_layer = L.geoJson(
                     data,
                     {style: function(feature) {
                         return {
                             color: "black",
-                            opacity: 0.3,
+                            opacity: 0.0,
                             weight: 1,
                             fillColor: cscale(Math.log10(feature.properties.count+1)),
                             fillOpacity: 0.3
@@ -215,13 +218,60 @@
                 heatmap_layer.addTo(map);
                 collection_metadata.match_docs = data.num_docs;
                 collection_metadata.show_docs = data.total;
-                updateCurrentMeta();
+                notifyMetadataChanged();
                 if (data.total < MAX_ROWS) {
                     updatePointsLayer(q, fq);
                 }
             });
     }
 
+    function updateLHeatmapLayer(q, fq) {
+        var bb = map.getBounds();
+        broadcastBoundingBox(bb);
+        var params = {
+            query: q,
+            min_lat: bb.getSouth(),
+            min_lon: bb.getWest(),
+            max_lat: bb.getNorth(),
+            max_lon: bb.getEast()
+        }
+        if (fq !== undefined && fq !== '') {
+            params.fq = fq;
+        }
+
+        var hm_url = "/things_leaflet_heatmap?" + new URLSearchParams(params);
+        fetch(hm_url)
+            .then(response => response.json())
+            .then(data => {
+                var count_max = Math.log10(data.max_value+1);
+                var cscale = chroma.scale(["blue","yellow", "red"]).domain([0,count_max]);
+                //var cscale = chroma.scale("spectral").domain([count_max,0]).padding(-0.15);
+                heatmap_layer = L.heatLayer(
+                    data.data,
+                    {radius: 15, max:1.0, blur: 15, minOpacity:0.1}
+                );
+                removeLayer("heatmap");
+                removeLayer("hmcluster");
+                heatmap_layer._tag = "heatmap"
+                heatmap_layer.addTo(map);
+                collection_metadata.match_docs = data.num_docs;
+                collection_metadata.show_docs = data.total;
+                notifyMetadataChanged();
+                if (data.total < MAX_ROWS) {
+                    updatePointsLayer(q, fq);
+                }
+            });
+    }
+
+    function updateHeatmapLayer(q, fq) {
+        console.log("Map zoom level = " + map.getZoom());
+        if (HEATMAP_STYLE === "heat") {
+            if (map.getZoom() <= 3) {
+                return updateLHeatmapLayer(q, fq);
+            }
+        }
+        return updateGHeatmapLayer(q, fq);
+    }
 
     function initMap() {
         const map_opts = {
@@ -232,9 +282,14 @@
         }
         map = L.map('map', map_opts).setView([0, 0], 2);
 
-        L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
+        var Esri_WorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+	        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+        });
+        var carto_worldLayer = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>'
-            }).addTo(map);
+            });
+        //Esri_WorldImagery.addTo(map);
+        carto_worldLayer.addTo(map);
 
         doZoom = function(e) {
             clearTimeout(_debounce);
@@ -254,18 +309,19 @@
         });
         doZoom();
         getCollectionMetadata();
+        listenForBroadcasts();
     }
 
     </script>
 </head>
 <body onLoad="initMap();">
-    <header x-data="{}">
-        <p>Displayng <span id="show_docs"></span> / <span id="match_docs"></span> / <span id="total_docs"></span> records</p>
+    <header x-data="displayMetadata()" x-on:metadata-changed.window="update($event);">
+        <p class="data">Displaying <span x-text="show_docs"></span> / <span x-text="match_docs"></span> / <span x-text="total_docs"></span> records</p>
     </header>
     <main>
         <section id="query_display" x-data="queryParams()" x-on:query-changed.window="update($event);">
-            <input  id="query" :value="q"></input>
-            <input  id="fquery" :value="fq"></input>
+            <div class="data">&nbsp;Q: <input class="query" id="query" :value="q"></input></div>
+            <div class="data">FQ: <input class="query" id="fquery" :value="fq"></input></div>
         </section>
         <section id="map_display">
             <div id="map"></div>

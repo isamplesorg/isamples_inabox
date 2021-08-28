@@ -7,7 +7,6 @@ function queryParams() {
         q: DEFAULT_Q,
         fq: "",
         update(ev){
-            console.log(this.q);
             this.q = ev.detail.q || this.q;
             this.fq = ev.detail.fq;
             updateHeatmapLayer(this.q, this.fq);
@@ -15,31 +14,29 @@ function queryParams() {
     }
 }
 
-
-function notifyQueryChanged(query, fquery) {
-    let e = new CustomEvent("query-changed",{
-        detail: {
-            q:query,
-            fq: fquery
+function displayMetadata() {
+    return {
+        total_docs: 0,
+        match_docs: 0,
+        show_docs: 0,
+        last_modified: "",
+        field_name: [],
+        update(ev) {
+            this.total_docs = ev.detail.total_docs || this.total_docs;
+            this.match_docs = ev.detail.match_docs || this.match_docs;
+            this.show_docs = ev.detail.show_docs || this.show_docs;
         }
-    });
-    console.log(`notify: q:${query} fq:${fquery}`);
-    window.dispatchEvent(e);
+    }
 }
 
-/*
-Add an event listener to handle messages sent from controlling windows.
- */
-window.addEventListener("message", (e) => {
-    const _host = getPageHost();
-    if (e.origin !== _host) {
-        console.log(`Unhandled event from: ${e.origin}`);
-        return;
-    }
-    if (e.data.name !== undefined) {
-        if (e.data.name === "set_query") {
-            notifyQueryChanged(e.data.q, e.data.fq);
-            //document.getElementById("query").value = e.data.query;
+
+function notifyMetadataChanged() {
+    let e = new CustomEvent("metadata-changed",{
+        detail: {
+            total_docs: collection_metadata.total_docs,
+            match_docs: collection_metadata.match_docs,
+            show_docs: collection_metadata.show_docs
         }
-    }
-}, false);
+    });
+    window.dispatchEvent(e);
+}

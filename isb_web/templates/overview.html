@@ -3,41 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <title>Overview</title>
-    <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css">
+    <link rel="stylesheet" href="/static/css/common.css" />
     <link rel="stylesheet" href="https://unpkg.com/gutenberg-css@0.6" media="print">
+
     <style>
-        :root {
-            --bg: #ffffff;
-        }
-
-        body {
-            font-size: 14px;
-        }
-
-        h1 {
-            font-size: 2rem;
-        }
-
-        h2 {
-            font-size: 1.8rem;
-        }
-
-        h3 {
-            font-size: 1.6rem;
-        }
         p.nowrap {
             white-space: nowrap;
         }
 
         td.numeric {
             text-align: right;
-            font-family: "Cousine", "Monaco", monospace;
+            font-family: var(--mono-font);
             font-weight: lighter;
         }
-        td.active {
-            color: green;
+        td {
+            padding-top:0.1rem;
+            padding-bottom:0.1rem;
+            padding-left: 0.1rem;
+            padding-right: 0.1rem;
         }
-
         tbody > tr:nth-child(even) {
             background: var(--bg);
         }
@@ -46,48 +30,11 @@
             background: var(--accent-bg);
             font-weight: bold;
         }
-
-        .github-corner:hover .octo-arm {
-            animation: octocat-wave 560ms ease-in-out;
-        }
-
-        @keyframes octocat-wave {
-            0%,
-            100% {
-                transform: rotate(0);
-            }
-
-            20%,
-            60% {
-                transform: rotate(-25deg);
-            }
-
-            40%,
-            80% {
-                transform: rotate(10deg);
-            }
-        }
-
-        @media (max-width: 500px) {
-            .github-corner .octo-arm {
-                animation: octocat-wave 560ms ease-in-out;
-            }
-
-            .github-corner:hover .octo-arm {
-                animation: none;
-            }
-        }
-
-        @media print {
-            body {
-                font-size: 10px;
-            }
-        }
-
     </style>
     <!-- using alpine.JS for UI interaction -->
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/numeral.min.js"></script>
+    <script src="//cdn.plot.ly/plotly-2.3.1.min.js"></script>
     <script type="text/javascript" src="/static/js/common.js"></script>
     <script type="text/javascript" src="/static/js/overview.js"></script>
 </head>
@@ -104,7 +51,7 @@
                   fill="currentColor" class="octo-body"></path>
         </svg>
     </a>
-    <button @click="openMapWindow();">Open map view</button>
+    <button @click="openMapWindow();">Open map view</button><button @click="openRecordsWindow();">Open records view</button>
 </header>
 <main>
     <section x-data="dataSummary()">
@@ -124,16 +71,17 @@
             <tr>
                 <td>Records</td>
                 <template x-for="src in sources">
-                    <td class="numeric" x-text="nFormat(totals[src].v)"
-                        @mouseover="setFQ(totals[src].fq);" @mouseleave="cancelFQ();"></td>
+                    <td class="numeric fqsrc" x-text="nFormat(totals[src].v)"
+                        @click="setFQ($event, totals[src].fq);"></td>
                 </template>
-                <td class="numeric" x-text="nFormat(total_records)" @mouseover="setFQ('');"
-                    @mouseleave="cancelFQ();"></td>
+                <td class="numeric fqsrc active" x-text="nFormat(total_records)" @click="setFQ($event, '');"></td>
             </tr>
             </tbody>
         </table>
         <template x-for="fld in fields">
             <div class="avoid-break-inside">
+                <details>
+                    <summary x-text="fld"></summary>
                 <table>
                     <thead>
                     <tr>
@@ -149,17 +97,22 @@
                         <tr>
                             <td x-text="cval"></td>
                             <template x-for="src in sources">
-                                <td class="numeric" x-text="nFormat(facets[fld][cval][src].v)"
-                                @mouseover="setFQ(facets[fld][cval][src].fq)" @mouseleave="cancelFQ()"></td>
+                                <td class="numeric fqsrc" x-text="nFormat(facets[fld][cval][src].v)"
+                                @click="setFQ($event, facets[fld][cval][src].fq)"></td>
                             </template>
-                            <td class="numeric" x-text="nFormat(facets[fld][cval].Total.v)"
-                                @mouseover="setFQ(facets[fld][cval].Total.fq)" @mouseleave="cancelFQ()"></td>
+                            <td class="numeric fqsrc" x-text="nFormat(facets[fld][cval].Total.v)"
+                                @click="setFQ($event, facets[fld][cval].Total.fq)"></td>
                         </tr>
                     </template>
                     </tbody>
                 </table>
+                </details>
             </div>
         </template>
+        <details>
+            <summary>Temporal Distribution</summary>
+            <div id="dates_id"></div>
+        </details>
     </section>
 </main>
 <footer x-data="siteInfo()">
