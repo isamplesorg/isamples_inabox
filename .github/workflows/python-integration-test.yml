@@ -5,8 +5,7 @@
 
  on:
    schedule:
-	   - cron: "* * * * *"
-	   
+     - cron: '* * * * *'  
    workflow_dispatch:
 
  jobs:
