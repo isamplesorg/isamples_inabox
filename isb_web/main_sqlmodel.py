@@ -1,10 +1,12 @@
 import fastapi
 import logging
 import uvicorn
+from fastapi import Depends
 from fastapi.logger import logger as fastapi_logger
 from sqlmodel import SQLModel, create_engine, Session, select
 import isb_web.config
 from isb_lib.models.thing import Thing
+from typing import List
 
 DATABASE_URL = isb_web.config.Settings().database_url
 app = fastapi.FastAPI()
@@ -15,13 +17,18 @@ engine = create_engine(DATABASE_URL, echo=True)
 def on_startup():
     SQLModel.metadata.create_all(engine)
 
-@app.get("/thingsqlmodel/")
-def read_things():
+
+def get_session():
     with Session(engine) as session:
-        statement = select(Thing).limit(10)
-        results = session.exec(statement)
-        things = results.all()
-        return things
+        yield session
+
+
+@app.get("/thingsqlmodel/")
+def read_things(session: Session = Depends(get_session)):
+    statement = select(Thing).limit(10)
+    results = session.exec(statement)
+    things = results.all()
+    return things
 
 def main():
     logging.basicConfig(level=logging.DEBUG)

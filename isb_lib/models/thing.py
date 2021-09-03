@@ -62,7 +62,7 @@ class Thing(SQLModel, table=True):
     resolve_elapsed: Optional[float] = Field(
         default=None, nullable=True, description="Time in seconds to resolve record"
     )
-    resolved_content: Optional[str] = Field(
+    resolved_content: Optional[dict] = Field(
         default=None,
         nullable=True,
         description="Resolved content, {content_type:, content: }",
