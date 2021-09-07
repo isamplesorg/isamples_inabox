@@ -6,33 +6,6 @@ from isb_lib.models import thing
 from isb_web.main_sqlmodel import get_session, app
 
 
-@pytest.fixture(name="session")
-def session_fixture():
-    engine = create_engine(
-        "sqlite://",
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
-    )
-    SQLModel.metadata.create_all(engine)
-    with Session(engine) as session:
-        yield session
-
-
-@pytest.fixture(name="client")
-def client_fixture(session: Session):
-    def get_session_override():
-        return session
-
-    app.dependency_overrides[get_session] = get_session_override
-    client = TestClient(app)
-    yield client
-    app.dependency_overrides.clear()
-
-
-TEST_IGSN = "IGSN:123456"
-TEST_RESOLVED_URL = "http://foo/bar"
-TEST_AUTHORITY_ID = "SESAR"
-
 def _test_model():
     thing_1 = thing.Thing()
     thing_1.id = TEST_IGSN
@@ -140,6 +113,37 @@ def _test_model():
     return thing_1
 
 
+@pytest.fixture(name="session")
+def session_fixture():
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    SQLModel.metadata.create_all(engine)
+    with Session(engine) as session:
+        thing_1 = _test_model()
+        session.add(thing_1)
+        session.commit()
+        yield session
+
+
+@pytest.fixture(name="client")
+def client_fixture(session: Session):
+    def get_session_override():
+        return session
+
+    app.dependency_overrides[get_session] = get_session_override
+    client = TestClient(app)
+    yield client
+    app.dependency_overrides.clear()
+
+
+TEST_IGSN = "IGSN:123456"
+TEST_RESOLVED_URL = "http://foo/bar"
+TEST_AUTHORITY_ID = "SESAR"
+
+
 def test_thing_list(client: TestClient, session: Session):
     thing_1 = _test_model()
     session.add(thing_1)
@@ -156,9 +160,6 @@ def test_thing_list(client: TestClient, session: Session):
 
 
 def test_things(client: TestClient, session: Session):
-    thing_1 = _test_model()
-    session.add(thing_1)
-    session.commit()
     response = client.get("/thing/", json={"authority": "SESAR"})
     data = response.json()
     first_fetched_thing = data["data"][0]
@@ -170,9 +171,6 @@ def test_things(client: TestClient, session: Session):
 
 
 def test_get_thing(client: TestClient, session: Session):
-    thing_1 = _test_model()
-    session.add(thing_1)
-    session.commit()
     response = client.get(f"/thing/{TEST_IGSN}")
     data = response.json()
     assert response.status_code == 200
@@ -180,9 +178,6 @@ def test_get_thing(client: TestClient, session: Session):
 
 
 def test_get_thing_core_format(client: TestClient, session: Session):
-    thing_1 = _test_model()
-    session.add(thing_1)
-    session.commit()
     response = client.get(f"/thing/{TEST_IGSN}?format=core")
     assert response.status_code == 200
     data = response.json()
