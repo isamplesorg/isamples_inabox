@@ -159,7 +159,7 @@ def test_things(client: TestClient, session: Session):
     thing_1 = _test_model()
     session.add(thing_1)
     session.commit()
-    response = client.get("/thing/", json={ "authority": "SESAR"})
+    response = client.get("/thing/", json={"authority": "SESAR"})
     data = response.json()
     first_fetched_thing = data["data"][0]
     assert data["total_records"] > 0
@@ -167,3 +167,26 @@ def test_things(client: TestClient, session: Session):
     assert data.get("last_page") is not None
     assert response.status_code == 200
     assert "SESAR" == first_fetched_thing["authority_id"]
+
+
+def test_get_thing(client: TestClient, session: Session):
+    thing_1 = _test_model()
+    session.add(thing_1)
+    session.commit()
+    response = client.get(f"/thing/{TEST_IGSN}")
+    data = response.json()
+    assert response.status_code == 200
+    assert data.get("@id") is not None
+
+
+def test_get_thing_core_format(client: TestClient, session: Session):
+    thing_1 = _test_model()
+    session.add(thing_1)
+    session.commit()
+    response = client.get(f"/thing/{TEST_IGSN}?format=core")
+    assert response.status_code == 200
+    data = response.json()
+    assert "iSamples" in data.get("$schema")
+    assert data.get("keywords") is not None
+    assert data.get("curation") is not None
+    assert data.get("label") is not None

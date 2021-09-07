@@ -33,3 +33,8 @@ def read_things(
     things_statement = things_statement.limit(limit)
     things_results = session.exec(things_statement)
     return overall_count, overall_pages, things_results.all()
+
+
+def get_thing(session: Session, identifier: str) -> Optional[Thing]:
+    statement = select(Thing).filter(Thing.id == identifier)
+    return session.exec(statement).first()

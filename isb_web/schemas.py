@@ -17,7 +17,7 @@ class ThingListEntry(SQLModel):
     authority_id: str
     tcreated: typing.Optional[datetime.datetime]
     resolved_status: int
-    resolved_url: str
+    resolved_url: typing.Optional[str]
     resolve_elapsed: float = None
 
     class Config:
