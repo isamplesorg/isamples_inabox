@@ -8,9 +8,11 @@ import isb_web.config
 from isb_lib.models.thing import Thing
 from typing import List
 
-DATABASE_URL = isb_web.config.Settings().database_url
 app = fastapi.FastAPI()
-engine = create_engine(DATABASE_URL, echo=True)
+database_url = isb_web.config.Settings().database_url
+# For unit tests, this won't be set, but we provide an alternate in-memory url and override the engine, so don't worry
+if database_url != "UNSET":
+    engine = create_engine(database_url, echo=True)
 
 
 @app.on_event("startup")
@@ -23,12 +25,13 @@ def get_session():
         yield session
 
 
-@app.get("/thingsqlmodel/")
+@app.get("/thingsqlmodel/", response_model=List[Thing])
 def read_things(session: Session = Depends(get_session)):
     statement = select(Thing).limit(10)
     results = session.exec(statement)
     things = results.all()
     return things
+
 
 def main():
     logging.basicConfig(level=logging.DEBUG)

@@ -63,9 +63,12 @@ class Thing(SQLModel, table=True):
         default=None, nullable=True, description="Time in seconds to resolve record"
     )
     resolved_content: Optional[dict] = Field(
-        default=None,
-        nullable=True,
-        description="Resolved content, {content_type:, content: }",
+        sa_column=sqlalchemy.Column(
+            sqlalchemy.JSON,
+            nullable=True,
+            default=None,
+            doc="Resolved content, {content_type:, content: }",
+        ),
     )
     resolved_media_type: Optional[str] = Field(
         default=None, nullable=True, description="Media type of resolved content"
