@@ -9,6 +9,7 @@ import isb_web.config
 import click
 import click_config_file
 
+
 class Thing(SQLModel, table=True):
     primary_key: Optional[int] = Field(
         # Need to use SQLAlchemy here because we can't have the Python attribute named _id or SQLModel won't see it
@@ -98,7 +99,7 @@ class Thing(SQLModel, table=True):
 @click_config_file.configuration_option(config_file_name="opencontext.cfg")
 @click.pass_context
 def main(context):
-    engine = create_engine(context.default_map['db_url'], echo=True)
+    engine = create_engine(context.default_map["db_url"], echo=True)
     SQLModel.metadata.create_all(engine)
     with Session(engine) as session:
         statement = select(Thing).limit(10)
