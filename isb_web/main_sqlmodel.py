@@ -7,6 +7,8 @@ from sqlmodel import SQLModel, create_engine, Session, select
 import isb_web.config
 from isb_lib.models.thing import Thing
 from typing import List
+from isb_web.schemas import ThingPage
+from isb_web import sqlmodel_database
 
 app = fastapi.FastAPI()
 database_url = isb_web.config.Settings().database_url
@@ -31,6 +33,32 @@ def read_things(session: Session = Depends(get_session)):
     results = session.exec(statement)
     things = results.all()
     return things
+
+
+@app.get("/thing/", response_model=ThingPage)
+def read_things(
+    session: Session = Depends(get_session),
+    offset: int = fastapi.Query(0, ge=0),
+    limit: int = fastapi.Query(1000, lt=10000, gt=0),
+    status: int = 200,
+    authority: str = fastapi.Query(None),
+):
+    total_records, npages, things = sqlmodel_database.read_things(
+        session, offset, limit, status, authority
+    )
+
+    params = {
+        "limit": limit,
+        "offset": offset,
+        "status": status,
+        "authority": authority,
+    }
+    return {
+        "params": params,
+        "last_page": npages,
+        "total_records": total_records,
+        "data": things,
+    }
 
 
 def main():

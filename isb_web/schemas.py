@@ -2,6 +2,7 @@ import typing
 import pydantic
 import datetime
 import fastapi
+from sqlmodel import SQLModel
 
 @pydantic.dataclasses.dataclass
 class ThingListRequest:
@@ -11,7 +12,7 @@ class ThingListRequest:
     authority: str = fastapi.Query(None)
 
 
-class ThingListEntry(pydantic.BaseModel):
+class ThingListEntry(SQLModel):
     id: str
     authority_id: str
     tcreated: typing.Optional[datetime.datetime]
@@ -22,11 +23,13 @@ class ThingListEntry(pydantic.BaseModel):
     class Config:
         orm_mode = True
 
-class ThingPage(pydantic.BaseModel):
+
+class ThingPage(SQLModel):
     total_records: int
     last_page: int
     params: dict
     data: typing.List[ThingListEntry]
+
 
 class ThingType(pydantic.BaseModel):
     item_type: str

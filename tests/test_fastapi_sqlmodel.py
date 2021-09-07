@@ -2,8 +2,8 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, SQLModel, create_engine
 from sqlmodel.pool import StaticPool
-from isb_web.main_sqlmodel import get_session, app
 from isb_lib.models import thing
+from isb_web.main_sqlmodel import get_session, app
 
 
 @pytest.fixture(name="session")
@@ -33,12 +33,12 @@ TEST_IGSN = "IGSN:123456"
 TEST_RESOLVED_URL = "http://foo/bar"
 TEST_AUTHORITY_ID = "SESAR"
 
-
-def test_thing_list(client: TestClient, session: Session):
+def _test_model():
     thing_1 = thing.Thing()
     thing_1.id = TEST_IGSN
     thing_1.authority_id = TEST_AUTHORITY_ID
     thing_1.resolved_url = TEST_RESOLVED_URL
+    thing_1.resolved_status = 200
     thing_1.resolved_content = {
         "@id": "https://data.geosamples.org/sample/igsn/BSU00062W",
         "igsn": "BSU00062W",
@@ -137,6 +137,11 @@ def test_thing_list(client: TestClient, session: Session):
             },
         },
     }
+    return thing_1
+
+
+def test_thing_list(client: TestClient, session: Session):
+    thing_1 = _test_model()
     session.add(thing_1)
     session.commit()
     response = client.get("/thingsqlmodel/", json={})
@@ -148,3 +153,17 @@ def test_thing_list(client: TestClient, session: Session):
     assert TEST_RESOLVED_URL == first_fetched_thing["resolved_url"]
     assert TEST_AUTHORITY_ID == first_fetched_thing["authority_id"]
     assert first_fetched_thing["resolved_content"].get("@id")
+
+
+def test_things(client: TestClient, session: Session):
+    thing_1 = _test_model()
+    session.add(thing_1)
+    session.commit()
+    response = client.get("/thing/", json={ "authority": "SESAR"})
+    data = response.json()
+    first_fetched_thing = data["data"][0]
+    assert data["total_records"] > 0
+    assert data.get("params") is not None
+    assert data.get("last_page") is not None
+    assert response.status_code == 200
+    assert "SESAR" == first_fetched_thing["authority_id"]
