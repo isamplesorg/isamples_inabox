@@ -16,7 +16,7 @@ from isb_web.sqlmodel_database import SQLModelDAO
 import isb_web
 
 app = fastapi.FastAPI()
-dao = SQLModelDAO()
+dao = SQLModelDAO(None)
 
 
 @app.on_event("startup")

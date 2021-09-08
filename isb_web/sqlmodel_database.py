@@ -6,15 +6,12 @@ import isb_web.config
 
 
 class SQLModelDAO:
-
-    def __init__(self):
+    def __init__(self, db_url: str):
         # This is a strange initializer, but FastAPI wants us to construct the object before we know we
         # want to use it.  So, separate out the object construction from the database connection.
         # In unit tests, this ends up getting swapped out and unused, which is the source of the confusion.
-        self.engine = None
-
-    def __init__(self, db_url: str):
-        self.connect_sqlmodel(db_url)
+        if db_url is not None:
+            self.connect_sqlmodel(db_url)
 
     def connect_sqlmodel(self, db_url: str):
         self.engine = create_engine(db_url, echo=True)
@@ -29,7 +26,7 @@ def read_things(
     offset: int,
     limit: int,
     status: int = 200,
-    authority: Optional[str] = None
+    authority: Optional[str] = None,
 ) -> tuple[int, int, List[ThingPage]]:
     count_statement = session.query(Thing)
     if authority is not None:
