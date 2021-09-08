@@ -144,21 +144,6 @@ TEST_RESOLVED_URL = "http://foo/bar"
 TEST_AUTHORITY_ID = "SESAR"
 
 
-def test_thing_list(client: TestClient, session: Session):
-    thing_1 = _test_model()
-    session.add(thing_1)
-    session.commit()
-    response = client.get("/thingsqlmodel/", json={})
-    data = response.json()
-    first_fetched_thing = data[0]
-    assert response.status_code == 200
-    assert 1 == first_fetched_thing["primary_key"]
-    assert TEST_IGSN == first_fetched_thing["id"]
-    assert TEST_RESOLVED_URL == first_fetched_thing["resolved_url"]
-    assert TEST_AUTHORITY_ID == first_fetched_thing["authority_id"]
-    assert first_fetched_thing["resolved_content"].get("@id")
-
-
 def test_things(client: TestClient, session: Session):
     response = client.get("/thing/", json={"authority": "SESAR"})
     data = response.json()
