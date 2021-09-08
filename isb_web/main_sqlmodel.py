@@ -13,6 +13,7 @@ from isamples_metadata.GEOMETransformer import GEOMETransformer
 from isamples_metadata.OpenContextTransformer import OpenContextTransformer
 from isamples_metadata.SmithsonianTransformer import SmithsonianTransformer
 from isb_web.sqlmodel_database import SQLModelDAO
+import isb_web
 
 app = fastapi.FastAPI()
 dao = SQLModelDAO()
@@ -20,7 +21,7 @@ dao = SQLModelDAO()
 
 @app.on_event("startup")
 def on_startup():
-    dao.connect_sqlmodel()
+    dao.connect_sqlmodel(isb_web.config.Settings().database_url)
 
 
 def get_session():

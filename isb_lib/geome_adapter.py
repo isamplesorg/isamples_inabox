@@ -304,7 +304,6 @@ class GEOMEItem(object):
             L.error("Item is not an object")
             return _thing
         _thing.item_type = self.getItemType()
-        _thing.related = None
         _thing.resolved_media_type = media_type
         _thing.resolve_elapsed = resolve_elapsed
         _thing.resolved_content = self.item

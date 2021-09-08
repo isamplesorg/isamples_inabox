@@ -44,7 +44,6 @@ class SmithsonianItem(object):
             L.error("Item is not an object")
             return _thing
         _thing.item_type = "sample"
-        _thing.related = None
         _thing.resolved_media_type = SmithsonianItem.TEXT_CSV
         # Note that this field doesn't make sense for Smithsonian as the information is coming from a local file
         # _thing.resolve_elapsed = resolve_elapsed

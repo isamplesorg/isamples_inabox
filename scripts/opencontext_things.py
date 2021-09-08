@@ -5,12 +5,13 @@ import click_config_file
 import asyncio
 import isb_lib.core
 import isb_lib.opencontext_adapter
-import igsn_lib.models
 import concurrent.futures
 import heartrate
 import sqlalchemy
 import sqlalchemy.orm
 import sqlalchemy.exc
+
+from isb_web.sqlmodel_database import SQLModelDAO, get_thing
 
 BACKLOG_SIZE = 40
 
@@ -39,15 +40,15 @@ async def _load_open_context_entries(session, max_count, start_from):
         L.info("got next id from open context %s", record)
         num_ids += 1
         id = record["uri"]
-        try:
-            res = session.query(igsn_lib.models.thing.Thing).filter_by(id=id).one()
+        existing_thing = get_thing(session, id)
+        if existing_thing is not None:
             logging.info("Already have %s", id)
             isb_lib.opencontext_adapter.update_thing(
-                res, record, datetime.datetime.now(), records.last_url_str()
+                existing_thing, record, datetime.datetime.now(), records.last_url_str()
             )
             session.commit()
             logging.info("Just saved existing thing")
-        except sqlalchemy.orm.exc.NoResultFound:
+        else:
             logging.debug("Don't have %s", id)
             thing = isb_lib.opencontext_adapter.load_thing(
                 record, datetime.datetime.now(), records.last_url_str()
@@ -120,7 +121,7 @@ def main(ctx, db_url, verbosity, heart_rate):
 @click.pass_context
 def load_records(ctx, max_records):
     L = get_logger()
-    session = isb_lib.core.get_db_session(ctx.obj["db_url"])
+    session = SQLModelDAO(ctx.obj["db_url"]).get_session()
     max_created = isb_lib.core.last_time_thing_created(
         session, isb_lib.opencontext_adapter.OpenContextItem.AUTHORITY_ID
     )

@@ -1,7 +1,7 @@
 """
 
 """
-
+import sys
 import logging
 import datetime
 import hashlib
@@ -19,6 +19,8 @@ import requests
 import shapely.wkt
 import shapely.geometry
 from sqlalchemy import select
+
+from isb_web.sqlmodel_database import SQLModelDAO
 
 RECOGNIZED_DATE_FORMATS = [
     "%Y",  # e.g. 1985
@@ -562,9 +564,7 @@ class CoreSolrImporter:
         offset: int = 0,
         min_time_created: datetime.datetime = None,
     ):
-        engine = igsn_lib.models.getEngine(db_url)
-        igsn_lib.models.createAll(engine)
-        self._db_session = igsn_lib.models.getSession(engine)
+        self._db_session = SQLModelDAO(db_url).get_session()
         self._authority_id = authority_id
         self._min_time_created = min_time_created
         self._thing_iterator = ThingRecordIterator(

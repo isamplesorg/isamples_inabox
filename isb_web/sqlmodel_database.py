@@ -6,11 +6,18 @@ import isb_web.config
 
 
 class SQLModelDAO:
-    # Ideally, this would happen in an init method, but FastAPI wants us to construct the object before we know we
-    # want to use it.  So, separate out the object construction from the database connection.
-    # In unit tests, this ends up getting swapped out and unused, which is the source of the confusion.
-    def connect_sqlmodel(self):
-        self.engine = create_engine(isb_web.config.Settings().database_url, echo=True)
+
+    def __init__(self):
+        # This is a strange initializer, but FastAPI wants us to construct the object before we know we
+        # want to use it.  So, separate out the object construction from the database connection.
+        # In unit tests, this ends up getting swapped out and unused, which is the source of the confusion.
+        self.engine = None
+
+    def __init__(self, db_url: str):
+        self.connect_sqlmodel(db_url)
+
+    def connect_sqlmodel(self, db_url: str):
+        self.engine = create_engine(db_url, echo=True)
         SQLModel.metadata.create_all(self.engine)
 
     def get_session(self) -> Session:
