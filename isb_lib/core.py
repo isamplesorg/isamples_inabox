@@ -7,11 +7,9 @@ import datetime
 import hashlib
 import json
 import typing
-import isamples_metadata.Transformer
 
 import igsn_lib.time
-import igsn_lib.models
-import igsn_lib.models.thing
+from isb_lib.models.thing import Thing
 from isamples_metadata.Transformer import Transformer
 import dateparser
 import re
@@ -19,6 +17,7 @@ import requests
 import shapely.wkt
 import shapely.geometry
 from sqlalchemy import select
+import heartrate
 
 from isb_web.sqlmodel_database import SQLModelDAO
 
@@ -75,13 +74,6 @@ def things_main(ctx, db_url, verbosity, heart_rate):
         heartrate.trace(browser=True)
 
 
-def get_db_session(db_url):
-    engine = igsn_lib.models.getEngine(db_url)
-    igsn_lib.models.createAll(engine)
-    session = igsn_lib.models.getSession(engine)
-    return session
-
-
 def last_time_thing_created(
     session, authority_id: typing.AnyStr
 ) -> typing.Optional[datetime.datetime]:
@@ -91,11 +83,11 @@ def last_time_thing_created(
         current_year = datetime.datetime(year=datetime.date.today().year - 1, month=1, day=1).strftime("%Y-%m-%d")
         return (
             session.execute(
-                select(igsn_lib.models.thing.Thing.tcreated)
-                .where(igsn_lib.models.thing.Thing.authority_id == authority_id)
-                .where(igsn_lib.models.thing.Thing.tcreated >= current_year)
+                select(Thing.tcreated)
+                .where(Thing.authority_id == authority_id)
+                .where(Thing.tcreated >= current_year)
                 .limit(1)
-                .order_by(igsn_lib.models.thing.Thing.tcreated.desc())
+                .order_by(Thing.tcreated.desc())
             )
             .fetchone()
             ._asdict()["tcreated"]
@@ -135,7 +127,7 @@ def relationAsSolrDoc(
     doc["tstamp"] = datetimeToSolrStr(ts)
     return doc
 
-def validate_resolved_content(authority_id: typing.AnyStr, thing: igsn_lib.models.thing.Thing):
+def validate_resolved_content(authority_id: typing.AnyStr, thing: Thing):
     if not isinstance(thing.resolved_content, dict):
         raise ValueError("Thing.resolved_content is not an object")
     if not thing.authority_id == authority_id:
