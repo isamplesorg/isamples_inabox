@@ -1,7 +1,20 @@
 from typing import Optional, List
-from sqlmodel import Session, select
+from sqlmodel import SQLModel, create_engine, Session, select
 from isb_lib.models.thing import Thing
 from isb_web.schemas import ThingPage
+import isb_web.config
+
+
+class SQLModelDAO:
+    # Ideally, this would happen in an init method, but FastAPI wants us to construct the object before we know we
+    # want to use it.  So, separate out the object construction from the database connection.
+    # In unit tests, this ends up getting swapped out and unused, which is the source of the confusion.
+    def connect_sqlmodel(self):
+        self.engine = create_engine(isb_web.config.Settings().database_url, echo=True)
+        SQLModel.metadata.create_all(self.engine)
+
+    def get_session(self) -> Session:
+        return Session(self.engine)
 
 
 def read_things(

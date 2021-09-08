@@ -64,6 +64,7 @@ class Thing(SQLModel, table=True):
         default=None, nullable=True, description="Time in seconds to resolve record"
     )
     resolved_content: Optional[dict] = Field(
+        # Use the raw SQLAlchemy column in order to get the proper JSON behavior
         sa_column=sqlalchemy.Column(
             sqlalchemy.JSON,
             nullable=True,

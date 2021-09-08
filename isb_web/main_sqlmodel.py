@@ -3,10 +3,7 @@ import logging
 import uvicorn
 from fastapi import Depends
 from fastapi.logger import logger as fastapi_logger
-from sqlmodel import SQLModel, create_engine, Session, select
-import isb_web.config
-from isb_lib.models.thing import Thing
-from typing import List
+from sqlmodel import Session
 from isb_web.schemas import ThingPage
 from isb_web import isb_format
 from isb_web import sqlmodel_database
@@ -15,30 +12,20 @@ from isamples_metadata.SESARTransformer import SESARTransformer
 from isamples_metadata.GEOMETransformer import GEOMETransformer
 from isamples_metadata.OpenContextTransformer import OpenContextTransformer
 from isamples_metadata.SmithsonianTransformer import SmithsonianTransformer
+from isb_web.sqlmodel_database import SQLModelDAO
 
 app = fastapi.FastAPI()
-database_url = isb_web.config.Settings().database_url
-# For unit tests, this won't be set, but we provide an alternate in-memory url and override the engine, so don't worry
-if database_url != "UNSET":
-    engine = create_engine(database_url, echo=True)
+dao = SQLModelDAO()
 
 
 @app.on_event("startup")
 def on_startup():
-    SQLModel.metadata.create_all(engine)
+    dao.connect_sqlmodel()
 
 
 def get_session():
-    with Session(engine) as session:
+    with dao.get_session() as session:
         yield session
-
-
-@app.get("/thingsqlmodel/", response_model=List[Thing])
-def read_things(session: Session = Depends(get_session)):
-    statement = select(Thing).limit(10)
-    results = session.exec(statement)
-    things = results.all()
-    return things
 
 
 @app.get("/thing/", response_model=ThingPage)
