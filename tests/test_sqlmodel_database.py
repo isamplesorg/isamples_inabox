@@ -1,9 +1,11 @@
+import datetime
+
 import pytest
 from sqlmodel import Session, SQLModel, create_engine
 from sqlmodel.pool import StaticPool
 
 from isb_lib.models.thing import Thing
-from isb_web.sqlmodel_database import get_thing_with_id, read_things
+from isb_web.sqlmodel_database import get_thing_with_id, read_things, last_time_thing_created
 
 
 @pytest.fixture(name="session")
@@ -48,3 +50,15 @@ def test_read_things_with_things(session: Session):
     assert 1 == count
     assert 0 == pages
     assert len(data) > 0
+
+
+def test_last_time_thing_created(session: Session):
+    test_authority = "test"
+    created = last_time_thing_created(session, test_authority)
+    assert created is None
+    new_thing = Thing(id="123456", authority_id=test_authority, resolved_url="http://foo.bar", resolved_status=200,
+                      resolved_content={"foo": "bar"}, tcreated=datetime.datetime.now())
+    session.add(new_thing)
+    session.commit()
+    new_created = last_time_thing_created(session, test_authority)
+    assert new_created is not None

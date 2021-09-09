@@ -19,6 +19,7 @@ import shapely.geometry
 from sqlalchemy import select
 import heartrate
 
+from isb_web import sqlmodel_database
 from isb_web.sqlmodel_database import SQLModelDAO
 
 RECOGNIZED_DATE_FORMATS = [
@@ -77,29 +78,7 @@ def things_main(ctx, db_url, verbosity, heart_rate):
 def last_time_thing_created(
     session, authority_id: typing.AnyStr
 ) -> typing.Optional[datetime.datetime]:
-    try:
-        # A bit of a hack to work around postgres perf issues.  Limit the number of records to examine by including a
-        # time created date in the qualifier.
-        current_year = datetime.datetime(year=datetime.date.today().year - 1, month=1, day=1).strftime("%Y-%m-%d")
-        return (
-            session.execute(
-                select(Thing.tcreated)
-                .where(Thing.authority_id == authority_id)
-                .where(Thing.tcreated >= current_year)
-                .limit(1)
-                .order_by(Thing.tcreated.desc())
-            )
-            .fetchone()
-            ._asdict()["tcreated"]
-        )
-    except:
-        e = sys.exc_info()[0]
-        getLogger().error(
-            "Exception trying to fetch the last time a thing was created for authority_id %s:\n\n%s",
-            authority_id,
-            e,
-        )
-        return None
+    return sqlmodel_database.last_time_thing_created(session, authority_id)
 
 
 def datetimeToSolrStr(dt):

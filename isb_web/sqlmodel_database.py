@@ -1,3 +1,4 @@
+import datetime
 from typing import Optional, List
 from sqlmodel import SQLModel, create_engine, Session, select
 from isb_lib.models.thing import Thing
@@ -11,6 +12,8 @@ class SQLModelDAO:
         # In unit tests, this ends up getting swapped out and unused, which is the source of the confusion.
         if db_url is not None:
             self.connect_sqlmodel(db_url)
+        else:
+            self.engine = None
 
     def connect_sqlmodel(self, db_url: str):
         self.engine = create_engine(db_url, echo=True)
@@ -59,3 +62,22 @@ def read_things(
 def get_thing_with_id(session: Session, identifier: str) -> Optional[Thing]:
     statement = select(Thing).filter(Thing.id == identifier)
     return session.exec(statement).first()
+
+
+def last_time_thing_created(
+    session: Session, authority_id: str
+) -> Optional[datetime.datetime]:
+    # A bit of a hack to work around postgres perf issues.  Limit the number of records to examine by including a
+    # time created date in the qualifier.
+    current_year = datetime.datetime(
+        year=datetime.date.today().year - 1, month=1, day=1
+    ).strftime("%Y-%m-%d")
+    created_select = (
+        select(Thing.tcreated)
+        .filter(Thing.authority_id == authority_id)
+        .filter(Thing.tcreated >= current_year)
+        .limit(1)
+        .order_by(Thing.tcreated.desc())
+    )
+    result = session.exec(created_select).first()
+    return result
