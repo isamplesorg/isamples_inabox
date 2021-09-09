@@ -14,7 +14,7 @@ import click
 import click_config_file
 
 from isb_lib.models.thing import Thing
-from isb_web.sqlmodel_database import SQLModelDAO, get_thing
+from isb_web.sqlmodel_database import SQLModelDAO, get_thing_with_id
 
 CONCURRENT_DOWNLOADS = 10
 BACKLOG_SIZE = 40
@@ -64,7 +64,7 @@ async def _loadSesarEntries(session, max_count, start_from=None):
                 try:
                     _id = next(ids)
                     igsn = igsn_lib.normalize(_id[0])
-                    existing_thing = get_thing(session, isb_lib.sesar_adapter.fullIgsn(igsn))
+                    existing_thing = get_thing_with_id(session, isb_lib.sesar_adapter.fullIgsn(igsn))
                     if existing_thing is not None:
                         logging.info("Already have %s at %s", igsn, existing_thing)
                         future = executor.submit(wrapLoadThing, igsn, _id[1], existing_thing)

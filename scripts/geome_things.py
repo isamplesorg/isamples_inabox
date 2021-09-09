@@ -14,7 +14,7 @@ import concurrent.futures
 import click
 import click_config_file
 from isb_lib.models.thing import Thing
-from isb_web.sqlmodel_database import SQLModelDAO, get_thing
+from isb_web.sqlmodel_database import SQLModelDAO, get_thing_with_id
 
 CONCURRENT_DOWNLOADS = 10
 BACKLOG_SIZE = 40
@@ -71,7 +71,7 @@ async def _loadGEOMEEntries(session, max_count, start_from=None):
                 try:
                     _id = next(ids)
                     identifier = _id[0]
-                    existing_thing = get_thing(session, identifier)
+                    existing_thing = get_thing_with_id(session, identifier)
                     if existing_thing is not None:
                         logging.debug("Already have %s at %s", identifier, _id[1])
                     else:

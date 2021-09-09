@@ -2,7 +2,6 @@ from typing import Optional, List
 from sqlmodel import SQLModel, create_engine, Session, select
 from isb_lib.models.thing import Thing
 from isb_web.schemas import ThingPage
-import isb_web.config
 
 
 class SQLModelDAO:
@@ -24,7 +23,7 @@ class SQLModelDAO:
 def read_things(
     session: Session,
     offset: int,
-    limit: int,
+    limit: int = 100,
     status: int = 200,
     authority: Optional[str] = None,
 ) -> tuple[int, int, List[ThingPage]]:
@@ -33,7 +32,10 @@ def read_things(
         count_statement = count_statement.filter(Thing.authority_id == authority)
     count_statement = count_statement.filter(Thing.resolved_status == status)
     overall_count = count_statement.count()
-    overall_pages = overall_count / limit
+    if limit > 0:
+        overall_pages = overall_count / limit
+    else:
+        overall_pages = 0
     things_statement = select(
         Thing.primary_key,
         Thing.id,
@@ -46,12 +48,14 @@ def read_things(
     if authority is not None:
         things_statement = things_statement.filter(Thing.authority_id == authority)
     things_statement = things_statement.filter(Thing.resolved_status == status)
-    things_statement = things_statement.offset(offset)
-    things_statement = things_statement.limit(limit)
+    if offset > 0:
+        things_statement = things_statement.offset(offset)
+    if limit > 0:
+        things_statement = things_statement.limit(limit)
     things_results = session.exec(things_statement)
     return overall_count, overall_pages, things_results.all()
 
 
-def get_thing(session: Session, identifier: str) -> Optional[Thing]:
+def get_thing_with_id(session: Session, identifier: str) -> Optional[Thing]:
     statement = select(Thing).filter(Thing.id == identifier)
     return session.exec(statement).first()

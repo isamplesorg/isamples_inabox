@@ -63,7 +63,7 @@ async def get_thing(
     session: Session = Depends(get_session),
 ):
     """Record for the specified identifier"""
-    item = sqlmodel_database.get_thing(session, identifier)
+    item = sqlmodel_database.get_thing_with_id(session, identifier)
     if item is None:
         raise fastapi.HTTPException(
             status_code=404, detail=f"Thing not found: {identifier}"

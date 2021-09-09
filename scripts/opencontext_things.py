@@ -11,7 +11,7 @@ import sqlalchemy
 import sqlalchemy.orm
 import sqlalchemy.exc
 
-from isb_web.sqlmodel_database import SQLModelDAO, get_thing
+from isb_web.sqlmodel_database import SQLModelDAO, get_thing_with_id
 
 BACKLOG_SIZE = 40
 
@@ -40,7 +40,7 @@ async def _load_open_context_entries(session, max_count, start_from):
         L.info("got next id from open context %s", record)
         num_ids += 1
         id = record["uri"]
-        existing_thing = get_thing(session, id)
+        existing_thing = get_thing_with_id(session, id)
         if existing_thing is not None:
             logging.info("Already have %s", id)
             isb_lib.opencontext_adapter.update_thing(

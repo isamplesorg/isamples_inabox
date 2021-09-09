@@ -7,13 +7,13 @@ import isb_lib.smithsonian_adapter
 import logging
 import sqlalchemy
 import datetime
-from isb_web.sqlmodel_database import get_thing, SQLModelDAO
+from isb_web.sqlmodel_database import get_thing_with_id, SQLModelDAO
 
 
 def _save_record_to_db(session, file_path, record):
     id = record["id"]
     logging.info("got next id from smithsonian %s", id)
-    existing_thing = get_thing(session, id)
+    existing_thing = get_thing_with_id(session, id)
     if existing_thing is not None:
         logging.info("Already have %s", id)
     else:
