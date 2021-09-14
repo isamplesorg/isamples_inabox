@@ -147,7 +147,7 @@ def populate_isb_core_solr(ctx):
         db_batch_size=1000,
         solr_batch_size=1000,
         solr_url="http://localhost:8983/api/collections/isb_core_records/",
-        min_time_created=None
+        min_time_created=max_solr_updated_date
     )
     allkeys = solr_importer.run_solr_import(isb_lib.opencontext_adapter.reparse_as_core_record)
     L.info(f"Total keys= {len(allkeys)}")

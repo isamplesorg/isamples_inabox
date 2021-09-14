@@ -94,20 +94,3 @@ class Thing(SQLModel, table=True):
             "resolved_media_type": self.resolved_media_type,
         }
         return res
-
-
-@click.command()
-@click_config_file.configuration_option(config_file_name="opencontext.cfg")
-@click.pass_context
-def main(context):
-    engine = create_engine(context.default_map["db_url"], echo=True)
-    SQLModel.metadata.create_all(engine)
-    with Session(engine) as session:
-        statement = select(Thing).limit(10)
-        results = session.exec(statement)
-        things = results.all()
-        print(f"Things are {things}")
-
-
-if __name__ == "__main__":
-    main()

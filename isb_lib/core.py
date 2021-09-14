@@ -1,7 +1,6 @@
 """
 
 """
-import sys
 import logging
 import datetime
 import hashlib
@@ -16,11 +15,10 @@ import re
 import requests
 import shapely.wkt
 import shapely.geometry
-from sqlalchemy import select
 import heartrate
 
 from isb_web import sqlmodel_database
-from isb_web.sqlmodel_database import SQLModelDAO, paged_things_with_ids
+from isb_web.sqlmodel_database import SQLModelDAO
 
 RECOGNIZED_DATE_FORMATS = [
     "%Y",  # e.g. 1985
@@ -498,7 +496,7 @@ class ThingRecordIterator:
     def yieldRecordsByPage(self):
         while True:
             n = 0
-            things = paged_things_with_ids(
+            things = sqlmodel_database.paged_things_with_ids(
                 self._session,
                 self._authority_id,
                 self._status,
