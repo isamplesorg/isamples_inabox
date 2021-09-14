@@ -11,7 +11,8 @@ import sqlalchemy
 import sqlalchemy.orm
 import sqlalchemy.exc
 
-from isb_web.sqlmodel_database import SQLModelDAO, get_thing_with_id
+from isb_web import sqlmodel_database
+from isb_web.sqlmodel_database import SQLModelDAO
 
 BACKLOG_SIZE = 40
 
@@ -40,7 +41,7 @@ async def _load_open_context_entries(session, max_count, start_from):
         L.info("got next id from open context %s", record)
         num_ids += 1
         id = record["uri"]
-        existing_thing = get_thing_with_id(session, id)
+        existing_thing = sqlmodel_database.get_thing_with_id(session, id)
         if existing_thing is not None:
             logging.info("Already have %s", id)
             isb_lib.opencontext_adapter.update_thing(
@@ -122,7 +123,7 @@ def main(ctx, db_url, verbosity, heart_rate):
 def load_records(ctx, max_records):
     L = get_logger()
     session = SQLModelDAO(ctx.obj["db_url"]).get_session()
-    max_created = isb_lib.core.last_time_thing_created(
+    max_created = sqlmodel_database.last_time_thing_created(
         session, isb_lib.opencontext_adapter.OpenContextItem.AUTHORITY_ID
     )
     L.info("loadRecords: %s", str(session))
@@ -146,7 +147,7 @@ def populate_isb_core_solr(ctx):
         db_batch_size=1000,
         solr_batch_size=1000,
         solr_url="http://localhost:8983/api/collections/isb_core_records/",
-        min_time_created=max_solr_updated_date
+        min_time_created=None
     )
     allkeys = solr_importer.run_solr_import(isb_lib.opencontext_adapter.reparse_as_core_record)
     L.info(f"Total keys= {len(allkeys)}")

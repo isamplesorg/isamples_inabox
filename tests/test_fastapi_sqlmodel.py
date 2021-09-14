@@ -3,7 +3,7 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session, SQLModel, create_engine
 from sqlmodel.pool import StaticPool
 from isb_lib.models import thing
-from isb_web.main_sqlmodel import get_session, app
+from isb_web.main import get_session, app
 
 
 def _test_model():
@@ -12,6 +12,7 @@ def _test_model():
     thing_1.authority_id = TEST_AUTHORITY_ID
     thing_1.resolved_url = TEST_RESOLVED_URL
     thing_1.resolved_status = 200
+    thing_1.item_type = "sample"
     thing_1.resolved_content = {
         "@id": "https://data.geosamples.org/sample/igsn/BSU00062W",
         "igsn": "BSU00062W",
@@ -170,3 +171,18 @@ def test_get_thing_core_format(client: TestClient, session: Session):
     assert data.get("keywords") is not None
     assert data.get("curation") is not None
     assert data.get("label") is not None
+
+
+def test_get_thing_list_metadata(client: TestClient, session: Session):
+    response = client.get(f"/thing")
+    data = response.json()
+    assert response.status_code == 200
+    assert "authority" in data
+    assert "status" in data
+
+
+def test_get_thing_list_types(client: TestClient, session: Session):
+    response = client.get(f"/thing/types")
+    data = response.json()
+    assert response.status_code == 200
+    assert "item_type" in data[0]

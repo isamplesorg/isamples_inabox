@@ -12,7 +12,6 @@ import json
 import igsn_lib
 import igsn_lib.oai
 import igsn_lib.time
-import igsn_lib.models.relation
 import isb_lib.core
 import isb_lib.sitemaps
 import uuid
@@ -80,39 +79,6 @@ class SESARItem(object):
         self.identifier = fullIgsn(identifier)
         self.item = source
 
-    def asRelations(self) -> typing.List[igsn_lib.models.relation.Relation]:
-        related = []
-        _id = self.item.get("description", {}).get("parentIdentifier", None)
-        if _id is not None:
-            _id = fullIgsn(_id)
-            related.append(
-                igsn_lib.models.relation.Relation(
-                    source=self.identifier,
-                    name="",
-                    s=self.identifier,
-                    p=SESARItem.RELATION_TYPE["parent"],
-                    o=_id,
-                )
-            )
-        for child in (
-            self.item.get("description", {})
-            .get("supplementMetadata", {})
-            .get("childIGSN", [])
-        ):
-            _id = fullIgsn(child)
-            related.append(
-                igsn_lib.models.relation.Relation(
-                    source=self.identifier,
-                    name="",
-                    s=self.identifier,
-                    p=SESARItem.RELATION_TYPE["child"],
-                    o=_id,
-                )
-            )
-        # Don't include siblings.
-        # Adding siblings adds about an order of magnitude more relations, and
-        # computing the siblings is simple - all the o with parent s
-        return related
 
     def solrRelations(self):
         """Provides a list of relation dicts suitable for adding to Solr"""

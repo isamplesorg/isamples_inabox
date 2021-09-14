@@ -20,7 +20,7 @@ from sqlalchemy import select
 import heartrate
 
 from isb_web import sqlmodel_database
-from isb_web.sqlmodel_database import SQLModelDAO
+from isb_web.sqlmodel_database import SQLModelDAO, paged_things_with_ids
 
 RECOGNIZED_DATE_FORMATS = [
     "%Y",  # e.g. 1985
@@ -73,12 +73,6 @@ def things_main(ctx, db_url, verbosity, heart_rate):
     ctx.obj["db_url"] = db_url
     if heart_rate:
         heartrate.trace(browser=True)
-
-
-def last_time_thing_created(
-    session, authority_id: typing.AnyStr
-) -> typing.Optional[datetime.datetime]:
-    return sqlmodel_database.last_time_thing_created(session, authority_id)
 
 
 def datetimeToSolrStr(dt):
@@ -494,34 +488,34 @@ class ThingRecordIterator:
         min_time_created: datetime.datetime = None,
     ):
         self._session = session
-        sql = "SELECT * FROM thing WHERE resolved_status=:status and _id > :_id"
-        params = {
-            "status": status,
-            "_id": offset
-        }
-        if authority_id is not None:
-            sql = sql + " AND authority_id=:authority_id"
-            params["authority_id"] = authority_id
-        if min_time_created is not None:
-            sql = sql + " AND tcreated>=:tcreated"
-            params["tcreated"] = min_time_created
-        self._sql = sql + " ORDER BY _id asc limit :limit"
-        params["limit"] = page_size
-        self._params = params
+        self._authority_id = authority_id
+        self._status = status
+        self._page_size = page_size
+        self._offset = offset
+        self._min_time_created = min_time_created
+        self._id = offset
 
     def yieldRecordsByPage(self):
         while True:
             n = 0
-            qry = self._session.execute(self._sql, self._params)
+            things = paged_things_with_ids(
+                self._session,
+                self._authority_id,
+                self._status,
+                self._page_size,
+                self._offset,
+                self._min_time_created,
+                self._id,
+            )
             max_id_in_page = 0
-            for rec in qry:
+            for rec in things:
                 n += 1
                 yield rec
-                max_id_in_page = rec["_id"]
+                max_id_in_page = rec.primary_key
             if n == 0:
                 break
             # Grab the next page, by only selecting records with _id > than the last one we fetched
-            self._params["_id"] = max_id_in_page
+            self._id = max_id_in_page
 
 
 class CoreSolrImporter:
