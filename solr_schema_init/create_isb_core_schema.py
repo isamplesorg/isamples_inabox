@@ -3,6 +3,7 @@ import typing
 
 import requests
 
+CREATE_CORE_API = "http://solr:8983/admin/cores?action=CREATE&name=isb_core_records"
 SOLR_API = "http://solr:8983/api/collections/isb_core_records/"
 MEDIA_JSON = "application/json"
 
@@ -84,8 +85,13 @@ def addDynamicField(dynamic_field_dict: typing.Dict):
     res = requests.post(f"{SOLR_API}schema", headers=headers, data=data)
     pj(res.json())
 
+def createCore():
+    headers = {"Content-Type": MEDIA_JSON}
+    res = requests.get(f"{CREATE_CORE_API}", headers=headers)
+
 #############
 # Internal iSamples bookkeeping columns
+createCore()
 createField("isb_core_id", "string", True, True, None)
 createField("source", "string", True, True, None)
 # The time the record was last updated in the source db
