@@ -1,7 +1,10 @@
 import json
 import typing
-
 import requests
+import time
+
+# Sleep for 20 seconds to allow for the Solr Docker container to start up.
+time.sleep(20)
 
 CREATE_CORE_API = "http://solr:8983/admin/cores?action=CREATE&name=isb_core_records"
 SOLR_API = "http://solr:8983/api/collections/isb_core_records/"
@@ -27,6 +30,7 @@ def listFieldTypes():
 def createField(
     fname, ftype="string", stored=True, indexed=True, default=None, multivalued=False
 ):
+    print(f"going to create field {fname}")
     headers = {"Content-Type": MEDIA_JSON}
     data = {
         "add-field": {
@@ -89,9 +93,11 @@ def createCore():
     headers = {"Content-Type": MEDIA_JSON}
     res = requests.get(f"{CREATE_CORE_API}", headers=headers)
 
+print("Going to create core in create_isb_core_schema")
 #############
 # Internal iSamples bookkeeping columns
 createCore()
+print("Going to create fields in create_isb_core_schema")
 createField("isb_core_id", "string", True, True, None)
 createField("source", "string", True, True, None)
 # The time the record was last updated in the source db
