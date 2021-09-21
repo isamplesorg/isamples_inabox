@@ -117,7 +117,7 @@ test = ["pytest-astropy (>=0.8)", "pytest-xdist", "objgraph", "ipython (>=4.2)",
 name = "asttokens"
 version = "2.0.5"
 description = "Annotate AST trees with source code positions"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -327,7 +327,7 @@ python-versions = ">=2.7"
 name = "executing"
 version = "0.8.1"
 description = "Get the currently executing AST node of a frame, and other information"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -383,7 +383,7 @@ pybind11 = ">=2.2"
 name = "flask"
 version = "2.0.1"
 description = "A simple framework for building complex web applications."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -428,7 +428,7 @@ python-versions = ">=3.6"
 name = "heartrate"
 version = "0.2.1"
 description = "Simple real time visualisation of the execution of a Python program."
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -602,7 +602,7 @@ resolved_reference = "089729db2f4d04575fdf588b691577692f2d0408"
 name = "itsdangerous"
 version = "2.0.1"
 description = "Safely pass data to untrusted environments and back."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -1154,7 +1154,7 @@ test = ["pytest", "pytest-doctestplus (>=0.7)"]
 name = "pygments"
 version = "2.10.0"
 description = "Pygments is a syntax highlighting package written in Python."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.5"
 
@@ -1630,7 +1630,7 @@ python-versions = ">=3.6.1"
 name = "werkzeug"
 version = "2.0.1"
 description = "The comprehensive WSGI web application library."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -1671,7 +1671,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "df8f5b1e7e49ab74745ff5c9af28dabe75af7de0b63638dbba03e98d843d93ed"
+content-hash = "0ff2b98d683912422eba7c6936e538c6e25e88e4ab02b65b2f5aa4b753589097"
 
 [metadata.files]
 accept-types = [
