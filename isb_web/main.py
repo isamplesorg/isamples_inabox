@@ -54,9 +54,9 @@ app.mount(
     fastapi.staticfiles.StaticFiles(directory=os.path.join(THIS_PATH, "static")),
     name="static",
 )
-# templates = fastapi.templating.Jinja2Templates(
-#     directory=os.path.join(THIS_PATH, "templates")
-# )
+templates = fastapi.templating.Jinja2Templates(
+    directory=os.path.join(THIS_PATH, "templates")
+)
 
 
 @app.on_event("startup")
@@ -451,19 +451,19 @@ async def get_related_solr(
     return res
 
 
-# @app.get("/map", include_in_schema=False)
-# async def root(request: fastapi.Request):
-#     return templates.TemplateResponse("spatial.html", {"request": request})
+@app.get("/map", include_in_schema=False)
+async def root(request: fastapi.Request):
+    return templates.TemplateResponse("spatial.html", {"request": request})
 
 
-# @app.get("/records", include_in_schema=False)
-# async def root(request: fastapi.Request):
-#     return templates.TemplateResponse("index.html", {"request": request})
+@app.get("/records", include_in_schema=False)
+async def root(request: fastapi.Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
 
-# @app.get("/", include_in_schema=False)
-# async def root(request: fastapi.Request):
-#     return templates.TemplateResponse("overview.html", {"request": request})
+@app.get("/", include_in_schema=False)
+async def root(request: fastapi.Request):
+    return templates.TemplateResponse("overview.html", {"request": request})
 
 
 def main():
