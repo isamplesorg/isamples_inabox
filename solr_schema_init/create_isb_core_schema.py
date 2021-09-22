@@ -3,11 +3,11 @@ import typing
 import requests
 import time
 
-# Sleep for 20 seconds to allow for the Solr Docker container to start up.
-time.sleep(20)
+# Sleep for 10 seconds to allow for the Solr Docker container to start up.
+time.sleep(10)
 
-CREATE_CORE_API = "http://solr:8983/admin/cores?action=CREATE&name=isb_core_records"
-SOLR_API = "http://solr:8983/api/collections/isb_core_records/"
+CREATE_COLLECTION_API = "http://solr:8983/solr/admin/collections?action=CREATE&name=isb_core_records_3&numShards=1&replicationFactor=1"
+SOLR_API = "http://solr:8983/api/collections/isb_core_records_3/"
 MEDIA_JSON = "application/json"
 
 
@@ -89,15 +89,22 @@ def addDynamicField(dynamic_field_dict: typing.Dict):
     res = requests.post(f"{SOLR_API}schema", headers=headers, data=data)
     pj(res.json())
 
-def createCore():
-    headers = {"Content-Type": MEDIA_JSON}
-    res = requests.get(f"{CREATE_CORE_API}", headers=headers)
 
-print("Going to create core in create_isb_core_schema")
+def createCollection():
+    print("Going to attempt to create collection isb_core_records")
+    headers = {"Content-Type": MEDIA_JSON}
+    res = requests.get(f"{CREATE_COLLECTION_API}", headers=headers)
+    print("Response is: " + str(res))
+    if res.status_code == 400:
+        print("Collection already exists.  Exiting.")
+        exit(0)
+    pj(res.json())
+
+print("Going to create collection in create_isb_core_schema")
 #############
-# Internal iSamples bookkeeping columns
-createCore()
+createCollection()
 print("Going to create fields in create_isb_core_schema")
+# Internal iSamples bookkeeping columns
 createField("isb_core_id", "string", True, True, None)
 createField("source", "string", True, True, None)
 # The time the record was last updated in the source db
