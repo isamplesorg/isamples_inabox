@@ -6,8 +6,8 @@ import time
 # Sleep for 10 seconds to allow for the Solr Docker container to start up.
 time.sleep(10)
 
-CREATE_COLLECTION_API = "http://solr:8983/solr/admin/collections?action=CREATE&name=isb_core_records_3&numShards=1&replicationFactor=1"
-SOLR_API = "http://solr:8983/api/collections/isb_core_records_3/"
+CREATE_COLLECTION_API = "http://solr:8983/solr/admin/collections?action=CREATE&name=isb_core_records&numShards=1&replicationFactor=1"
+SOLR_API = "http://solr:8983/api/collections/isb_core_records/"
 MEDIA_JSON = "application/json"
 
 
