@@ -22,10 +22,10 @@ BACKLOG_SIZE = 40
 def getLogger():
     return logging.getLogger("main")
 
-def wrapLoadThing(ark, tc):
+def wrapLoadThing(ark, tc, existing_thing: Thing = None):
     """Return request information to assist future management"""
     try:
-        return ark, tc, isb_lib.geome_adapter.loadThing(ark, tc)
+        return ark, tc, isb_lib.geome_adapter.loadThing(ark, tc, existing_thing)
     except:
         pass
     return ark, tc, None
@@ -74,11 +74,12 @@ async def _loadGEOMEEntries(session, max_count, start_from=None):
                     existing_thing = get_thing_with_id(session, identifier)
                     if existing_thing is not None:
                         logging.debug("Already have %s at %s", identifier, _id[1])
+                        future = executor.submit(wrapLoadThing, identifier, _id[1], existing_thing)
                     else:
                         future = executor.submit(wrapLoadThing, identifier, _id[1])
-                        futures.append(future)
-                        working[identifier] = 0
-                        total_requested += 1
+                    futures.append(future)
+                    working[identifier] = 0
+                    total_requested += 1
                 except StopIteration as e:
                     L.info("Reached end of identifier iteration.")
                     num_prepared = 0
