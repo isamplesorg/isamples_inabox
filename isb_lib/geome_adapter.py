@@ -172,7 +172,6 @@ class GEOMEIdentifierIterator(isb_lib.core.IdentifierIterator):
         L.debug("recordsInProject project %s", project_id)
         params = {"includePublic": "true", "admin": "false"}
         url = f"{GEOME_API}projects/{project_id}/expeditions"
-        #url = f"{GEOME_API}records/{record_type}/json"
         headers = {
             "Accept": "application/json",
         }
@@ -188,7 +187,6 @@ class GEOMEIdentifierIterator(isb_lib.core.IdentifierIterator):
                 response.reason,
             )
             return
-        # L.debug("recordsInProject data: %s", response.text[:256])
         expeditions_json = response.json()
         if len(expeditions_json) == 0:
             L.error("Project doesn't have any expeditions project:%s", project_id)
@@ -200,7 +198,7 @@ class GEOMEIdentifierIterator(isb_lib.core.IdentifierIterator):
                 have_data_for_project = str(project_id) in self.known_existing_projects
                 # For each expedition, check to see if the mod date is greater than the last time we fetched.
                 # If it is, fetch the bcids of the samples in the expedition.
-                if expedition_modified_datetime.timestamp() > self._date_start.timestamp(): # or not have_data_for_project:
+                if expedition_modified_datetime.timestamp() > self._date_start.timestamp() or not have_data_for_project:
                     more_work = True
                     params = {
                         "limit": _page_size,
