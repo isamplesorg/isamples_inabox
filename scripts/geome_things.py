@@ -14,6 +14,7 @@ import concurrent.futures
 import click
 import click_config_file
 from isb_lib.models.thing import Thing
+from isb_web import sqlmodel_database
 from isb_web.sqlmodel_database import SQLModelDAO, get_thing_with_id
 
 CONCURRENT_DOWNLOADS = 10
@@ -180,17 +181,12 @@ def loadRecords(ctx, max_records):
 
     session = SQLModelDAO((ctx.obj["db_url"])).get_session()
     try:
-        oldest_record = None
-        res = (
-            session.query(Thing)
-            .order_by(Thing.tcreated.desc())
-            .first()
+        max_created = sqlmodel_database.last_time_thing_created(
+            session, isb_lib.geome_adapter.GEOMEItem.AUTHORITY_ID
         )
-        if not res is None:
-            oldest_record = res.tcreated
-        logging.info("Oldest = %s", oldest_record)
+        logging.info("Oldest = %s", max_created)
         time.sleep(1)
-        loadGEOMEEntries(session, max_records, start_from=oldest_record)
+        loadGEOMEEntries(session, max_records, start_from=max_created)
     finally:
         session.close()
 

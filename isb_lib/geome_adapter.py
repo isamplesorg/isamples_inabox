@@ -195,12 +195,12 @@ class GEOMEIdentifierIterator(isb_lib.core.IdentifierIterator):
         for expedition_dict in expeditions_json:
             # Skip developer messages
             if type(expedition_dict) is dict:
-                modified_date = expedition_dict["modified"]
-                datetime_modified_date = dateparser.parse(modified_date)
+                expedition_modified_date = expedition_dict["modified"]
+                expedition_modified_datetime = dateparser.parse(expedition_modified_date)
                 have_data_for_project = str(project_id) in self.known_existing_projects
                 # For each expedition, check to see if the mod date is greater than the last time we fetched.
                 # If it is, fetch the bcids of the samples in the expedition.
-                if datetime_modified_date > self.comparison_date: # or not have_data_for_project:
+                if expedition_modified_datetime.timestamp() > self._date_start.timestamp(): # or not have_data_for_project:
                     more_work = True
                     params = {
                         "limit": _page_size,
@@ -226,9 +226,9 @@ class GEOMEIdentifierIterator(isb_lib.core.IdentifierIterator):
 
                         for record in expeditions_json.get("content", {}).get(record_type, []):
                             L.debug("recordsInProject Record id: %s", record.get("bcid", None))
-                            # print(json.dumps(record, indent=2))
-                            # raise NotImplementedError
-                            yield record
+                            # When we yield here, yield both the record and the expedition modify date, since
+                            # we'll compare the modify date of the expedition when we go to fetch again.
+                            yield (record, expedition_modified_datetime)
                         if len(expeditions_json.get("content", {}).get(record_type, [])) < _page_size:
                             more_work = False
                         params["page"] = params["page"] + 1
@@ -253,13 +253,11 @@ class GEOMEIdentifierIterator(isb_lib.core.IdentifierIterator):
         for p in self._project_ids:
             # return the next set of identifiers within a project
             if not p["loaded"]:
-                for record in self.recordsInProject(p["project_id"], self._record_type):
+                for (record, modified_date) in self.recordsInProject(p["project_id"], self._record_type):
                     # record identifier
                     rid = record.get("bcid", None)
-                    # record timestamp
-                    t_collected = geomeEventRecordTimestamp(record)
                     if not rid is None:
-                        p["identifiers"].append((rid, t_collected))
+                        p["identifiers"].append((rid, modified_date))
                 p["loaded"] = True
                 L.info(
                     "Added %s identifiers from project %s",
