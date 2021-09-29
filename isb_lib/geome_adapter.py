@@ -55,79 +55,6 @@ def geomeEventRecordTimestamp(record):
 
 
 class GEOMEIdentifierIterator(isb_lib.core.IdentifierIterator):
-    comparison_date = datetime.datetime(year=2021, month=5, day=15)
-    known_existing_projects = [
-    "255",
-    "293",
-    "241",
-    "78",
-    "118",
-    "319",
-    "286",
-    "384",
-    "383",
-    "190",
-    "191",
-    "344",
-    "305",
-    "244",
-    "71",
-    "316",
-    "70",
-    "373",
-    "354",
-    "13",
-    "83",
-    "67",
-    "365",
-    "64",
-    "243",
-    "328",
-    "309",
-    "284",
-    "382",
-    "323",
-    "154",
-    "1",
-    "212," "74",
-    "295",
-    "357",
-    "222",
-    "292",
-    "75",
-    "242",
-    "317",
-    "240",
-    "201",
-    "348",
-    "44",
-    "282",
-    "339",
-    "181",
-    "73",
-    "248",
-    "72",
-    "85",
-    "337",
-    "90",
-    "79",
-    "82",
-    "69",
-    "80",
-    "81",
-    "68",
-    "40",
-    "254",
-    "61",
-    "223",
-    "41",
-    "76",
-    "221",
-    "290",
-    "77",
-    "89",
-    "168",
-    ]
     def __init__(
         self,
         offset: int = 0,
@@ -195,10 +122,9 @@ class GEOMEIdentifierIterator(isb_lib.core.IdentifierIterator):
             if type(expedition_dict) is dict:
                 expedition_modified_date = expedition_dict["modified"]
                 expedition_modified_datetime = dateparser.parse(expedition_modified_date)
-                have_data_for_project = str(project_id) in self.known_existing_projects
                 # For each expedition, check to see if the mod date is greater than the last time we fetched.
                 # If it is, fetch the bcids of the samples in the expedition.
-                if expedition_modified_datetime.timestamp() > self._date_start.timestamp() or not have_data_for_project:
+                if expedition_modified_datetime.timestamp() > self._date_start.timestamp():
                     more_work = True
                     params = {
                         "limit": _page_size,
