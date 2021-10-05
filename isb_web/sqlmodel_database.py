@@ -5,7 +5,7 @@ from typing import Optional, List
 from sqlalchemy import Index
 from sqlalchemy.exc import ProgrammingError
 from sqlmodel import SQLModel, create_engine, Session, select
-from isb_lib.models.thing import Thing
+from isb_lib.models.thing import Thing, Identifier
 from isb_web.schemas import ThingPage
 
 
@@ -19,6 +19,13 @@ class SQLModelDAO:
         else:
             self.engine = None
 
+    # Utility method to attempt to create an index but catch an exception if it already exists
+    def _create_index(self, index: Index):
+        try:
+            index.create(self.engine)
+        except ProgrammingError:
+            pass
+
     def connect_sqlmodel(self, db_url: str):
         self.engine = create_engine(db_url, echo=False)
         SQLModel.metadata.create_all(self.engine)
@@ -30,33 +37,29 @@ class SQLModelDAO:
             Thing.authority_id,
         )
         # These index creations will throw if they already exist -- there's nothing to do in that case
-        try:
-            id_resolved_status_authority_id_idx.create(self.engine)
-        except ProgrammingError:
-            pass
+        self._create_index(id_resolved_status_authority_id_idx)
+
         authority_id_tcreated_idx = Index(
             "authority_id_tcreated_idx", Thing.authority_id, Thing.tcreated
         )
-        try:
-            authority_id_tcreated_idx.create(self.engine)
-        except ProgrammingError:
-            pass
+        self._create_index(authority_id_tcreated_idx)
+
         item_type_status_idx = Index(
             "item_type_status_idx", Thing.item_type, Thing.resolved_status
         )
-        try:
-            item_type_status_idx.create(self.engine)
-        except ProgrammingError:
-            pass
+        self._create_index(item_type_status_idx)
+
         resolved_status_authority_id_idx = Index(
             "resolved_status_authority_id_idx",
             Thing.resolved_status,
             Thing.authority_id,
         )
-        try:
-            resolved_status_authority_id_idx.create(self.engine)
-        except ProgrammingError:
-            pass
+        self._create_index(resolved_status_authority_id_idx)
+
+        guid_thing_id_idx = Index(
+            "guid_thing_id_idx", Identifier.guid, Identifier.thing_id
+        )
+        self._create_index(guid_thing_id_idx)
 
     def get_session(self) -> Session:
         return Session(self.engine)
@@ -101,7 +104,14 @@ def read_things_summary(
 
 def get_thing_with_id(session: Session, identifier: str) -> Optional[Thing]:
     statement = select(Thing).filter(Thing.id == identifier)
-    return session.exec(statement).first()
+    result = session.exec(statement).first()
+    if result is None:
+        # Fall back to querying the Identifiers table
+        join_statement = select(Thing, Identifier).where(Identifier.guid == identifier and Identifier.thing_id == Thing.primary_key)
+        result = session.exec(join_statement).first()
+        if result is not None:
+            result = result[0]
+    return result
 
 
 def last_time_thing_created(

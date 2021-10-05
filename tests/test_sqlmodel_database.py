@@ -5,7 +5,7 @@ from sqlmodel import Session, SQLModel, create_engine
 from sqlmodel.pool import StaticPool
 
 from isb_lib.core import ThingRecordIterator
-from isb_lib.models.thing import Thing
+from isb_lib.models.thing import Thing, Identifier
 from isb_web.sqlmodel_database import get_thing_with_id, read_things_summary, last_time_thing_created, \
     paged_things_with_ids
 
@@ -107,3 +107,19 @@ def test_thing_iterator(session: Session):
         assert type(thing) is Thing
         count_iterated_things += 1
     assert num_things == count_iterated_things
+
+
+def test_thing_with_identifier(session: Session):
+    new_thing = Thing(id="123456", authority_id="test", resolved_url="http://foo.bar", resolved_status=200, resolved_content = { "foo": "bar" })
+    session.add(new_thing)
+    session.commit()
+    test_id = "ark:/123456"
+    # Right now, query by that id shouldn't find anything
+    thing_with_identifier = get_thing_with_id(session, test_id)
+    assert thing_with_identifier is None
+    new_identifier = Identifier(guid=test_id, thing_id=new_thing.primary_key)
+    session.add(new_identifier)
+    session.commit()
+    # Just added ID, should find it now
+    thing_with_identifier = get_thing_with_id(session, test_id)
+    assert thing_with_identifier is not None
