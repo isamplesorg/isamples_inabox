@@ -110,7 +110,8 @@ def test_thing_iterator(session: Session):
 
 
 def test_thing_with_identifier(session: Session):
-    new_thing = Thing(id="123456", authority_id="test", resolved_url="http://foo.bar", resolved_status=200, resolved_content = { "foo": "bar" })
+    thing_id = "123456"
+    new_thing = Thing(id=thing_id, authority_id="test", resolved_url="http://foo.bar", resolved_status=200, resolved_content = {"foo": "bar"})
     session.add(new_thing)
     session.commit()
     test_id = "ark:/123456"
@@ -119,7 +120,10 @@ def test_thing_with_identifier(session: Session):
     assert thing_with_identifier is None
     new_identifier = ThingIdentifier(guid=test_id, thing_id=new_thing.primary_key)
     session.add(new_identifier)
+    new_identifier2 = ThingIdentifier(guid="http://not.real", thing_id="67890")
+    session.add(new_identifier2)
     session.commit()
     # Just added ID, should find it now
     thing_with_identifier = get_thing_with_id(session, test_id)
     assert thing_with_identifier is not None
+    assert thing_id == thing_with_identifier.id

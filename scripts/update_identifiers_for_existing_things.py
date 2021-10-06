@@ -2,7 +2,6 @@ from time import sleep
 
 import click
 import click_config_file
-from sqlalchemy import delete
 from sqlmodel import select
 
 import isb_lib
@@ -34,11 +33,13 @@ def insert_geome_identifiers(session, thing):
 
 
 def insert_open_context_identifiers(session, thing):
-    open_context_uri = thing.resolved_content["uri"]
-    open_context_identifier = ThingIdentifier(guid=open_context_uri, thing_id=thing.primary_key)
-    if open_context_uri in opencontext_ids:
-        print()
-    session.add(open_context_identifier)
+    citation_uri = thing.resolved_content["citation uri"]
+    if citation_uri is not None:
+        open_context_uri = isb_lib.core.normalized_id(citation_uri)
+        open_context_identifier = ThingIdentifier(guid=open_context_uri, thing_id=thing.primary_key)
+        if open_context_uri in opencontext_ids:
+            print()
+        session.add(open_context_identifier)
 
 
 def insert_standard_identifier(session, thing):
@@ -73,8 +74,8 @@ def main(ctx, db_url, verbosity, heart_rate):
     session.commit()
     sleep(10)
     index = 0
-    page_size = 1000
-    max_index = 5000
+    page_size = 10000
+    max_index = 6000000
     while index < max_index:
         statement = select(Thing).order_by(Thing.primary_key.asc()).slice(index, index + page_size)
         for thing in session.exec(statement):

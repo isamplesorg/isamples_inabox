@@ -107,10 +107,8 @@ def get_thing_with_id(session: Session, identifier: str) -> Optional[Thing]:
     result = session.exec(statement).first()
     if result is None:
         # Fall back to querying the Identifiers table
-        join_statement = select(Thing, ThingIdentifier).where(ThingIdentifier.guid == identifier and ThingIdentifier.thing_id == Thing.primary_key)
+        join_statement = select(Thing).join(ThingIdentifier).where(ThingIdentifier.guid == identifier)
         result = session.exec(join_statement).first()
-        if result is not None:
-            result = result[0]
     return result
 
 

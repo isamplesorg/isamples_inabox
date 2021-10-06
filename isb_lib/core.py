@@ -63,6 +63,13 @@ def initialize_logging(verbosity: typing.AnyStr):
     if verbosity not in LOG_LEVELS.keys():
         L.warning("%s is not a log level, set to INFO", verbosity)
 
+
+n2t_regex = re.compile(r"https?://n2t\.net/")
+
+
+def normalized_id(raw_id: typing.AnyStr) -> typing.AnyStr:
+    return n2t_regex.sub("", raw_id)
+
 def things_main(ctx, db_url, solr_url, verbosity, heart_rate):
     ctx.ensure_object(dict)
     initialize_logging(verbosity)
