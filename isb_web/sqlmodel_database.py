@@ -1,10 +1,13 @@
 import datetime
 import sqlalchemy
+import logging
 from typing import Optional, List
 
 from sqlalchemy import Index
 from sqlalchemy.exc import ProgrammingError
 from sqlmodel import SQLModel, create_engine, Session, select
+
+import isb_lib.core
 from isb_lib.models.thing import Thing, ThingIdentifier
 from isb_web.schemas import ThingPage
 
@@ -179,3 +182,68 @@ def get_sample_types(session: Session):
         .group_by(Thing.item_type)
     )
     return dbq.all()
+
+
+def _insert_geome_identifiers(session: Session, thing: Thing):
+    # For now, we will fail all requests for parent IDs, because events appear in multiple samples
+    # and would violate referential integrity if we made pointers to children from the event ID
+    # parent = thing.resolved_content.get("parent")
+    # if parent is not None:
+    #     event_ark = parent["bcid"]
+    #     if event_ark in arks_to_bp:
+    #         print()
+    #     event_identifier = ThingIdentifier(guid=event_ark, thing_id=thing.primary_key)
+    #     session.add(event_identifier)
+    children = thing.resolved_content.get("children")
+    if children is not None:
+        for child in children:
+            child_ark = child["bcid"]
+            child_identifier = ThingIdentifier(guid=child_ark, thing_id=thing.primary_key)
+            session.add(child_identifier)
+
+
+def _insert_open_context_identifiers(session: Session, thing: Thing):
+    citation_uri = thing.resolved_content["citation uri"]
+    if citation_uri is not None and type(citation_uri) is str:
+        open_context_uri = isb_lib.core.normalized_id(citation_uri)
+        open_context_identifier = ThingIdentifier(guid=open_context_uri, thing_id=thing.primary_key)
+        session.add(open_context_identifier)
+
+
+def _insert_standard_identifier(session: Session, thing: Thing):
+    thing_identifier = ThingIdentifier(guid=thing.id, thing_id=thing.primary_key)
+    session.add(thing_identifier)
+
+
+def insert_identifiers(session: Session, thing: Thing):
+    if thing.authority_id == "GEOME":
+        _insert_geome_identifiers(session, thing)
+    elif thing.authority_id == "OPENCONTEXT":
+        _insert_open_context_identifiers(session, thing)
+    _insert_standard_identifier(session, thing)
+
+
+def delete_identifiers(session: Session, thing: Thing) -> bool:
+    if thing.primary_key is None:
+        # No pk, hasn't been saved
+        return False
+    else:
+        identifier_select = select(ThingIdentifier).where(ThingIdentifier.thing_id == thing.primary_key)
+        thing_identifiers = session.exec(identifier_select).all()
+        for identifier in thing_identifiers:
+            session.delete(identifier)
+        session.commit()
+        return True
+
+
+def save_thing(session: Session, thing: Thing):
+    logging.debug("Going to delete existing identifiers (if any)")
+    delete_identifiers(session, thing)
+    logging.debug("Going to add thing to session")
+    session.add(thing)
+    logging.debug("Added thing to session")
+    session.commit()
+    logging.debug("committed session")
+    insert_identifiers(session, thing)
+    logging.debug("going to insert identifiers")
+    session.commit()

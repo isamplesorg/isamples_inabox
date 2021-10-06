@@ -12,7 +12,7 @@ import sqlalchemy.orm
 import sqlalchemy.exc
 
 from isb_web import sqlmodel_database
-from isb_web.sqlmodel_database import SQLModelDAO
+from isb_web.sqlmodel_database import SQLModelDAO, save_thing
 
 BACKLOG_SIZE = 40
 
@@ -55,11 +55,7 @@ async def _load_open_context_entries(session, max_count, start_from):
                 record, datetime.datetime.now(), records.last_url_str()
             )
             try:
-                logging.debug("Going to add thing to session")
-                session.add(thing)
-                logging.debug("Added thing to session")
-                session.commit()
-                logging.debug("committed session")
+                save_thing(session, thing)
             except sqlalchemy.exc.IntegrityError as e:
                 session.rollback()
                 logging.error("Item already exists: %s", record)
