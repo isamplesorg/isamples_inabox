@@ -9,7 +9,7 @@ import isb_lib.core
 from isb_lib.models.thing import Thing, ThingIdentifier
 from isb_web.sqlmodel_database import SQLModelDAO
 
-arks_to_bp = ["ark:/21547/Duf242514eacdfe6ca78a925008f7c003082", "ark:/21547/DsN2abdc7db9aa0e9d1b24061c87005b561e"]
+arks_to_bp = ["ark:/21547/Duf242514eacdfe6ca78a925008f7c003082", "ark:/21547/DsN2abdc7db9aa0e9d1b24061c87005b561e", "ark:/21547/Dsw2T1um44.1"]
 opencontext_ids = ["http://opencontext.org/subjects/5d917e24-52ec-4c10-8a51-a1586c1c451f", "http://opencontext.org/subjects/DD2E7987-6313-4FAD-C4BE-A8980D181854"]
 
 def insert_geome_identifiers(session, thing):
@@ -34,10 +34,10 @@ def insert_geome_identifiers(session, thing):
 
 def insert_open_context_identifiers(session, thing):
     citation_uri = thing.resolved_content["citation uri"]
-    if citation_uri is not None:
+    if citation_uri is not None and type(citation_uri) is str:
         open_context_uri = isb_lib.core.normalized_id(citation_uri)
         open_context_identifier = ThingIdentifier(guid=open_context_uri, thing_id=thing.primary_key)
-        if open_context_uri in opencontext_ids:
+        if open_context_uri in arks_to_bp:
             print()
         session.add(open_context_identifier)
 
@@ -75,17 +75,27 @@ def main(ctx, db_url, verbosity, heart_rate):
     sleep(10)
     index = 0
     page_size = 10000
-    max_index = 6000000
+    max_index = 150000
+    last_thing_id = 0
     while index < max_index:
-        statement = select(Thing).order_by(Thing.primary_key.asc()).slice(index, index + page_size)
+        statement = select(Thing)
+        if last_thing_id > 0:
+            statement = statement.where(Thing.primary_key > last_thing_id)
+        statement = statement.order_by(Thing.primary_key.asc()).limit(page_size)
+        batch_count = 0
         for thing in session.exec(statement):
             if thing.authority_id == "GEOME":
                 insert_geome_identifiers(session, thing)
             elif thing.authority_id == "OPENCONTEXT":
                 insert_open_context_identifiers(session, thing)
             insert_standard_identifier(session, thing)
+            last_thing_id = thing.primary_key
+            batch_count += 1
         session.commit()
+        if batch_count < page_size - 1:
+            break
         index += page_size
+        print("About to start index " + str(index))
 
 
 if __name__ == "__main__":
