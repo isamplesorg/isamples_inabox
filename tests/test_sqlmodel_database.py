@@ -5,7 +5,7 @@ from sqlmodel import Session, SQLModel, create_engine
 from sqlmodel.pool import StaticPool
 
 from isb_lib.core import ThingRecordIterator
-from isb_lib.models.thing import Thing, Identifier
+from isb_lib.models.thing import Thing, ThingIdentifier
 from isb_web.sqlmodel_database import get_thing_with_id, read_things_summary, last_time_thing_created, \
     paged_things_with_ids
 
@@ -117,7 +117,7 @@ def test_thing_with_identifier(session: Session):
     # Right now, query by that id shouldn't find anything
     thing_with_identifier = get_thing_with_id(session, test_id)
     assert thing_with_identifier is None
-    new_identifier = Identifier(guid=test_id, thing_id=new_thing.primary_key)
+    new_identifier = ThingIdentifier(guid=test_id, thing_id=new_thing.primary_key)
     session.add(new_identifier)
     session.commit()
     # Just added ID, should find it now

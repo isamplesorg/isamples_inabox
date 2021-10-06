@@ -93,7 +93,7 @@ class Thing(SQLModel, table=True):
         return res
 
 
-class Identifier(SQLModel, table=True):
+class ThingIdentifier(SQLModel, table=True):
     guid: Optional[str] = Field(
         primary_key=True, default=None, nullable=False, index=True, description="The String GUID"
     )

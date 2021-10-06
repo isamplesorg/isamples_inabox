@@ -5,7 +5,7 @@ from typing import Optional, List
 from sqlalchemy import Index
 from sqlalchemy.exc import ProgrammingError
 from sqlmodel import SQLModel, create_engine, Session, select
-from isb_lib.models.thing import Thing, Identifier
+from isb_lib.models.thing import Thing, ThingIdentifier
 from isb_web.schemas import ThingPage
 
 
@@ -57,7 +57,7 @@ class SQLModelDAO:
         self._create_index(resolved_status_authority_id_idx)
 
         guid_thing_id_idx = Index(
-            "guid_thing_id_idx", Identifier.guid, Identifier.thing_id
+            "guid_thing_id_idx", ThingIdentifier.guid, ThingIdentifier.thing_id
         )
         self._create_index(guid_thing_id_idx)
 
@@ -107,7 +107,7 @@ def get_thing_with_id(session: Session, identifier: str) -> Optional[Thing]:
     result = session.exec(statement).first()
     if result is None:
         # Fall back to querying the Identifiers table
-        join_statement = select(Thing, Identifier).where(Identifier.guid == identifier and Identifier.thing_id == Thing.primary_key)
+        join_statement = select(Thing, ThingIdentifier).where(ThingIdentifier.guid == identifier and ThingIdentifier.thing_id == Thing.primary_key)
         result = session.exec(join_statement).first()
         if result is not None:
             result = result[0]
