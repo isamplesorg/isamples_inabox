@@ -95,14 +95,17 @@ class Thing(SQLModel, table=True):
 
 class ThingIdentifier(SQLModel, table=True):
     guid: Optional[str] = Field(
-        primary_key=True, default=None, nullable=False, index=False, description="The String GUID"
+        primary_key=True,
+        default=None,
+        nullable=False,
+        index=False,
+        description="The String GUID",
     )
     tstamp: datetime = Field(
         default=igsn_lib.time.dtnow(),
         description="When the identifier was added to this database",
-        index=False
+        index=False,
     )
     thing_id: Optional[int] = Field(
-        default=None, nullable=False, foreign_key="thing._id",
-        index=False
+        default=None, nullable=False, foreign_key="thing._id", index=False
     )

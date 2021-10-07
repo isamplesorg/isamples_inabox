@@ -91,9 +91,7 @@ def load_open_context_entries(session, max_count, start_from=None):
 @click.option(
     "-d", "--db_url", default=None, help="SQLAlchemy database URL for storage"
 )
-@click.option(
-    "-s", "--solr_url", default=None, help="Solr index URL"
-)
+@click.option("-s", "--solr_url", default=None, help="Solr index URL")
 @click.option(
     "-v",
     "--verbosity",
@@ -147,10 +145,13 @@ def populate_isb_core_solr(ctx):
         db_batch_size=1000,
         solr_batch_size=1000,
         solr_url=solr_url,
-        min_time_created=max_solr_updated_date
+        min_time_created=max_solr_updated_date,
     )
-    allkeys = solr_importer.run_solr_import(isb_lib.opencontext_adapter.reparse_as_core_record)
+    allkeys = solr_importer.run_solr_import(
+        isb_lib.opencontext_adapter.reparse_as_core_record
+    )
     L.info(f"Total keys= {len(allkeys)}")
+
 
 if __name__ == "__main__":
     main()

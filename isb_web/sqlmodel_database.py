@@ -110,7 +110,11 @@ def get_thing_with_id(session: Session, identifier: str) -> Optional[Thing]:
     result = session.exec(statement).first()
     if result is None:
         # Fall back to querying the Identifiers table
-        join_statement = select(Thing).join(ThingIdentifier).where(ThingIdentifier.guid == identifier)
+        join_statement = (
+            select(Thing)
+            .join(ThingIdentifier)
+            .where(ThingIdentifier.guid == identifier)
+        )
         result = session.exec(join_statement).first()
     return result
 
@@ -198,7 +202,9 @@ def _insert_geome_identifiers(session: Session, thing: Thing):
     if children is not None:
         for child in children:
             child_ark = child["bcid"]
-            child_identifier = ThingIdentifier(guid=child_ark, thing_id=thing.primary_key)
+            child_identifier = ThingIdentifier(
+                guid=child_ark, thing_id=thing.primary_key
+            )
             session.add(child_identifier)
 
 
@@ -206,7 +212,9 @@ def _insert_open_context_identifiers(session: Session, thing: Thing):
     citation_uri = thing.resolved_content["citation uri"]
     if citation_uri is not None and type(citation_uri) is str:
         open_context_uri = isb_lib.core.normalized_id(citation_uri)
-        open_context_identifier = ThingIdentifier(guid=open_context_uri, thing_id=thing.primary_key)
+        open_context_identifier = ThingIdentifier(
+            guid=open_context_uri, thing_id=thing.primary_key
+        )
         session.add(open_context_identifier)
 
 
@@ -228,7 +236,9 @@ def delete_identifiers(session: Session, thing: Thing) -> bool:
         # No pk, hasn't been saved
         return False
     else:
-        identifier_select = select(ThingIdentifier).where(ThingIdentifier.thing_id == thing.primary_key)
+        identifier_select = select(ThingIdentifier).where(
+            ThingIdentifier.thing_id == thing.primary_key
+        )
         thing_identifiers = session.exec(identifier_select).all()
         for identifier in thing_identifiers:
             session.delete(identifier)

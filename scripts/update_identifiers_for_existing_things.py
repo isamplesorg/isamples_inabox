@@ -9,8 +9,16 @@ import isb_lib.core
 from isb_lib.models.thing import Thing, ThingIdentifier
 from isb_web.sqlmodel_database import SQLModelDAO
 
-arks_to_bp = ["ark:/21547/Duf242514eacdfe6ca78a925008f7c003082", "ark:/21547/DsN2abdc7db9aa0e9d1b24061c87005b561e", "ark:/21547/Dsw2T1um44.1"]
-opencontext_ids = ["http://opencontext.org/subjects/5d917e24-52ec-4c10-8a51-a1586c1c451f", "http://opencontext.org/subjects/DD2E7987-6313-4FAD-C4BE-A8980D181854"]
+arks_to_bp = [
+    "ark:/21547/Duf242514eacdfe6ca78a925008f7c003082",
+    "ark:/21547/DsN2abdc7db9aa0e9d1b24061c87005b561e",
+    "ark:/21547/Dsw2T1um44.1",
+]
+opencontext_ids = [
+    "http://opencontext.org/subjects/5d917e24-52ec-4c10-8a51-a1586c1c451f",
+    "http://opencontext.org/subjects/DD2E7987-6313-4FAD-C4BE-A8980D181854",
+]
+
 
 def insert_geome_identifiers(session, thing):
     # For now, we will fail all requests for parent IDs, because events appear in multiple samples
@@ -28,7 +36,9 @@ def insert_geome_identifiers(session, thing):
             child_ark = child["bcid"]
             if child_ark in arks_to_bp:
                 print()
-            child_identifier = ThingIdentifier(guid=child_ark, thing_id=thing.primary_key)
+            child_identifier = ThingIdentifier(
+                guid=child_ark, thing_id=thing.primary_key
+            )
             session.add(child_identifier)
 
 
@@ -36,7 +46,9 @@ def insert_open_context_identifiers(session, thing):
     citation_uri = thing.resolved_content["citation uri"]
     if citation_uri is not None and type(citation_uri) is str:
         open_context_uri = isb_lib.core.normalized_id(citation_uri)
-        open_context_identifier = ThingIdentifier(guid=open_context_uri, thing_id=thing.primary_key)
+        open_context_identifier = ThingIdentifier(
+            guid=open_context_uri, thing_id=thing.primary_key
+        )
         if open_context_uri in arks_to_bp:
             print()
         session.add(open_context_identifier)

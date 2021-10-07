@@ -8,6 +8,7 @@ import logging
 
 from isb_lib.models.thing import Thing
 
+
 class SmithsonianItem(object):
     AUTHORITY_ID = "SMITHSONIAN"
     TEXT_CSV = "text/csv"

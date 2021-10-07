@@ -57,9 +57,7 @@ def load_smithsonian_entries(session, max_count, file_path, start_from=None):
 @click.option(
     "-d", "--db_url", default=None, help="SQLAlchemy database URL for storage"
 )
-@click.option(
-    "-s", "--solr_url", default=None, help="Solr index URL"
-)
+@click.option("-s", "--solr_url", default=None, help="Solr index URL")
 @click.option(
     "-v",
     "--verbosity",

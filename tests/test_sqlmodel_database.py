@@ -7,8 +7,14 @@ from sqlmodel.pool import StaticPool
 
 from isb_lib.core import ThingRecordIterator
 from isb_lib.models.thing import Thing, ThingIdentifier
-from isb_web.sqlmodel_database import get_thing_with_id, read_things_summary, last_time_thing_created, \
-    paged_things_with_ids, insert_identifiers, save_thing
+from isb_web.sqlmodel_database import (
+    get_thing_with_id,
+    read_things_summary,
+    last_time_thing_created,
+    paged_things_with_ids,
+    insert_identifiers,
+    save_thing,
+)
 
 
 @pytest.fixture(name="session")
@@ -30,7 +36,13 @@ def test_get_thing_with_id_no_things(session: Session):
 
 def test_get_thing_with_id_thing(session: Session):
     id = "123456"
-    new_thing = Thing(id=id, authority_id="test", resolved_url="http://foo.bar", resolved_status=200, resolved_content = { "foo": "bar" })
+    new_thing = Thing(
+        id=id,
+        authority_id="test",
+        resolved_url="http://foo.bar",
+        resolved_status=200,
+        resolved_content={"foo": "bar"},
+    )
     session.add(new_thing)
     session.commit()
     shouldnt_be_none = get_thing_with_id(session, id)
@@ -47,7 +59,13 @@ def test_read_things_no_things(session: Session):
 
 
 def test_read_things_with_things(session: Session):
-    new_thing = Thing(id="123456", authority_id="test", resolved_url="http://foo.bar", resolved_status=200, resolved_content = { "foo": "bar" })
+    new_thing = Thing(
+        id="123456",
+        authority_id="test",
+        resolved_url="http://foo.bar",
+        resolved_status=200,
+        resolved_content={"foo": "bar"},
+    )
     session.add(new_thing)
     session.commit()
     count, pages, data = read_things_summary(session, 0, 0)
@@ -60,18 +78,34 @@ def test_last_time_thing_created(session: Session):
     test_authority = "test"
     created = last_time_thing_created(session, test_authority)
     assert created is None
-    new_thing = Thing(id="123456", authority_id=test_authority, resolved_url="http://foo.bar", resolved_status=200,
-                      resolved_content={"foo": "bar"}, tcreated=datetime.datetime.now())
+    new_thing = Thing(
+        id="123456",
+        authority_id=test_authority,
+        resolved_url="http://foo.bar",
+        resolved_status=200,
+        resolved_content={"foo": "bar"},
+        tcreated=datetime.datetime.now(),
+    )
     session.add(new_thing)
     session.commit()
     new_created = last_time_thing_created(session, test_authority)
     assert new_created is not None
 
 
-def _add_some_things(session: Session, num_things: int, authority_id: str, tcreated: datetime.datetime = None):
+def _add_some_things(
+    session: Session,
+    num_things: int,
+    authority_id: str,
+    tcreated: datetime.datetime = None,
+):
     for i in range(num_things):
-        new_thing = Thing(id=str(i), authority_id=authority_id, resolved_url="http://foo.bar", resolved_status=200,
-                          resolved_content={"foo": "bar"})
+        new_thing = Thing(
+            id=str(i),
+            authority_id=authority_id,
+            resolved_url="http://foo.bar",
+            resolved_status=200,
+            resolved_content={"foo": "bar"},
+        )
         if tcreated is not None:
             new_thing.tcreated = tcreated
         session.add(new_thing)
@@ -112,7 +146,13 @@ def test_thing_iterator(session: Session):
 
 def test_thing_with_identifier(session: Session):
     thing_id = "123456"
-    new_thing = Thing(id=thing_id, authority_id="test", resolved_url="http://foo.bar", resolved_status=200, resolved_content = {"foo": "bar"})
+    new_thing = Thing(
+        id=thing_id,
+        authority_id="test",
+        resolved_url="http://foo.bar",
+        resolved_status=200,
+        resolved_content={"foo": "bar"},
+    )
     session.add(new_thing)
     session.commit()
     test_id = "ark:/123456"
@@ -134,7 +174,9 @@ def _fetch_thing_identifiers(session: Session) -> typing.List[ThingIdentifier]:
     return session.exec(select(ThingIdentifier)).all()
 
 
-def _test_insert_identifiers(session: Session, thing: Thing) -> typing.List[ThingIdentifier]:
+def _test_insert_identifiers(
+    session: Session, thing: Thing
+) -> typing.List[ThingIdentifier]:
     session.add(thing)
     session.commit()
     insert_identifiers(session, thing)
@@ -147,7 +189,13 @@ def _test_insert_identifiers(session: Session, thing: Thing) -> typing.List[Thin
 def test_insert_identifiers_geome(session: Session):
     thing_id = "123456"
     child_id = "1234567890"
-    geome_thing = Thing(id=thing_id, authority_id="GEOME", resolved_url="http://foo.bar", resolved_status=200, resolved_content = {"children": [{"bcid": child_id}]})
+    geome_thing = Thing(
+        id=thing_id,
+        authority_id="GEOME",
+        resolved_url="http://foo.bar",
+        resolved_status=200,
+        resolved_content={"children": [{"bcid": child_id}]},
+    )
     identifiers = _test_insert_identifiers(session, geome_thing)
     assert 2 == len(identifiers)
 
@@ -155,23 +203,38 @@ def test_insert_identifiers_geome(session: Session):
 def test_insert_identifiers_opencontext(session: Session):
     thing_id = "7890"
     citation_uri = "12345"
-    opencontext_thing = Thing(id=thing_id, authority_id="OPENCONTEXT", resolved_url="http://foo.bar", resolved_status=200,
-                        resolved_content={"citation uri": citation_uri})
+    opencontext_thing = Thing(
+        id=thing_id,
+        authority_id="OPENCONTEXT",
+        resolved_url="http://foo.bar",
+        resolved_status=200,
+        resolved_content={"citation uri": citation_uri},
+    )
     identifiers = _test_insert_identifiers(session, opencontext_thing)
     assert 2 == len(identifiers)
 
 
 def test_insert_identifiers_sesar(session: Session):
     thing_id = "7890"
-    sesar_thing = Thing(id=thing_id, authority_id="SESAR", resolved_url="http://foo.bar", resolved_status=200,
-                        resolved_content={})
+    sesar_thing = Thing(
+        id=thing_id,
+        authority_id="SESAR",
+        resolved_url="http://foo.bar",
+        resolved_status=200,
+        resolved_content={},
+    )
     identifiers = _test_insert_identifiers(session, sesar_thing)
     assert 1 == len(identifiers)
 
 
 def test_save_thing(session: Session) -> Thing:
-    sesar_thing = Thing(id="12345", authority_id="SESAR", resolved_url="http://foo.bar", resolved_status=200,
-                        resolved_content={})
+    sesar_thing = Thing(
+        id="12345",
+        authority_id="SESAR",
+        resolved_url="http://foo.bar",
+        resolved_status=200,
+        resolved_content={},
+    )
     save_thing(session, sesar_thing)
     # we should have a ThingIdentifier now
     ids = _fetch_thing_identifiers(session)
@@ -187,5 +250,3 @@ def test_save_existing_thing(session: Session):
     ids = _fetch_thing_identifiers(session)
     # should still have 1 id since we whacked the old ones during the save
     assert 1 == len(ids)
-
-
