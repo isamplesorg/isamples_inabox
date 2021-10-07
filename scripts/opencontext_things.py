@@ -47,7 +47,7 @@ async def _load_open_context_entries(session, max_count, start_from):
             isb_lib.opencontext_adapter.update_thing(
                 existing_thing, record, datetime.datetime.now(), records.last_url_str()
             )
-            session.commit()
+            save_thing(session, existing_thing)
             logging.info("Just saved existing thing")
         else:
             logging.debug("Don't have %s", id)
