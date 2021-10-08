@@ -93,7 +93,7 @@ async def _loadGEOMEEntries(session, max_count, start_from=None):
                     futures.remove(fut)
                     if not _thing is None:
                         try:
-                            save_thing(_thing)
+                            save_thing(session, _thing)
                         except sqlalchemy.exc.IntegrityError as e:
                             session.rollback()
                             logging.error("Item already exists: %s", _id[0])
