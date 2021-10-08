@@ -3,6 +3,7 @@ import datetime
 
 import isamples_metadata.SmithsonianTransformer
 
+import isb_lib
 import isb_lib.core
 import logging
 
@@ -66,7 +67,7 @@ def load_thing(
     # For the purposes of the Things db, we want to use a normalized form of the identifier.  Note that there is one
     # other column in the Smithsonian dump that we'd need to transform to the normalized form if we wanted to use it,
     # that is occurrenceID.  Currently it is unused in our Transformer codebase.
-    normalized_id = isb_lib.core.normalized_id(thing_dict["id"])
+    normalized_id = isb_lib.normalized_id(thing_dict["id"])
     try:
         t_created = datetime.datetime(
             year=int(thing_dict["year"]),

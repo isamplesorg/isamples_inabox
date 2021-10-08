@@ -45,7 +45,7 @@ def insert_geome_identifiers(session, thing):
 def insert_open_context_identifiers(session, thing):
     citation_uri = thing.resolved_content["citation uri"]
     if citation_uri is not None and type(citation_uri) is str:
-        open_context_uri = isb_lib.core.normalized_id(citation_uri)
+        open_context_uri = isb_lib.normalized_id(citation_uri)
         open_context_identifier = ThingIdentifier(
             guid=open_context_uri, thing_id=thing.primary_key
         )
