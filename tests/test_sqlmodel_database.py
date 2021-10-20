@@ -13,7 +13,7 @@ from isb_web.sqlmodel_database import (
     last_time_thing_created,
     paged_things_with_ids,
     insert_identifiers,
-    save_thing,
+    save_thing, things_for_sitemap,
 )
 
 
@@ -130,6 +130,34 @@ def test_paged_things_with_ids(session: Session):
     assert 5 == len(things_with_tcreated)
     all_things = paged_things_with_ids(session, authority, 200, 100, 0, None, 0)
     assert 15 == len(all_things)
+
+
+def test_things_for_sitemap(session: Session):
+    authority = "test"
+    _add_some_things(session, 20, authority)
+    things = things_for_sitemap(session, None, 200, 100, 0, None)
+    # should have a list of 20
+    assert 20 == len(things)
+    for thing in things:
+        assert thing.authority_id == authority
+    # remember this for later
+    last_tstamp = things[-1].tstamp
+    last_id = things[-1].primary_key
+
+    different_authority = "different"
+    _add_some_things(session, 20, different_authority)
+
+    # fetch again, should still get the first ones because they have an older tstamp
+    fetched_again_things = things_for_sitemap(session, None, 200, 100, 0, None)
+    for thing in things:
+        assert thing.authority_id == authority
+
+    # Now fetch with the tstamp and id
+    new_things = things_for_sitemap(session, None, 200, 100, 0, last_tstamp, last_id)
+    # Should get 20, should have the new authority
+    assert 20 == len(new_things)
+    for new_thing in new_things:
+        assert new_thing.authority_id == different_authority
 
 
 def test_thing_iterator(session: Session):
