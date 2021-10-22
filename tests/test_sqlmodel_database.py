@@ -15,6 +15,7 @@ from isb_web.sqlmodel_database import (
     insert_identifiers,
     save_thing, things_for_sitemap,
 )
+from test_utils import _add_some_things
 
 
 @pytest.fixture(name="session")
@@ -90,26 +91,6 @@ def test_last_time_thing_created(session: Session):
     session.commit()
     new_created = last_time_thing_created(session, test_authority)
     assert new_created is not None
-
-
-def _add_some_things(
-    session: Session,
-    num_things: int,
-    authority_id: str,
-    tcreated: datetime.datetime = None,
-):
-    for i in range(num_things):
-        new_thing = Thing(
-            id=str(i),
-            authority_id=authority_id,
-            resolved_url="http://foo.bar",
-            resolved_status=200,
-            resolved_content={"foo": "bar"},
-        )
-        if tcreated is not None:
-            new_thing.tcreated = tcreated
-        session.add(new_thing)
-    session.commit()
 
 
 def test_paged_things_with_ids(session: Session):

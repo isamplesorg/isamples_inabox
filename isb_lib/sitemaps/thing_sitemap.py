@@ -44,10 +44,11 @@ class UrlSetIterator:
 
     @staticmethod
     def _entries_for_thing(thing: Thing) -> typing.List[UrlSetEntry]:
+        # TODO: this needs to account for child records
         return [UrlSetEntry(thing.id, thing.tstamp)]
 
     def _has_next(self, thing_entries: typing.List[UrlSetEntry]) -> bool:
-        return self.num_urls + len(thing_entries) < self._max_length
+        return self.num_urls + len(thing_entries) <= self._max_length
 
     def __next__(self) -> UrlSetEntry:
         # Dont read past the bounds
@@ -78,6 +79,7 @@ class SitemapIndexIterator:
         self,
         session: Session,
         authority: str = None,
+        num_things_per_file: int = MAX_URLS_IN_SITEMAP,
         status: int = 200,
         offset: int = 0,
     ):
@@ -85,6 +87,7 @@ class SitemapIndexIterator:
         self._last_primary_key = 0
         self._session = session
         self._authority = authority
+        self._num_things_per_file = num_things_per_file
         self._status = status
         self._offset = offset
         self._last_url_set_iterator = None
@@ -95,11 +98,6 @@ class SitemapIndexIterator:
 
     def __next__(self) -> UrlSetIterator:
         if self._last_url_set_iterator is not None:
-            if self._last_url_set_iterator.num_urls < MAX_URLS_IN_SITEMAP:
-                # Didn't make it to the limit last time around, we've hit the end
-                # TODO: handle the case where we didn't make it to the end due to child records
-                raise StopIteration
-
             # Update our last values with the last ones from the previous iterator
             self._last_timestamp = self._last_url_set_iterator.last_tstamp
             self._last_primary_key = self._last_url_set_iterator.last_primary_key
@@ -107,15 +105,15 @@ class SitemapIndexIterator:
             self._session,
             self._authority,
             self._status,
-            MAX_URLS_IN_SITEMAP,
+            self._num_things_per_file,
             self._offset,
             self._last_timestamp,
             self._last_primary_key,
         )
         # TODO: this needs to handle edge cases
-        if len(things) < MAX_URLS_IN_SITEMAP:
-            self._next_time_done = True
-        next_url_set_iterator = UrlSetIterator(self.num_url_sets, MAX_URLS_IN_SITEMAP, things)
+        if len(things) == 0:
+            raise StopIteration
+        next_url_set_iterator = UrlSetIterator(self.num_url_sets, self._num_things_per_file, things)
         self._last_url_set_iterator = next_url_set_iterator
         self.num_url_sets = self.num_url_sets + 1
         return next_url_set_iterator
