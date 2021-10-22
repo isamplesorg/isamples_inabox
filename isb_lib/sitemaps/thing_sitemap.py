@@ -1,3 +1,4 @@
+import datetime
 import typing
 
 from sqlmodel import Session
@@ -8,12 +9,20 @@ from isb_web import sqlmodel_database
 MAX_URLS_IN_SITEMAP = 50000
 
 
+class SitemapIndexEntry:
+    """Individual sitemap file entry in the sitemap index"""
+
+    def __init__(self, sitemap_filename: str, last_mod: datetime.datetime):
+        self.sitemap_filename = sitemap_filename
+        self.last_mod_str = last_mod.isoformat()
+
+
 class UrlSetEntry:
     """Individual url entry in an urlset"""
 
-    def __init__(self, identifier: str, last_mod: str):
+    def __init__(self, identifier: str, last_mod: datetime.datetime):
         self.identifier = identifier
-        self.last_mod = last_mod
+        self.last_mod_str = last_mod.isoformat()
 
 
 class UrlSetIterator:
@@ -58,6 +67,9 @@ class UrlSetIterator:
             # TODO: handle the case where we have multiple Things
             return thing_entries[0]
 
+    def sitemap_index_entry(self) -> SitemapIndexEntry:
+        return SitemapIndexEntry(f"sitemap-{self.sitemap_index}.xml", self.last_tstamp)
+
 
 class SitemapIndexIterator:
     """Iterator class responsible for listing the individual sitemap files in a sitemap index"""
@@ -69,7 +81,6 @@ class SitemapIndexIterator:
         status: int = 200,
         offset: int = 0,
     ):
-        self._num_url_sets = 0
         self._last_timestamp = None
         self._last_primary_key = 0
         self._session = session
@@ -77,6 +88,7 @@ class SitemapIndexIterator:
         self._status = status
         self._offset = offset
         self._last_url_set_iterator = None
+        self.num_url_sets = 0
 
     def __iter__(self):
         return self
@@ -100,9 +112,11 @@ class SitemapIndexIterator:
             self._last_timestamp,
             self._last_primary_key,
         )
+        # TODO: this needs to handle edge cases
         if len(things) < MAX_URLS_IN_SITEMAP:
             self._next_time_done = True
-        next_url_set_iterator = UrlSetIterator(self._num_url_sets, MAX_URLS_IN_SITEMAP, things)
+        next_url_set_iterator = UrlSetIterator(self.num_url_sets, MAX_URLS_IN_SITEMAP, things)
         self._last_url_set_iterator = next_url_set_iterator
+        self.num_url_sets = self.num_url_sets + 1
         return next_url_set_iterator
 
