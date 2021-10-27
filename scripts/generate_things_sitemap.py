@@ -70,7 +70,7 @@ https://www.sitemaps.org/schemas/sitemap/0.9/siteindex.xsd">\n"""
         for sitemap_index_entry in sitemap_index_entries:
 
             loc_str = xmlesc(
-                os.path.join(host, sitemap_index_entry.gzipped_sitemap_filename())
+                os.path.join(host, "sitemaps", sitemap_index_entry.gzipped_sitemap_filename())
             )
             lastmod_str = xmlesc(sitemap_index_entry.last_mod_str)
             await writer(
