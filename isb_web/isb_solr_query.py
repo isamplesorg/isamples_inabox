@@ -316,7 +316,7 @@ def solr_records_for_sitemap(
     Args:
         rsession: The requests.session object to use for sending the solr request
         authority_id: The authority_id to use when querying SOLR, defaults to all
-        start_index: The offset for the records o return
+        start_index: The offset for the records to return
         batch_size: Number of documents for this particular sitemap document
 
     Returns:

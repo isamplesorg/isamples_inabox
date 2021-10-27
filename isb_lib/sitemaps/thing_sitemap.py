@@ -55,16 +55,7 @@ class UrlSetIterator:
         # Safe to check the length by creating the urlset entries to see if we're past the end
         next_thing = self._things[self._thing_index]
         # Some records don't have sourceUpdatedTime, so try a couple fallbacks:
-        # (1) producedBy_resultTime
-        # (2) indexUpdatedTime
         timestamp_str = next_thing.get("sourceUpdatedTime")
-        if timestamp_str is None:
-            timestamp_str = next_thing.get("producedBy_resultTime")
-        if timestamp_str is None:
-            timestamp_str = next_thing.get("indexUpdatedTime")
-        if timestamp_str is None:
-            timestamp_str = datetime.datetime.now().isoformat()
-
         next_url_set_entry = UrlSetEntry(next_thing["id"], timestamp_str)
         # Update the necessary state
         self.num_urls += 1
