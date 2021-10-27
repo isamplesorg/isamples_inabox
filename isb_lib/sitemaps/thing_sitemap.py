@@ -14,6 +14,9 @@ class SitemapIndexEntry:
         self.sitemap_filename = sitemap_filename
         self.last_mod_str = last_mod
 
+    def gzipped_sitemap_filename(self) -> str:
+        return f"{self.sitemap_filename}.gz"
+
 
 class UrlSetEntry:
     """Individual url entry in an urlset"""
@@ -72,7 +75,7 @@ class UrlSetIterator:
 
     def sitemap_index_entry(self) -> SitemapIndexEntry:
         return SitemapIndexEntry(
-            f"sitemap-{self.sitemap_index}.xml.gz", self.last_tstamp_str
+            f"sitemap-{self.sitemap_index}.xml", self.last_tstamp_str
         )
 
 
