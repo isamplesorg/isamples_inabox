@@ -2,6 +2,7 @@ import typing
 import requests
 import geojson
 import fastapi
+import os.path
 
 import isb_web.config
 
@@ -29,6 +30,10 @@ def clip_float(v, min_v, max_v):
     if v > max_v:
         return max_v
     return v
+
+
+def get_solr_url(path_component: str):
+    return os.path.join(BASE_URL, path_component)
 
 
 def _get_heatmap(
@@ -66,7 +71,7 @@ def _get_heatmap(
     if grid_level is not None:
         params["facet.heatmap.gridLevel"] = grid_level
     # Get the solr heatmap for the provided bounds
-    url = f"{BASE_URL}/select"
+    url = get_solr_url("select")
     response = requests.get(url, headers=headers, params=params)
 
     # logging.debug("Got: %s", response.url)
@@ -265,7 +270,7 @@ def solr_query(params):
     Returns:
         Iterator for the solr response.
     """
-    url = f"{BASE_URL}/select"
+    url = get_solr_url("select")
     headers = {"Accept": "application/json"}
     wt_map = {
         "csv": "text/plain",
@@ -291,7 +296,7 @@ def solr_luke():
     Returns:
         JSON document iterator
     """
-    url = f"{BASE_URL}/admin/luke"
+    url = get_solr_url("/admin/luke")
     params = {"show": "schema", "wt": "json"}
     headers = {"Accept": "application/json"}
     response = requests.get(url, headers=headers, params=params, stream=True)
@@ -329,7 +334,7 @@ def solr_records_for_sitemap(
         "start": start_index,
         "fl": "id,sourceUpdatedTime",
     }
-    _url = f"{BASE_URL}select"
+    _url = get_solr_url("select")
     res = rsession.get(_url, headers=headers, params=params)
     json = res.json()
     docs = json["response"]["docs"]
