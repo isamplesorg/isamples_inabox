@@ -190,5 +190,7 @@ addDynamicField({
 createField("producedBy_samplingSite_location_ll", "location", True, True, None)
 createField("producedBy_samplingSite_location_bb", "bbox", True, True, None)
 createField("producedBy_samplingSite_location_rpt", "location_rpt", True, True, None)
+createField("producedBy_samplingSite_location_latitude", "pfloat", True, True, None)
+createField("producedBy_samplingSite_location_longitude", "pfloat", True, True, None)
 
 pj(listFields())
