@@ -48,14 +48,14 @@ def test_sitemap(rsession: requests.sessions, sitemap_index_url: str):
             <lastmod>2006-08-10T12:00:00Z</lastmod>
           </sitemap>    
     """
-    random_child_index = random.randrange(0, len(sitemap_list) - 1)
-    random_child = sitemap_list[random_child_index]
-    random_child_children = random_child.getchildren()
-    for child_element in random_child_children:
-        if "lastmod" in child_element.tag:
-            _assert_date_tag_text(child_element)
-        elif "loc" in child_element.tag:
-            sitemap_file_loc = child_element.text
+    random_sitemap_index = random.randrange(0, len(sitemap_list) - 1)
+    random_sitemap_element = sitemap_list[random_sitemap_index]
+    random_sitemap_children = random_sitemap_element.getchildren()
+    for random_sitemap_child in random_sitemap_children:
+        if "lastmod" in random_sitemap_child.tag:
+            _assert_date_tag_text(random_sitemap_child)
+        elif "loc" in random_sitemap_child.tag:
+            sitemap_file_loc = random_sitemap_child.text
             res = rsession.get(sitemap_file_loc)
             uncompressed_text = gzip.decompress(res.content)
             sitemap_file_root = lxml.etree.fromstring(uncompressed_text, parser=xmlp)
