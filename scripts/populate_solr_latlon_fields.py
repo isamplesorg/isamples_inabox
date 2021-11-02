@@ -40,9 +40,9 @@ def main(ctx):
             if insert_latlon_fields_for_record(record):
                 records_to_add.append(record)
         isb_lib.core.solrAddRecords(rsession, solr_records, solr_url)
+        isb_lib.core.solrCommit(rsession, solr_url)
         offset += batch_size
         logging.info(f"Just finished {offset} records")
-    isb_lib.core.solrCommit(rsession, solr_url)
 
 
 if __name__ == "__main__":
