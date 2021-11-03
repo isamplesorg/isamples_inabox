@@ -4,7 +4,6 @@ import os
 import lxml.etree
 import random
 import dateparser
-import gzip
 from lxml.etree import _Element
 
 
@@ -44,7 +43,7 @@ def test_sitemap(rsession: requests.sessions, sitemap_index_url: str):
     sitemap_list = root.getchildren()
     """These sitemap children look like this:
           <sitemap>
-            <loc>http://mars.cyverse.org/sitemaps/sitemap-5.xml.gz</loc>
+            <loc>http://mars.cyverse.org/sitemaps/sitemap-5.xml</loc>
             <lastmod>2006-08-10T12:00:00Z</lastmod>
           </sitemap>    
     """
@@ -57,8 +56,7 @@ def test_sitemap(rsession: requests.sessions, sitemap_index_url: str):
         elif "loc" in random_sitemap_child.tag:
             sitemap_file_loc = random_sitemap_child.text
             res = rsession.get(sitemap_file_loc)
-            uncompressed_text = gzip.decompress(res.content)
-            sitemap_file_root = lxml.etree.fromstring(uncompressed_text, parser=xmlp)
+            sitemap_file_root = lxml.etree.fromstring(res.content, parser=xmlp)
             urlset_children = sitemap_file_root.getchildren()
             """The urlset children look like this:
                   <url>
@@ -69,9 +67,8 @@ def test_sitemap(rsession: requests.sessions, sitemap_index_url: str):
 
             # Get 100 randomly selected urlset children and try and resolve the url in the loc
             for n in range(0, 100):
-                random_url_tag = urlset_children[
-                    random.randrange(0, len(urlset_children))
-                ]
+                random_url_index = random.randrange(0, len(urlset_children))
+                random_url_tag = urlset_children[random_url_index]
                 for url_child in random_url_tag.getchildren():
                     if "lastmod" in url_child.tag:
                         _assert_date_tag_text(url_child)
