@@ -18,7 +18,7 @@ def mutate_record(record: typing.Dict) -> typing.Optional[typing.Dict]:
 @click.pass_context
 def main(ctx):
     """Starting point template for reindexing the iSB Core Solr schema.  Solr URL is contained in a file called
-    isb_web_config.env that should be located in the same directory as this file"""
+    isb_web_config.env that should be located in the same directory as this file."""
     solr_url = isb_web.config.Settings().solr_url
     isb_lib.core.things_main(ctx, None, solr_url, "INFO", False)
     total_records = 0
