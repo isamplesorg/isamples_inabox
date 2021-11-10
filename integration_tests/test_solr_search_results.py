@@ -32,12 +32,14 @@ authority_ids = [
 ]
 
 
-def _send_solr_query(rsession: requests.sessions, solr_url: str, query: str) -> typing.List[typing.Dict]:
+def _send_solr_query(
+    rsession: requests.sessions, solr_url: str, query: str
+) -> typing.List[typing.Dict]:
     params = {
         "start": 0,
         "limit": 10,
         "fl": "*",
-        "q": f"searchText:{query}",
+        "q": f"searchText:({query})",
     }
     res = rsession.get(solr_url, headers=headers(), params=params)
     response_dict = res.json()
@@ -71,12 +73,14 @@ opencontext_projects = [
     # "Excavations at Polis",
     "Avkat Archaeological Project",
     "Kenan Tepe",
-    "Giza Botanical Database"
+    "Giza Botanical Database",
 ]
 
 
 @pytest.mark.parametrize("project_label", opencontext_projects)
-def test_opencontext_projects(rsession: requests.sessions, solr_url: str, project_label: str):
+def test_opencontext_projects(
+    rsession: requests.sessions, solr_url: str, project_label: str
+):
     docs = _send_solr_query(rsession, solr_url, project_label)
     for doc in docs:
         for word in project_label.split():
@@ -94,10 +98,30 @@ geome_search_terms = [
 
 
 @pytest.mark.parametrize("geome_search_term", geome_search_terms)
-def test_geome_search_terms(rsession: requests.sessions, solr_url: str, geome_search_term: str):
+def test_geome_search_terms(
+    rsession: requests.sessions, solr_url: str, geome_search_term: str
+):
     docs = _send_solr_query(rsession, solr_url, geome_search_term)
     for doc in docs:
         for word in geome_search_term.split():
             appears_in_search_text = _value_in_search_text(word, doc)
             assert appears_in_search_text
             assert doc["source"] == "GEOME"
+
+
+geographic_search_terms = [
+    "New Zealand",
+    "United States",
+    "Moorea",
+    "Bali",
+]
+
+
+@pytest.mark.parametrize("geographic_search_term", geographic_search_terms)
+def test_geographic_search_terms(
+    rsession: requests.sessions, solr_url: str, geographic_search_term: str
+):
+    docs = _send_solr_query(rsession, solr_url, geographic_search_term)
+    for doc in docs:
+        appears_in_search_text = _value_in_search_text(geographic_search_term, doc)
+        assert appears_in_search_text
