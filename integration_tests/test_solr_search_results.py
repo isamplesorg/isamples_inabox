@@ -114,6 +114,7 @@ geographic_search_terms = [
     "United States",
     "Moorea",
     "Bali",
+    "Italy",
 ]
 
 
