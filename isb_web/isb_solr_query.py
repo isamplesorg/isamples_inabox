@@ -2,9 +2,9 @@ import typing
 import requests
 import geojson
 import fastapi
-import os.path
 import logging
-
+import os.path
+import urllib.parse
 import isb_web.config
 
 BASE_URL = isb_web.config.Settings().solr_url
@@ -24,6 +24,37 @@ _GEOJSON_ERR_PCT = 0.2
 # 0.1 for the leaflet heatmap tends to generate more cells for the heatmap “blob” generation
 _LEAFLET_ERR_PCT = 0.1
 
+# Maximum rows to return in a streaming request.
+MAX_STREAMING_ROWS = 500000
+
+RESERVED_CHAR_LIST = [
+    "+",
+    "-",
+    "&",
+    "|",
+    "!",
+    "(",
+    ")",
+    "{",
+    "}",
+    "[",
+    "]",
+    "^",
+    '"',
+    "~",
+    "*",
+    "?",
+    ":",
+]
+
+
+def escape_solr_query_term(term):
+    """Escape a query term for inclusion in a query."""
+    term = term.replace("\\", "\\\\")
+    for c in RESERVED_CHAR_LIST:
+        term = term.replace(c, r"\{}".format(c))
+    return term
+
 
 def clip_float(v, min_v, max_v):
     if v < min_v:
@@ -34,7 +65,7 @@ def clip_float(v, min_v, max_v):
 
 
 def get_solr_url(path_component: str):
-    return os.path.join(BASE_URL, path_component)
+    return urllib.parse.urljoin(BASE_URL, path_component)
 
 
 def _get_heatmap(
@@ -287,9 +318,138 @@ def solr_query(params, query=None):
     if query is None:
         response = requests.get(url, headers=headers, params=params, stream=True)
     else:
-        response = requests.post(url, headers=headers, params=params, json=query, stream=True)
+        response = requests.post(
+            url, headers=headers, params=params, json=query, stream=True
+        )
     return fastapi.responses.StreamingResponse(
         response.iter_content(chunk_size=2048), media_type=content_type
+    )
+
+
+def solr_get_record(identifier):
+    """
+    Retrieve the solr document for the specified identifier.
+
+    The select endpoint is used instead of get because get does
+    not return fields populated by copyField operations.
+
+    Args:
+        identifier: string, the record identifier
+
+    Returns: status_code, object
+    """
+    params = {
+        "wt": "json",
+        "q": f"id:{escape_solr_query_term(identifier)}",
+        "fl": "*",
+        "rows": 1,
+        "start": 0,
+    }
+    url = get_solr_url("select")
+    headers = {"Accept": "application/json"}
+    response = requests.get(url, headers=headers, params=params)
+    if response.status_code != 200:
+        return response.status_code, None
+    docs = response.json()
+    if docs["response"]["numFound"] == 0:
+        return 404, None
+    return 200, docs["response"]["docs"][0]
+
+
+def solr_searchStream(params, collection="isb_core_records"):
+    """
+    Requests a streaming search response from solr.
+
+    The usual q, fq, fl, sort and other standard parameters are accepted.
+
+    Only records that have longitude and latitude are returned.
+
+    The response always includes at least the fields except if
+    "xycount" is true (below):
+      id: the record id
+      x: longitude
+      y: latitude
+
+    If "xycount" is provided as a truthy value, then the results include only
+    the fields "x,y,n" where n is the number of records at x,y.
+
+    Example with curl:
+    curl --data-urlencode \
+      'expr=search(isb_core_records,q="source:SESAR",fq="searchText:sample",fq="hasMaterialCategory:Mineral",fl="id,producedBy_samplingSite_location_latitude,producedBy_samplingSite_location_longitude",sort="id asc",qt="/export")'\
+      "http://localhost:8983/solr/isb_core_records/stream"
+
+    Args:
+        params: parameters for the search expression
+        collection: name of collection to search
+
+    Returns:
+        Stream of records from solr
+    """
+    # TODO: Test coverage, need to mock solr?
+
+    point_rollup = False
+    default_params = {
+        "q": "*:*",
+        "rows": MAX_STREAMING_ROWS,
+    }
+    default_params.update(params)
+    url = get_solr_url("stream")
+    headers = {"Accept": "application/json"}
+    qparams = {}
+    _params = []
+    _has_sort = False
+    _has_fl = False
+    _field_list = [
+        "id",
+        "x:producedBy_samplingSite_location_longitude",
+        "y:producedBy_samplingSite_location_latitude",
+    ]
+    for k, v in default_params.items():
+        if k == "xycount":
+            v = str(v).lower()
+            if v in ["1", "true", "yes", "y"]:
+                point_rollup = True
+            k = None
+        if k == "rows":
+            if int(v) > MAX_STREAMING_ROWS:
+                v = MAX_STREAMING_ROWS
+        if k == "sort":
+            _has_sort = True
+        if k == "fl":
+            _has_fl = True
+            _fields = v.split(",")
+            for f in _fields:
+                if f not in _field_list:
+                    _field_list.append(f)
+            v = ",".join(_field_list)
+        if not k is None:
+            _params.append(f'{k}="{v}"')
+    if not _has_fl:
+        _params.append(f'fl="{",".join(_field_list)}"')
+    #if not _has_sort:
+    #    _params.append('sort="id asc"')
+    _params.append(
+        (
+            'fq="producedBy_samplingSite_location_longitude:*'
+            ' AND producedBy_samplingSite_location_latitude:*"'
+        )
+    )
+    content_type = "application/json"
+    request = {"expr": f'search({collection},{",".join(_params)},qt="/select")'}
+    if point_rollup:
+        request = {
+            "expr": (
+                f'select(rollup(search({collection},{",".join(_params)},qt="/select")'
+                ',over="x,y",count(*)),x,y,count(*) as n)'
+            )
+        }
+    logging.info("Expression = %s", request["expr"])
+    response = requests.post(
+        url, headers=headers, params=qparams, data=request, stream=True
+    )
+    logging.info("Returning response")
+    return fastapi.responses.StreamingResponse(
+        response.iter_content(chunk_size=4096), media_type=content_type
     )
 
 
@@ -301,7 +461,7 @@ def solr_luke():
     Returns:
         JSON document iterator
     """
-    url = get_solr_url("/admin/luke")
+    url = get_solr_url("admin/luke")
     params = {"show": "schema", "wt": "json"}
     headers = {"Accept": "application/json"}
     response = requests.get(url, headers=headers, params=params, stream=True)
@@ -316,7 +476,7 @@ def _fetch_solr_records(
     start_index: int = 0,
     batch_size: int = 50000,
     field: typing.Optional[str] = None,
-    sort: typing.Optional[str] = None
+    sort: typing.Optional[str] = None,
 ):
     headers = {"Content-Type": "application/json"}
     if authority_id is None:
@@ -356,8 +516,14 @@ def solr_records_for_sitemap(
     Returns:
         A list of dictionaries of solr documents with id and sourceUpdatedTime fields
     """
-    return _fetch_solr_records(rsession, authority_id, start_index, batch_size, "id,sourceUpdatedTime", "sourceUpdatedTime asc")
-
+    return _fetch_solr_records(
+        rsession,
+        authority_id,
+        start_index,
+        batch_size,
+        "id,sourceUpdatedTime",
+        "sourceUpdatedTime asc",
+    )
 
 
 class ISBCoreSolrRecordIterator:
@@ -367,11 +533,11 @@ class ISBCoreSolrRecordIterator:
 
     def __init__(
         self,
-        rsession = requests.session(),
+        rsession=requests.session(),
         authority: str = None,
         batch_size: int = 50000,
         offset: int = 0,
-        sort: str = None
+        sort: str = None,
     ):
         """
 
@@ -390,18 +556,27 @@ class ISBCoreSolrRecordIterator:
         self._current_batch = []
         self._current_batch_index = -1
 
-
     def __iter__(self):
         return self
 
-
     def __next__(self) -> typing.Dict:
-        if len(self._current_batch) == 0 or self._current_batch_index == len(self._current_batch):
-            self._current_batch = _fetch_solr_records(self.rsession, self.authority, self.offset, self.batch_size, None, self.sort)
+        if len(self._current_batch) == 0 or self._current_batch_index == len(
+            self._current_batch
+        ):
+            self._current_batch = _fetch_solr_records(
+                self.rsession,
+                self.authority,
+                self.offset,
+                self.batch_size,
+                None,
+                self.sort,
+            )
             if len(self._current_batch) == 0:
                 # reached the end of the records
                 raise StopIteration
-            logging.info(f"Just fetched {len(self._current_batch)} ISB Core solr records at offset {self.offset}")
+            logging.info(
+                f"Just fetched {len(self._current_batch)} ISB Core solr records at offset {self.offset}"
+            )
             self.offset += self.batch_size
             self._current_batch_index = 0
         # return the next one in the list and increment our index
