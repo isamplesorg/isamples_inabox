@@ -119,7 +119,6 @@ def session_fixture():
         yield session
 
 
-
 @pytest.mark.parametrize(
     "sitemap_filename,last_mod_date,expected_num_urls", sitemap_fetcher_test_values
 )

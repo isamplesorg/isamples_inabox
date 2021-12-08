@@ -2,9 +2,10 @@ from abc import ABC
 import datetime
 import lxml.etree
 import requests
-import dateparser
 import typing
 import logging
+
+import isb_lib.core
 from isb_lib.models.thing import Thing
 
 
@@ -41,6 +42,7 @@ class SitemapFetcher(ABC):
         self.urls_to_fetch = []
 
     def _fetch_file(self):
+        logging.info(f"Going to fetch sitemap at {self._url}")
         res = self._session.get(self._url)
         root = lxml.etree.fromstring(res.content)
         sitemap_list = root.getchildren()
@@ -73,7 +75,7 @@ class SitemapFetcher(ABC):
                 .__next__()
                 .text
             )
-            lastmod_date = dateparser.parse(lastmod)
+            lastmod_date = isb_lib.core.parsed_date_from_isamples_format(lastmod)
             if (
                 self._last_modified is None
                 or lastmod_date.timestamp() >= self._last_modified.timestamp()
@@ -83,9 +85,11 @@ class SitemapFetcher(ABC):
 
 class SitemapFileFetcher(SitemapFetcher):
     def fetch_sitemap_file(self):
+        """Fetches the contents of the particular sitemap file and stores the URLs to fetch"""
         self._fetch_file()
 
     def fetch_child_files(self) -> typing.List[ThingFetcher]:
+        """Fetches the actual Things, one per file"""
         thing_fetchers = []
         for url in self.urls_to_fetch:
             thing_fetcher = ThingFetcher(
@@ -111,6 +115,7 @@ class SitemapIndexFetcher(SitemapFetcher):
         self._fetch_file()
 
     def fetch_child_files(self) -> typing.List[SitemapFileFetcher]:
+        """Fetches the individual sitemap URLs from the sitemap index, and returns them in a list"""
         file_fetchers = []
         for url in self.urls_to_fetch:
             child_file_fetcher = self.sitemap_file_fetcher(url)
