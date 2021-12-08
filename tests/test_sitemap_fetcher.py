@@ -4,8 +4,7 @@ import os
 from urllib.request import url2pathname
 import datetime
 
-# Taken from https://stackoverflow.com/questions/10123929/fetch-a-file-from-a-local-url-with-python-requests#22989322
-from isb_lib.sitemaps.sitemap_fetcher import SitemapIndexFetcher
+from isb_lib.sitemaps.sitemap_fetcher import SitemapIndexFetcher, SitemapFileFetcher
 
 
 class LocalFileSitemapIndexFetcher(SitemapIndexFetcher):
@@ -14,7 +13,23 @@ class LocalFileSitemapIndexFetcher(SitemapIndexFetcher):
         filename = os.path.join(os.getcwd(), file_url)
         return f"file://{filename}"
 
+    def sitemap_file_fetcher(self, url: str) -> SitemapFileFetcher:
+        return LocalFileSitemapFileFetcher(
+            self.prepare_sitemap_file_url(url),
+            self._authority,
+            self._last_modified,
+            self._session,
+        )
 
+
+class LocalFileSitemapFileFetcher(SitemapFileFetcher):
+    def prepare_thing_file_url(self, file_url: str) -> str:
+        """Overridden to reconstruct file urls by subbing in the cwd plus the relative file path"""
+        filename = os.path.join(os.getcwd(), file_url)
+        return f"file://{filename}"
+
+
+# Taken from https://stackoverflow.com/questions/10123929/fetch-a-file-from-a-local-url-with-python-requests#22989322
 class LocalFileAdapter(requests.adapters.BaseAdapter):
     """Protocol Adapter to allow Requests to GET file:// URLs"""
 
@@ -104,8 +119,13 @@ def test_sitemap_fetcher(
     )
     sitemap_fetcher.fetch_index_file()
     assert expected_num_urls == len(sitemap_fetcher.urls_to_fetch)
+    # This kicks off the request for each child file
     child_fetchers = sitemap_fetcher.fetch_child_files()
     for child_fetcher in child_fetchers:
         # Note that this data has been doctored to have the same number of qualified urls for the sitemap index
         # and the individual child files, so this assertion is valid -- otherwise this wouldn't necessarily work
         assert expected_num_urls == len(child_fetcher.urls_to_fetch)
+
+        thing_fetchers = child_fetcher.fetch_child_files()
+        for thing_fetcher in thing_fetchers:
+            assert thing_fetcher.thing is not None
