@@ -1,5 +1,7 @@
 from abc import ABC
 import datetime
+from typing import Iterator
+
 import lxml.etree
 import requests
 import typing
@@ -10,18 +12,23 @@ from isb_lib.models.thing import Thing
 
 
 class ThingFetcher:
+    pass
+
+
+class ThingFetcher:
     def __init__(self, url: str, session: requests.sessions = requests.session()):
         self._url = url
         self._session = session
         self.thing = None
 
-    def fetch_thing(self):
+    def fetch_thing(self) -> typing.Optional[ThingFetcher]:
         try:
             response = self._session.get(self._url)
             json_dict = response.json()
             thing = Thing()
             thing.take_values_from_json_dict(json_dict)
             self.thing = thing
+            return self
         except Exception as e:
             logging.warning(e)
             return None
@@ -82,11 +89,15 @@ class SitemapFetcher(ABC):
             ):
                 self.urls_to_fetch.append(loc)
 
+    def url_iterator(self) -> Iterator:
+        return iter(self.urls_to_fetch)
+
 
 class SitemapFileFetcher(SitemapFetcher):
-    def fetch_sitemap_file(self):
+    def fetch_sitemap_file(self) -> SitemapFetcher:
         """Fetches the contents of the particular sitemap file and stores the URLs to fetch"""
         self._fetch_file()
+        return self
 
     def fetch_child_files(self) -> typing.List[ThingFetcher]:
         """Fetches the actual Things, one per file"""
@@ -121,6 +132,7 @@ class SitemapIndexFetcher(SitemapFetcher):
             child_file_fetcher = self.sitemap_file_fetcher(url)
             child_file_fetcher.fetch_sitemap_file()
             file_fetchers.append(child_file_fetcher)
+            break
         return file_fetchers
 
     def prepare_sitemap_file_url(self, file_url: str) -> str:
