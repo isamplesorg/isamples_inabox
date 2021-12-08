@@ -3,8 +3,12 @@ import requests
 import os
 from urllib.request import url2pathname
 import datetime
+import dateparser
+from sqlalchemy.pool import StaticPool
+from sqlmodel import SQLModel, create_engine, Session
 
 from isb_lib.sitemaps.sitemap_fetcher import SitemapIndexFetcher, SitemapFileFetcher
+from isb_web import sqlmodel_database
 
 
 class LocalFileSitemapIndexFetcher(SitemapIndexFetcher):
@@ -103,6 +107,19 @@ def local_file_requests_session():
     return requests_session
 
 
+@pytest.fixture(name="sqlmodel_session")
+def session_fixture():
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    SQLModel.metadata.create_all(engine)
+    with Session(engine) as session:
+        yield session
+
+
+
 @pytest.mark.parametrize(
     "sitemap_filename,last_mod_date,expected_num_urls", sitemap_fetcher_test_values
 )
@@ -111,6 +128,7 @@ def test_sitemap_fetcher(
     last_mod_date: datetime.datetime,
     expected_num_urls: int,
     local_file_requests_session,
+    sqlmodel_session
 ):
     filename = os.path.join(os.getcwd(), sitemap_filename)
     sitemap_index_file = f"file://{filename}"
@@ -128,4 +146,11 @@ def test_sitemap_fetcher(
 
         thing_fetchers = child_fetcher.fetch_child_files()
         for thing_fetcher in thing_fetchers:
-            assert thing_fetcher.thing is not None
+            thing = thing_fetcher.thing
+            assert thing is not None
+            # postgres will do the type coercion from string to timestamp, sqlite will not, so manually
+            # convert these to datetime objects for test purposes
+            thing.tstamp = dateparser.parse(thing.tstamp)
+            thing.tcreated = dateparser.parse(thing.tcreated)
+            thing.tresolved = dateparser.parse(thing.tresolved)
+            sqlmodel_database.save_thing(sqlmodel_session, thing_fetcher.thing)
