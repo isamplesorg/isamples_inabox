@@ -5,7 +5,14 @@ from urllib.request import url2pathname
 import datetime
 
 # Taken from https://stackoverflow.com/questions/10123929/fetch-a-file-from-a-local-url-with-python-requests#22989322
-from isb_lib.sitemaps.sitemap_fetcher import SitemapFetcher
+from isb_lib.sitemaps.sitemap_fetcher import SitemapIndexFetcher
+
+
+class LocalFileSitemapIndexFetcher(SitemapIndexFetcher):
+    def prepare_sitemap_file_url(self, file_url: str) -> str:
+        """Overridden to reconstruct file urls by subbing in the cwd plus the relative file path"""
+        filename = os.path.join(os.getcwd(), file_url)
+        return f"file://{filename}"
 
 
 class LocalFileAdapter(requests.adapters.BaseAdapter):
@@ -92,8 +99,13 @@ def test_sitemap_fetcher(
 ):
     filename = os.path.join(os.getcwd(), sitemap_filename)
     sitemap_index_file = f"file://{filename}"
-    sitemap_fetcher = SitemapFetcher(
+    sitemap_fetcher = LocalFileSitemapIndexFetcher(
         sitemap_index_file, "OPENCONTEXT", last_mod_date, local_file_requests_session
     )
     sitemap_fetcher.fetch_index_file()
     assert expected_num_urls == len(sitemap_fetcher.urls_to_fetch)
+    child_fetchers = sitemap_fetcher.fetch_child_files()
+    for child_fetcher in child_fetchers:
+        # Note that this data has been doctored to have the same number of qualified urls for the sitemap index
+        # and the individual child files, so this assertion is valid -- otherwise this wouldn't necessarily work
+        assert expected_num_urls == len(child_fetcher.urls_to_fetch)
