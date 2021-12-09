@@ -90,7 +90,7 @@ class SitemapFetcher(ABC):
                 self.urls_to_fetch.append(loc)
 
     def url_iterator(self) -> Iterator:
-        return iter(self.urls_to_fetch)
+        return iter(self.urls_to_fetch[0:50])
 
 
 class SitemapFileFetcher(SitemapFetcher):
@@ -132,7 +132,6 @@ class SitemapIndexFetcher(SitemapFetcher):
             child_file_fetcher = self.sitemap_file_fetcher(url)
             child_file_fetcher.fetch_sitemap_file()
             file_fetchers.append(child_file_fetcher)
-            break
         return file_fetchers
 
     def prepare_sitemap_file_url(self, file_url: str) -> str:

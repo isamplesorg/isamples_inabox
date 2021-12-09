@@ -14,7 +14,7 @@ from isb_lib.sitemaps.sitemap_fetcher import SitemapIndexFetcher, SitemapFileFet
 from isb_web import sqlmodel_database
 from isb_web.sqlmodel_database import SQLModelDAO
 
-CONCURRENT_DOWNLOADS = 50
+CONCURRENT_DOWNLOADS = 20
 
 
 @click.command()
@@ -42,7 +42,7 @@ CONCURRENT_DOWNLOADS = 50
 def main(ctx, url: str, authority: str, ignore_last_modified: bool):
     solr_url = isb_web.config.Settings().solr_url
     rsession = requests.session()
-    adapter = requests.adapters.HTTPAdapter(pool_connections=CONCURRENT_DOWNLOADS, pool_maxsize=CONCURRENT_DOWNLOADS)
+    adapter = requests.adapters.HTTPAdapter(pool_connections=CONCURRENT_DOWNLOADS * 2, pool_maxsize=CONCURRENT_DOWNLOADS * 2)
     rsession.mount('http://', adapter)
     db_session = SQLModelDAO(isb_web.config.Settings().database_url).get_session()
     authority = authority.upper()
@@ -55,29 +55,18 @@ def main(ctx, url: str, authority: str, ignore_last_modified: bool):
         last_updated_date = sqlmodel_database.last_time_thing_created(
             db_session, authority
         )
-    sitemap_fetcher = SitemapIndexFetcher(url, authority, last_updated_date, rsession)
-    sitemap_fetcher.fetch_index_file()
-    futures = []
-    more_work = len(sitemap_fetcher.urls_to_fetch) > 0
-    sitemap_index_iterator = sitemap_fetcher.url_iterator()
-    with concurrent.futures.ThreadPoolExecutor(max_workers=CONCURRENT_DOWNLOADS) as executor:
-        while more_work:
-            while len(futures) < CONCURRENT_DOWNLOADS:
-                try:
-                    url = next(sitemap_index_iterator)
-                    fetcher = SitemapFileFetcher(url, authority, last_updated_date, rsession)
-                    future = executor.submit(fetcher.fetch_sitemap_file)
-                    futures.append(future)
-                except StopIteration:
-                    logging.info("Got all of the sitemap files")
-                    break
-
-            for fut in concurrent.futures.as_completed(futures):
-                sitemap_file_fetcher = fut.result()
-                futures.remove(fut)
+    sitemap_index_fetcher = SitemapIndexFetcher(url, authority, last_updated_date, rsession)
+    sitemap_index_fetcher.fetch_index_file()
+    # fetch the contents of the individual sitemap files serially to preserve order
+    for url in sitemap_index_fetcher.urls_to_fetch:
+        sitemap_file_fetcher = SitemapFileFetcher(url, authority, last_updated_date, rsession)
+        sitemap_file_fetcher.fetch_sitemap_file()
+        fetched_all_things_for_current_sitemap_file = False
+        sitemap_file_iterator = sitemap_file_fetcher.url_iterator()
+        with concurrent.futures.ThreadPoolExecutor(max_workers=CONCURRENT_DOWNLOADS) as thing_executor:
+            while not fetched_all_things_for_current_sitemap_file:
                 thing_futures = []
-                sitemap_file_iterator = sitemap_file_fetcher.url_iterator()
-                with concurrent.futures.ThreadPoolExecutor(max_workers=CONCURRENT_DOWNLOADS) as thing_executor:
+                while len(thing_futures) < CONCURRENT_DOWNLOADS and not fetched_all_things_for_current_sitemap_file:
                     try:
                         thing_url = next(sitemap_file_iterator)
                         # At this point, we need to massage the URLs a bit, the sitemap publishes them like so:
@@ -88,12 +77,14 @@ def main(ctx, url: str, authority: str, ignore_last_modified: bool):
                         thing_fetcher = ThingFetcher(parsed_url.geturl(), rsession)
                         thing_future = thing_executor.submit(thing_fetcher.fetch_thing)
                         thing_futures.append(thing_future)
-
-                        for thing_fut in concurrent.futures.as_completed(thing_futures):
-                            thing_fetcher = thing_fut.result()
-                            thing_futures.remove(thing_fut)
                     except StopIteration:
                         logging.info(f"Finished all the requests for f{sitemap_file_fetcher._url}")
+                        fetched_all_things_for_current_sitemap_file = True
+                for thing_fut in concurrent.futures.as_completed(thing_futures):
+                    thing_fetcher = thing_fut.result()
+                    if thing_fetcher is not None:
+                        logging.info(f"Finished fetching thing f{thing_fetcher.thing.id}")
+                    thing_futures.remove(thing_fut)
 
 
 if __name__ == "__main__":
