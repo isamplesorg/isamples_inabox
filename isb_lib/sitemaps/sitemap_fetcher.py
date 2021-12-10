@@ -30,7 +30,7 @@ class ThingFetcher:
             self.thing = thing
             return self
         except Exception as e:
-            logging.warning(e)
+            logging.error(f"Error fetching thing from url: {self._url}, exception is: {e}")
             return None
 
 
@@ -91,6 +91,10 @@ class SitemapFetcher(ABC):
 
     def url_iterator(self) -> Iterator:
         return iter(self.urls_to_fetch[0:50])
+
+    @property
+    def url(self):
+        return self._url
 
 
 class SitemapFileFetcher(SitemapFetcher):

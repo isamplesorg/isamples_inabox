@@ -290,3 +290,15 @@ def save_thing(session: Session, thing: Thing):
     insert_identifiers(session, thing)
     logging.debug("going to insert identifiers")
     session.commit()
+
+
+def save_or_update_thing(session: Session, thing: Thing):
+    try:
+        save_thing(session, thing)
+    except sqlalchemy.exc.IntegrityError as e:
+        session.rollback()
+        logging.error(f"Thing already exists f{thing.id}, will recreate record")
+        existing_thing = get_thing_with_id(session, thing.id)
+        session.delete(existing_thing)
+        session.commit()
+        save_thing(session, thing)

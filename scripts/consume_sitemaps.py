@@ -44,10 +44,11 @@ def main(ctx, url: str, authority: str, ignore_last_modified: bool):
     rsession = requests.session()
     adapter = requests.adapters.HTTPAdapter(pool_connections=CONCURRENT_DOWNLOADS * 2, pool_maxsize=CONCURRENT_DOWNLOADS * 2)
     rsession.mount('http://', adapter)
-    db_session = SQLModelDAO(isb_web.config.Settings().database_url).get_session()
+    db_url = isb_web.config.Settings().database_url
+    db_session = SQLModelDAO(db_url).get_session()
     authority = authority.upper()
     isb_lib.core.things_main(
-        ctx, None, solr_url, "INFO", False
+        ctx, db_url, solr_url, "INFO", False
     )
     if ignore_last_modified:
         last_updated_date = None
@@ -55,9 +56,23 @@ def main(ctx, url: str, authority: str, ignore_last_modified: bool):
         last_updated_date = sqlmodel_database.last_time_thing_created(
             db_session, authority
         )
+    fetch_sitemap_files(authority, last_updated_date, rsession, url, db_session)
+
+
+def thing_fetcher_for_url(thing_url: str, rsession) -> ThingFetcher:
+    # At this point, we need to massage the URLs a bit, the sitemap publishes them like so:
+    # https://mars.cyverse.org/thing/ark:/21547/DxI2SKS002?full=false&amp;format=core
+    # We need to change full to true to get all the metadata, as well as the original format
+    parsed_url = urllib.parse.urlparse(thing_url)
+    parsed_url = parsed_url._replace(query="full=true&format=original")
+    thing_fetcher = ThingFetcher(parsed_url.geturl(), rsession)
+    return thing_fetcher
+
+
+def fetch_sitemap_files(authority, last_updated_date, rsession, url, db_session):
     sitemap_index_fetcher = SitemapIndexFetcher(url, authority, last_updated_date, rsession)
+    # fetch the index file, and iterate over the individual sitemap files serially so we preserve order
     sitemap_index_fetcher.fetch_index_file()
-    # fetch the contents of the individual sitemap files serially to preserve order
     for url in sitemap_index_fetcher.urls_to_fetch:
         sitemap_file_fetcher = SitemapFileFetcher(url, authority, last_updated_date, rsession)
         sitemap_file_fetcher.fetch_sitemap_file()
@@ -66,24 +81,25 @@ def main(ctx, url: str, authority: str, ignore_last_modified: bool):
         with concurrent.futures.ThreadPoolExecutor(max_workers=CONCURRENT_DOWNLOADS) as thing_executor:
             while not fetched_all_things_for_current_sitemap_file:
                 thing_futures = []
+                # While the queue is less than the max, add things to the queue
                 while len(thing_futures) < CONCURRENT_DOWNLOADS and not fetched_all_things_for_current_sitemap_file:
                     try:
-                        thing_url = next(sitemap_file_iterator)
-                        # At this point, we need to massage the URLs a bit, the sitemap publishes them like so:
-                        # https://mars.cyverse.org/thing/ark:/21547/DxI2SKS002?full=false&amp;format=core
-                        # We need to change full to true to get all the metadata, as well as the original format
-                        parsed_url = urllib.parse.urlparse(thing_url)
-                        parsed_url = parsed_url._replace(query="full=true&format=original")
-                        thing_fetcher = ThingFetcher(parsed_url.geturl(), rsession)
+                        thing_fetcher = thing_fetcher_for_url(next(sitemap_file_iterator), rsession)
+                        # Add the download job to the queue and remember it
                         thing_future = thing_executor.submit(thing_fetcher.fetch_thing)
                         thing_futures.append(thing_future)
                     except StopIteration:
-                        logging.info(f"Finished all the requests for f{sitemap_file_fetcher._url}")
+                        logging.info(f"Finished all the requests for f{sitemap_file_fetcher.url}")
                         fetched_all_things_for_current_sitemap_file = True
+                # Then read out results and save to the database after the queue is filled to capacity.
+                # Provided there are more urls in the iterator, return to the top of the loop to fill the queue again
                 for thing_fut in concurrent.futures.as_completed(thing_futures):
                     thing_fetcher = thing_fut.result()
                     if thing_fetcher is not None:
                         logging.info(f"Finished fetching thing f{thing_fetcher.thing.id}")
+                        sqlmodel_database.save_or_update_thing(db_session, thing_fetcher.thing)
+                    else:
+                        logging.error(f"Error fetching thing for {sitemap_file_fetcher.url}")
                     thing_futures.remove(thing_fut)
 
 
