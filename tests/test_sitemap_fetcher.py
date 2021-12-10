@@ -149,7 +149,6 @@ def test_sitemap_fetcher(
             assert thing is not None
             # postgres will do the type coercion from string to timestamp, sqlite will not, so manually
             # convert these to datetime objects for test purposes
-            thing.tstamp = dateparser.parse(thing.tstamp)
             thing.tcreated = dateparser.parse(thing.tcreated)
             thing.tresolved = dateparser.parse(thing.tresolved)
             sqlmodel_database.save_thing(sqlmodel_session, thing_fetcher.thing)
