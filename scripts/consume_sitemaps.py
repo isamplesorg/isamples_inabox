@@ -96,7 +96,7 @@ def fetch_sitemap_files(authority, last_updated_date, rsession, url, db_session)
                 for thing_fut in concurrent.futures.as_completed(thing_futures):
                     thing_fetcher = thing_fut.result()
                     if thing_fetcher is not None:
-                        logging.info(f"Finished fetching thing f{thing_fetcher.thing.id}")
+                        logging.info(f"Finished fetching thing {thing_fetcher.thing.id}")
                         sqlmodel_database.save_or_update_thing(db_session, thing_fetcher.thing)
                     else:
                         logging.error(f"Error fetching thing for {sitemap_file_fetcher.url}")

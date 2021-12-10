@@ -1,4 +1,6 @@
 import datetime
+from datetime import timedelta
+
 import sqlalchemy
 import logging
 from typing import Optional, List
@@ -292,13 +294,25 @@ def save_thing(session: Session, thing: Thing):
     session.commit()
 
 
+IGNORE_TIMESTAMP_DELTA = timedelta(hours=1)
+
+
 def save_or_update_thing(session: Session, thing: Thing):
     try:
         save_thing(session, thing)
     except sqlalchemy.exc.IntegrityError as e:
         session.rollback()
-        logging.error(f"Thing already exists f{thing.id}, will recreate record")
+        logging.info(f"Thing already exists {thing.id}, will recreate record")
         existing_thing = get_thing_with_id(session, thing.id)
+        # In this case -- we've likely pulled a duplicate child/parent thing across the wire with multiple requests for
+        # the same content.  We know this can occur with the way we publish URLs in sitemaps, so log it and continue
+        # on our merry way.
+        if existing_thing.tstamp.timestamp() > (datetime.datetime.now() - IGNORE_TIMESTAMP_DELTA).timestamp():
+            logging.warning(f"Skipping saving existing thing {existing_thing.id} because it's timestamp {existing_thing.tstamp} is within the ignore threshold")
+            return
         session.delete(existing_thing)
         session.commit()
-        save_thing(session, thing)
+        try:
+            save_thing(session, thing)
+        except sqlalchemy.exc.IntegrityError as integrity_error:
+            logging.error(f"Got error attempting to save existing thing {thing.id}, exception: {integrity_error}")
