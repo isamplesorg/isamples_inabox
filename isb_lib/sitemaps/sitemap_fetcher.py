@@ -101,7 +101,7 @@ class SitemapFetcher(ABC):
                 self.urls_to_fetch.append(loc)
 
     def url_iterator(self) -> Iterator:
-        return iter(self.urls_to_fetch[0:50])
+        return iter(self.urls_to_fetch)
 
     @property
     def url(self):
