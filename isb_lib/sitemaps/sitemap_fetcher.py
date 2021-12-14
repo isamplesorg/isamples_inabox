@@ -1,3 +1,5 @@
+import os.path
+import urllib.parse
 from abc import ABC
 import datetime
 from typing import Iterator
@@ -17,21 +19,30 @@ class ThingFetcher:
 
 class ThingFetcher:
     def __init__(self, url: str, session: requests.sessions = requests.session()):
-        self._url = url
+        self.url = url
         self._session = session
         self.thing = None
+        self.primary_key_fetched = None
 
-    def fetch_thing(self) -> typing.Optional[ThingFetcher]:
+    def fetch_thing(self) -> ThingFetcher:
         try:
-            response = self._session.get(self._url)
+            response = self._session.get(self.url)
             json_dict = response.json()
             thing = Thing()
             thing.take_values_from_json_dict(json_dict)
             self.thing = thing
+            self.primary_key_fetched = json_dict["primary_key"]
             return self
         except Exception as e:
-            logging.error(f"Error fetching thing from url: {self._url}, exception is: {e}")
-            return None
+            logging.error(
+                f"Error fetching thing from url: {self.url}, exception is: {e}"
+            )
+            self.thing = None
+            return self
+
+    def thing_identifier(self) -> str:
+        url_path = urllib.parse.urlparse(self.url).path
+        return url_path.removeprefix("/thing/")
 
 
 class SitemapFetcher(ABC):
@@ -98,6 +109,16 @@ class SitemapFetcher(ABC):
 
 
 class SitemapFileFetcher(SitemapFetcher):
+    def __init__(
+        self,
+        url: str,
+        authority: str,
+        last_modified: typing.Optional[datetime.datetime],
+        session: requests.sessions = requests.session(),
+    ):
+        super().__init__(url, authority, last_modified, session)
+        self.primary_keys_fetched = set()
+
     def fetch_sitemap_file(self) -> SitemapFetcher:
         """Fetches the contents of the particular sitemap file and stores the URLs to fetch"""
         self._fetch_file()

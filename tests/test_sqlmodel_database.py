@@ -13,7 +13,7 @@ from isb_web.sqlmodel_database import (
     last_time_thing_created,
     paged_things_with_ids,
     insert_identifiers,
-    save_thing, things_for_sitemap,
+    save_thing, things_for_sitemap, mark_thing_not_found,
 )
 from test_utils import _add_some_things
 
@@ -259,3 +259,28 @@ def test_save_existing_thing(session: Session):
     ids = _fetch_thing_identifiers(session)
     # should still have 1 id since we whacked the old ones during the save
     assert 1 == len(ids)
+
+
+def test_mark_existing_thing_not_found(session: Session):
+    existing_thing = test_save_thing(session)
+    # make sure status is 200
+    assert 200 == existing_thing.resolved_status
+    resolved_url = "http://foo.bar.baz"
+    mark_thing_not_found(session, existing_thing.id, resolved_url)
+    # fetch it again to read out the db, should be 404
+    refetched_thing = get_thing_with_id(session, existing_thing.id)
+    assert 404 == refetched_thing.resolved_status
+    assert resolved_url == refetched_thing.resolved_url
+
+
+def test_mark_nonexistent_thing_not_found(session: Session):
+    id = "ark:/123456"
+    existing_thing_with_id = get_thing_with_id(session, id)
+    assert None == existing_thing_with_id
+    resolved_url = "http://foo.bar.baz.beg"
+    mark_thing_not_found(session, id, resolved_url)
+    not_found_thing = get_thing_with_id(session, id)
+    assert not_found_thing is not None
+    assert id == not_found_thing.id
+    assert resolved_url == not_found_thing.resolved_url
+    assert 404 == not_found_thing.resolved_status

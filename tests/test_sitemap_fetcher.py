@@ -7,7 +7,11 @@ import dateparser
 from sqlalchemy.pool import StaticPool
 from sqlmodel import SQLModel, create_engine, Session
 
-from isb_lib.sitemaps.sitemap_fetcher import SitemapIndexFetcher, SitemapFileFetcher
+from isb_lib.sitemaps.sitemap_fetcher import (
+    SitemapIndexFetcher,
+    SitemapFileFetcher,
+    ThingFetcher,
+)
 from isb_web import sqlmodel_database
 
 
@@ -127,7 +131,7 @@ def test_sitemap_fetcher(
     last_mod_date: datetime.datetime,
     expected_num_urls: int,
     local_file_requests_session,
-    sqlmodel_session
+    sqlmodel_session,
 ):
     filename = os.path.join(os.getcwd(), sitemap_filename)
     sitemap_index_file = f"file://{filename}"
@@ -152,3 +156,11 @@ def test_sitemap_fetcher(
             thing.tcreated = dateparser.parse(thing.tcreated)
             thing.tresolved = dateparser.parse(thing.tresolved)
             sqlmodel_database.save_thing(sqlmodel_session, thing_fetcher.thing)
+
+
+def test_thing_fetcher_thing_identifier():
+    thing_fetcher = ThingFetcher(
+        "https://mars.cyverse.org/thing/ark:/65665/3cb09f2ef-0548-4670-b99c-d4a60bd750c3?full=true&format=original"
+    )
+    thing_identifier = thing_fetcher.thing_identifier()
+    assert "ark:/65665/3cb09f2ef-0548-4670-b99c-d4a60bd750c3" == thing_identifier

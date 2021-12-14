@@ -5,7 +5,7 @@ import sqlalchemy
 import logging
 from typing import Optional, List
 
-from sqlalchemy import Index
+from sqlalchemy import Index, update
 from sqlalchemy.exc import ProgrammingError
 from sqlmodel import SQLModel, create_engine, Session, select
 from sqlmodel.sql.expression import SelectOfScalar
@@ -146,7 +146,7 @@ def _base_thing_select(
     status: int = 200,
     limit: int = 100,
     offset: int = 0,
-    min_id: int = 0
+    min_id: int = 0,
 ) -> SelectOfScalar[Thing]:
     thing_select = select(Thing).filter(Thing.resolved_status == status)
     if authority is not None:
@@ -294,9 +294,6 @@ def save_thing(session: Session, thing: Thing):
     session.commit()
 
 
-IGNORE_TIMESTAMP_DELTA = timedelta(hours=1)
-
-
 def save_or_update_thing(session: Session, thing: Thing):
     try:
         save_thing(session, thing)
@@ -304,15 +301,33 @@ def save_or_update_thing(session: Session, thing: Thing):
         session.rollback()
         logging.info(f"Thing already exists {thing.id}, will recreate record")
         existing_thing = get_thing_with_id(session, thing.id)
-        # In this case -- we've likely pulled a duplicate child/parent thing across the wire with multiple requests for
-        # the same content.  We know this can occur with the way we publish URLs in sitemaps, so log it and continue
-        # on our merry way.
-        if existing_thing.tstamp.timestamp() > (datetime.datetime.now() - IGNORE_TIMESTAMP_DELTA).timestamp():
-            logging.warning(f"Skipping saving existing thing {existing_thing.id} because it's timestamp {existing_thing.tstamp} is within the ignore threshold")
-            return
-        session.delete(existing_thing)
-        session.commit()
+        delete_identifiers(session, thing)
+        if existing_thing is not None:
+            session.delete(existing_thing)
+            session.commit()
         try:
             save_thing(session, thing)
         except sqlalchemy.exc.IntegrityError as integrity_error:
-            logging.error(f"Got error attempting to save existing thing {thing.id}, exception: {integrity_error}")
+            session.rollback()
+            logging.error(
+                f"Got error attempting to save existing thing {thing.id}, exception: {integrity_error}"
+            )
+
+
+def mark_thing_not_found(session: Session, thing_id: str, resolved_url: str):
+    """In case we get an error fetching a thing, mark it as not found in the database"""
+    existing_thing = get_thing_with_id(session, thing_id)
+    if existing_thing is None:
+        thing = Thing()
+        thing.id = thing_id
+        thing.resolved_status = 404
+        thing.tresolved = datetime.datetime.now()
+        thing.resolved_url = resolved_url
+        save_thing(session, thing)
+    else:
+        session.execute(
+            update(isb_lib.models.thing.Thing)
+            .where(isb_lib.models.thing.Thing.id == thing_id)
+            .values(resolved_status=404)
+            .values(resolved_url=resolved_url)
+        )
