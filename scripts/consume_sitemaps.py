@@ -57,6 +57,10 @@ def main(ctx, url: str, authority: str, ignore_last_modified: bool):
     if ignore_last_modified:
         last_updated_date = None
     else:
+        # Smithsonian's dump has dates marked in the future.  So, Smithsonian will never update.  For the purposes
+        # of iSamples Central, this is actually ok as we don't have an automated import pipeline for Smithsonian.
+        # Once the Smithsonian gets an automated import time in place, we'll need to address this somehow.
+        # https://github.com/isamplesorg/isamples_inabox/issues/110
         last_updated_date = sqlmodel_database.last_time_thing_created(
             db_session, authority
         )
