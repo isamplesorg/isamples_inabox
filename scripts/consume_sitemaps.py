@@ -125,12 +125,12 @@ def fetch_sitemap_files(authority, last_updated_date, rsession, url, db_session)
                         )
                         if (
                             not thing_fetcher.primary_key_fetched
-                            in sitemap_file_fetcher.primary_keys_fetched
+                            in sitemap_index_fetcher.primary_keys_fetched
                         ):
                             sqlmodel_database.save_or_update_thing(
                                 db_session, thing_fetcher.thing
                             )
-                            sitemap_file_fetcher.primary_keys_fetched.add(
+                            sitemap_index_fetcher.primary_keys_fetched.add(
                                 thing_fetcher.primary_key_fetched
                             )
                     else:
