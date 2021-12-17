@@ -222,7 +222,7 @@ def get_sample_types(session: Session):
     return dbq.all()
 
 
-def _insert_geome_identifiers(session: Session, thing: Thing):
+def _insert_geome_identifiers(thing: Thing):
     # For now, we will fail all requests for parent IDs, because events appear in multiple samples
     # and would violate referential integrity if we made pointers to children from the event ID
     # parent = thing.resolved_content.get("parent")
@@ -239,30 +239,30 @@ def _insert_geome_identifiers(session: Session, thing: Thing):
             child_identifier = ThingIdentifier(
                 guid=child_ark, thing_id=thing.primary_key
             )
-            session.add(child_identifier)
+            thing.identifiers.append(child_identifier)
 
 
-def _insert_open_context_identifiers(session: Session, thing: Thing):
+def _insert_open_context_identifiers(thing: Thing):
     citation_uri = thing.resolved_content["citation uri"]
     if citation_uri is not None and type(citation_uri) is str:
         open_context_uri = isb_lib.normalized_id(citation_uri)
         open_context_identifier = ThingIdentifier(
             guid=open_context_uri, thing_id=thing.primary_key
         )
-        session.add(open_context_identifier)
+        thing.identifiers.append(open_context_identifier)
 
 
-def _insert_standard_identifier(session: Session, thing: Thing):
+def _insert_standard_identifier(thing: Thing):
     thing_identifier = ThingIdentifier(guid=thing.id, thing_id=thing.primary_key)
-    session.add(thing_identifier)
+    thing.identifiers.append(thing_identifier)
 
 
-def insert_identifiers(session: Session, thing: Thing):
+def insert_identifiers(thing: Thing):
     if thing.authority_id == "GEOME":
-        _insert_geome_identifiers(session, thing)
+        _insert_geome_identifiers(thing)
     elif thing.authority_id == "OPENCONTEXT":
-        _insert_open_context_identifiers(session, thing)
-    _insert_standard_identifier(session, thing)
+        _insert_open_context_identifiers(thing)
+    _insert_standard_identifier(thing)
 
 
 def delete_identifiers(session: Session, thing: Thing) -> bool:
@@ -282,13 +282,13 @@ def delete_identifiers(session: Session, thing: Thing) -> bool:
 
 def save_thing(session: Session, thing: Thing):
     logging.debug("Going to delete existing identifiers (if any)")
-    delete_identifiers(session, thing)
+    # delete_identifiers(session, thing)
     logging.debug("Going to add thing to session")
     session.add(thing)
     logging.debug("Added thing to session")
     session.commit()
     logging.debug("committed session")
-    insert_identifiers(session, thing)
+    insert_identifiers(thing)
     logging.debug("going to insert identifiers")
     session.commit()
 

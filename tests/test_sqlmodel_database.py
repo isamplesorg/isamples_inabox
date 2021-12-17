@@ -197,7 +197,7 @@ def _test_insert_identifiers(
 ) -> typing.List[ThingIdentifier]:
     session.add(thing)
     session.commit()
-    insert_identifiers(session, thing)
+    insert_identifiers(thing)
     session.commit()
     # should have two ids for specified thing
     ids = _fetch_thing_identifiers(session)
@@ -260,6 +260,8 @@ def test_save_thing(session: Session) -> Thing:
     return sesar_thing
 
 
+# TODO: this is failing due to the identifiers.  Idea is to modify the identifiers list management to
+# check for an existing one and manage that appropriately.  This should be trivial to just compare the GUIDs
 def test_save_existing_thing(session: Session):
     existing_thing = test_save_thing(session)
     # touch the timestamp to update the Thing

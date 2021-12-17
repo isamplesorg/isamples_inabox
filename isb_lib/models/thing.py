@@ -1,8 +1,8 @@
 import igsn_lib.time
 import json
-from typing import Optional
+from typing import Optional, List
 import typing
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field, SQLModel, Relationship
 from datetime import datetime
 import sqlalchemy
 
@@ -72,6 +72,9 @@ class Thing(SQLModel, table=True):
     resolved_media_type: Optional[str] = Field(
         default=None, nullable=True, description="Media type of resolved content"
     )
+    identifiers: List["ThingIdentifier"] = Relationship(
+        back_populates="thing", sa_relationship_kwargs={"cascade": "all,delete-orphan"}
+    )
 
     def __repr__(self):
         return json.dumps(self.as_json_dict(), indent=2)
@@ -122,4 +125,7 @@ class ThingIdentifier(SQLModel, table=True):
     )
     thing_id: Optional[int] = Field(
         default=None, nullable=False, foreign_key="thing._id", index=False
+    )
+    thing: Optional[Thing] = Relationship(
+        back_populates="identifiers", sa_relationship_kwargs={"cascade": "all"}
     )

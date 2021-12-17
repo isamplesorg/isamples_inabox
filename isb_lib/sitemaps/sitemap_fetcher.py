@@ -109,14 +109,6 @@ class SitemapFetcher(ABC):
 
 
 class SitemapFileFetcher(SitemapFetcher):
-    def __init__(
-        self,
-        url: str,
-        authority: str,
-        last_modified: typing.Optional[datetime.datetime],
-        session: requests.sessions = requests.session(),
-    ):
-        super().__init__(url, authority, last_modified, session)
 
     def fetch_sitemap_file(self) -> SitemapFetcher:
         """Fetches the contents of the particular sitemap file and stores the URLs to fetch"""
@@ -140,6 +132,17 @@ class SitemapFileFetcher(SitemapFetcher):
 
 
 class SitemapIndexFetcher(SitemapFetcher):
+
+    def __init__(
+        self,
+        url: str,
+        authority: str,
+        last_modified: typing.Optional[datetime.datetime],
+        session: requests.sessions = requests.session(),
+    ):
+        super().__init__(url, authority, last_modified, session)
+        self.primary_keys_fetched = set()
+
     def fetch_index_file(self):
         xmlp = lxml.etree.XMLParser(
             recover=True,
@@ -148,7 +151,6 @@ class SitemapIndexFetcher(SitemapFetcher):
         )
         lxml.etree.set_default_parser(xmlp)
         self._fetch_file()
-        self.primary_keys_fetched = set()
 
     def fetch_child_files(self) -> typing.List[SitemapFileFetcher]:
         """Fetches the individual sitemap URLs from the sitemap index, and returns them in a list"""
