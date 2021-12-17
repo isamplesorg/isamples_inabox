@@ -65,6 +65,7 @@ def main(ctx, url: str, authority: str, ignore_last_modified: bool):
         last_updated_date = sqlmodel_database.last_time_thing_created(
             db_session, authority
         )
+    logging.info(f"Going to fetch records for authority {authority} with updated date > {last_updated_date}")
     fetch_sitemap_files(authority, last_updated_date, rsession, url, db_session)
 
 
