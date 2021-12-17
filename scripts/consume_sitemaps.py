@@ -52,7 +52,8 @@ def main(ctx, url: str, authority: str, ignore_last_modified: bool):
     rsession.mount("http://", adapter)
     db_url = isb_web.config.Settings().database_url
     db_session = SQLModelDAO(db_url).get_session()
-    authority = authority.upper()
+    if authority is not None:
+        authority = authority.upper()
     isb_lib.core.things_main(ctx, db_url, solr_url, "INFO", False)
     if ignore_last_modified:
         last_updated_date = None
@@ -74,6 +75,7 @@ def thing_fetcher_for_url(thing_url: str, rsession) -> ThingFetcher:
     parsed_url = urllib.parse.urlparse(thing_url)
     parsed_url = parsed_url._replace(query="full=true&format=original")
     thing_fetcher = ThingFetcher(parsed_url.geturl(), rsession)
+    logging.info(f"Constructed ThingFetcher for {parsed_url.geturl()}")
     return thing_fetcher
 
 

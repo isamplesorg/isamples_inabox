@@ -13,7 +13,9 @@ from isb_web.sqlmodel_database import (
     last_time_thing_created,
     paged_things_with_ids,
     insert_identifiers,
-    save_thing, things_for_sitemap, mark_thing_not_found,
+    save_thing,
+    things_for_sitemap,
+    mark_thing_not_found,
 )
 from test_utils import _add_some_things
 
@@ -75,13 +77,20 @@ def test_read_things_with_things(session: Session):
     assert len(data) > 0
 
 
-def test_last_time_thing_created(session: Session):
-    test_authority = "test"
-    created = last_time_thing_created(session, test_authority)
+last_time_thing_created_values = [("test", "test"), (None, "test")]
+
+
+@pytest.mark.parametrize(
+    "authority_id_for_fetch,authority_id_for_create", last_time_thing_created_values
+)
+def test_last_time_thing_created(
+    session: Session, authority_id_for_fetch: str, authority_id_for_create: str
+):
+    created = last_time_thing_created(session, authority_id_for_fetch)
     assert created is None
     new_thing = Thing(
         id="123456",
-        authority_id=test_authority,
+        authority_id=authority_id_for_create,
         resolved_url="http://foo.bar",
         resolved_status=200,
         resolved_content={"foo": "bar"},
@@ -89,7 +98,7 @@ def test_last_time_thing_created(session: Session):
     )
     session.add(new_thing)
     session.commit()
-    new_created = last_time_thing_created(session, test_authority)
+    new_created = last_time_thing_created(session, authority_id_for_fetch)
     assert new_created is not None
 
 

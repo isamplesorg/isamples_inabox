@@ -132,11 +132,10 @@ def last_time_thing_created(
     )
     created_select = (
         select(Thing.tcreated)
-        .filter(Thing.authority_id == authority_id)
-        .filter(Thing.tcreated >= one_year_ago)
-        .limit(1)
-        .order_by(Thing.tcreated.desc())
     )
+    if authority_id is not None:
+        created_select = created_select.filter(Thing.authority_id == authority_id)
+    created_select = created_select.filter(Thing.tcreated >= one_year_ago).limit(1).order_by(Thing.tcreated.desc())
     result = session.exec(created_select).first()
     return result
 
