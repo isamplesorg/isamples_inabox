@@ -15,7 +15,7 @@ from isb_web.sqlmodel_database import (
     insert_identifiers,
     save_thing,
     things_for_sitemap,
-    mark_thing_not_found,
+    mark_thing_not_found, save_or_update_thing,
 )
 from test_utils import _add_some_things
 
@@ -260,16 +260,27 @@ def test_save_thing(session: Session) -> Thing:
     return sesar_thing
 
 
-# TODO: this is failing due to the identifiers.  Idea is to modify the identifiers list management to
-# check for an existing one and manage that appropriately.  This should be trivial to just compare the GUIDs
 def test_save_existing_thing(session: Session):
     existing_thing = test_save_thing(session)
     # touch the timestamp to update the Thing
     existing_thing.tstamp = datetime.datetime.now()
     save_thing(session, existing_thing)
     ids = _fetch_thing_identifiers(session)
-    # should still have 1 id since we whacked the old ones during the save
+    # should still have 1 id since we didn't recreate existing ones during the save
     assert 1 == len(ids)
+
+
+def test_save_or_update_thing_existing_thing(session: Session):
+    existing_thing = test_save_thing(session)
+    not_from_session_thing = Thing()
+    not_from_session_thing.take_values_from_other_thing(existing_thing)
+    updated_tstamp = datetime.datetime.now()
+    not_from_session_thing.tstamp = updated_tstamp
+    save_or_update_thing(session, not_from_session_thing)
+    session.commit()
+    # fetch it again, verify it has the proper tstamp
+    refetched_thing = get_thing_with_id(session, not_from_session_thing.id)
+    assert updated_tstamp == refetched_thing.tstamp
 
 
 def test_mark_existing_thing_not_found(session: Session):

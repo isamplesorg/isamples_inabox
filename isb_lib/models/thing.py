@@ -76,6 +76,23 @@ class Thing(SQLModel, table=True):
         back_populates="thing", sa_relationship_kwargs={"cascade": "all,delete-orphan"}
     )
 
+    def insert_thing_identifier_if_not_present(self, identifier: "ThingIdentifier"):
+        for existing_identifier in self.identifiers:
+            if identifier.semantically_equals(existing_identifier):
+                # Already have it, no need to do anything so bail
+                return
+        identifier.thing = self
+
+    def take_values_from_other_thing(self, other_thing: "Thing"):
+        self.id = other_thing.id
+        self.resolved_content = other_thing.resolved_content
+        self.resolved_url = other_thing.resolved_url
+        self.resolved_status = other_thing.resolved_status
+        self.tresolved = other_thing.tresolved
+        self.resolve_elapsed = other_thing.resolve_elapsed
+        self.tcreated = other_thing.tcreated
+        self.tstamp = other_thing.tstamp
+
     def __repr__(self):
         return json.dumps(self.as_json_dict(), indent=2)
 
@@ -129,3 +146,7 @@ class ThingIdentifier(SQLModel, table=True):
     thing: Optional[Thing] = Relationship(
         back_populates="identifiers", sa_relationship_kwargs={"cascade": "all"}
     )
+
+    def semantically_equals(self, other: "ThingIdentifier") -> bool:
+        """Method to check if two identifiers are semantically equal ignoring bookkeeping fields"""
+        return self.thing_id == other.thing_id and self.guid == other.guid
