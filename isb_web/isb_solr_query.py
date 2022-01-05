@@ -526,6 +526,30 @@ def solr_records_for_sitemap(
     )
 
 
+def solr_records_for_stac_collection(
+    authority_id: typing.Optional[str] = None,
+    start_index: int = 0,
+    batch_size: int = 1000,
+) -> typing.List[typing.Dict]:
+    """
+
+    Args:
+        authority_id: The authority_id to use when querying SOLR, defaults to all
+        start_index: The offset for the records to return
+        batch_size: Number of documents for this particular sitemap document
+
+    Returns:
+        A list of dictionaries of solr documents with id and lat/lon fields
+    """
+    return _fetch_solr_records(
+        requests.session(),
+        authority_id,
+        start_index,
+        batch_size,
+        "id,producedBy_samplingSite_location_longitude,producedBy_samplingSite_location_latitude",
+        "sourceUpdatedTime asc",
+    )
+
 class ISBCoreSolrRecordIterator:
     """
     Iterator class for looping over all the Solr records in the ISB core Solr schema

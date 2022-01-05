@@ -8,6 +8,16 @@ from isb_lib.core import MEDIA_GEO_JSON, MEDIA_JSON
 def stac_item_from_solr_dict(
     solr_dict: typing.Dict, stac_url_prefix: str, thing_url_prefix: str
 ) -> typing.Optional[typing.Dict]:
+    """
+
+    Args:
+        solr_dict: The solr document to transform to a STAC item (https://github.com/radiantearth/stac-spec/blob/master/item-spec/item-spec.md)
+        stac_url_prefix: The URL prefix to the stac url
+        thing_url_prefix: The URL to the things url
+
+    Returns:
+        A dictionary representing the stac item corresponding to the thing document
+    """
     latitude = solr_dict.get("producedBy_samplingSite_location_latitude")
     longitude = solr_dict.get("producedBy_samplingSite_location_longitude")
     if latitude is None or longitude is None:
@@ -50,3 +60,9 @@ def stac_item_from_solr_dict(
     stac_item["assets"] = assets_dict
 
     return stac_item
+
+
+def stac_collection_from_solr_dicts(solr_dicts: typing.List[typing.Dict]) -> typing.Optional[typing.Dict]:
+    # Iterate through the records, creating a collection per
+    # https://github.com/radiantearth/stac-spec/blob/master/collection-spec/collection-spec.md
+    return None

@@ -465,6 +465,18 @@ async def get_stac_item(
         detail=f"Unable to retrieve stac item for identifier: {identifier}"
     )
 
+@app.get("/stac_collection/", response_model=typing.Any)
+def get_stac_collection(
+    offset: int = fastapi.Query(0, ge=0),
+    limit: int = fastapi.Query(1000, lt=10000, gt=0),
+    authority: str = fastapi.Query(None),
+):
+    solr_docs = isb_solr_query.solr_records_for_stac_collection(authority, offset, limit)
+    stac_collection = isb_lib.stac.stac_collection_from_solr_dicts(solr_docs)
+    return fastapi.responses.JSONResponse(
+        content=stac_collection, media_type=MEDIA_JSON
+    )
+
 
 
 @app.get(
