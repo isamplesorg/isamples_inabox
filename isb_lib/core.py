@@ -37,6 +37,10 @@ SOLR_TIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 ELEVATION_PATTERN = re.compile(r"\s*(-?\d+\.?\d*)\s*m?", re.IGNORECASE)
 
 
+MEDIA_JSON = "application/json"
+MEDIA_NQUADS = "application/n-quads"
+MEDIA_GEO_JSON = "application/geo+json"
+
 def getLogger():
     return logging.getLogger("isb_lib.core")
 
