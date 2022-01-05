@@ -15,6 +15,7 @@ from sqlmodel import Session
 
 import isb_web
 import isamples_metadata.GEOMETransformer
+from isb_lib.core import MEDIA_GEO_JSON, MEDIA_JSON, MEDIA_NQUADS
 from isb_web import sqlmodel_database
 from isb_web import schemas
 from isb_web import crud
@@ -30,17 +31,15 @@ import json
 import hashlib
 import authlib.integrations.starlette_client
 from starlette.middleware.sessions import SessionMiddleware
+import geojson
 
 import logging
 
 from isb_web.schemas import ThingPage
 from isb_web.sqlmodel_database import SQLModelDAO
+import isb_lib.stac
 
 THIS_PATH = os.path.dirname(os.path.abspath(__file__))
-
-MEDIA_JSON = "application/json"
-MEDIA_NQUADS = "application/n-quads"
-MEDIA_GEO_JSON = "application/geo+json"
 
 # Setup logging from the config, but don't
 # blowup if the logging config can't be found
@@ -440,6 +439,31 @@ async def get_thing(
     )
 
 
+@app.get("/stac_item/{identifier:path}", response_model=typing.Any)
+async def get_stac_item(
+    identifier: str,
+    session: Session = Depends(get_session),
+):
+    status, doc = isb_solr_query.solr_get_record(identifier)
+    if status == 200:
+        stac_item = isb_lib.stac.stac_item_from_solr_dict(
+            doc, "http://isamples.org/stac/", "http://isamples.org/thing/"
+        )
+        if stac_item is not None:
+            return fastapi.responses.JSONResponse(
+                content=stac_item, media_type=MEDIA_GEO_JSON
+            )
+        else:
+            # We don't have location data to make a stac item, return a 404
+            status = 404
+
+    raise fastapi.HTTPException(
+        status_code=status,
+        detail=f"Unable to retrieve stac item for identifier: {identifier}"
+    )
+
+
+
 @app.get(
     "/things_geojson_heatmap",
     response_model=typing.Any,
@@ -573,7 +597,7 @@ async def get_related(
     name: str = None,
     offset: int = 0,
     limit: int = 1000,
-    accept: typing.Optional[str] = fastapi.Header("application/json"),
+    accept: typing.Optional[str] = fastapi.Header(MEDIA_JSON),
 ):
     """Relations that match provided s, p, o, source, name.
 
@@ -619,7 +643,7 @@ async def get_related_solr(
     name: str = None,
     offset: int = 0,
     limit: int = 1000,
-    accept: typing.Optional[str] = fastapi.Header("application/json"),
+    accept: typing.Optional[str] = fastapi.Header(MEDIA_JSON),
 ):
     """Relations that match provided s, p, o, source, name.
 
