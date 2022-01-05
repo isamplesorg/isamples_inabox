@@ -444,6 +444,9 @@ async def get_stac_item(
     identifier: str,
     session: Session = Depends(get_session),
 ):
+    # stac wants things to have filenames, so let these requests work, too.
+    if identifier.endswith(".json"):
+        identifier = identifier.removesuffix(".json")
     status, doc = isb_solr_query.solr_get_record(identifier)
     if status == 200:
         stac_item = isb_lib.stac.stac_item_from_solr_dict(
