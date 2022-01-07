@@ -93,6 +93,10 @@ tags_metadata = [
     }
 ]
 
+THING_URL_PATH = config.Settings().thing_url_path
+STAC_ITEM_URL_PATH = config.Settings().stac_item_url_path
+STAC_COLLECTION_URL_PATH = config.Settings().stac_collection_url_path
+
 app = fastapi.FastAPI(openapi_tags=tags_metadata)
 dao = SQLModelDAO(None)
 
@@ -242,7 +246,7 @@ async def login():
 """
 
 
-@app.get("/thing", response_model=schemas.ThingListMeta)
+@app.get(f"/{THING_URL_PATH}", response_model=schemas.ThingListMeta)
 async def thing_list_metadata(
     session: Session = Depends(get_session),
 ):
@@ -251,7 +255,7 @@ async def thing_list_metadata(
     return meta
 
 
-@app.get("/thing/", response_model=ThingPage)
+@app.get(f"/{THING_URL_PATH}/", response_model=ThingPage)
 def thing_list(
     offset: int = fastapi.Query(0, ge=0),
     limit: int = fastapi.Query(1000, lt=10000, gt=0),
@@ -277,7 +281,7 @@ def thing_list(
     }
 
 
-@app.get("/thing/types", response_model=typing.List[schemas.ThingType])
+@app.get(f"/{THING_URL_PATH}/types", response_model=typing.List[schemas.ThingType])
 async def thing_list_types(
     session: Session = Depends(get_session),
 ):
@@ -298,7 +302,7 @@ def set_default_params(params, defs):
 
 
 # TODO: Don't blindly accept user input!
-@app.get("/thing/select", response_model=typing.Any)
+@app.get(f"/{THING_URL_PATH}/select", response_model=typing.Any)
 async def get_solr_select(request: fastapi.Request):
     """Send select request to the Solr isb_core_records collection.
 
@@ -325,7 +329,7 @@ async def get_solr_select(request: fastapi.Request):
     return isb_solr_query.solr_query(params)
 
 
-@app.get("/thing/select/info", response_model=typing.Any)
+@app.get(f"/{THING_URL_PATH}/select/info", response_model=typing.Any)
 async def get_solr_luke_info():
     """Retrieve information about the record schema.
 
@@ -335,7 +339,7 @@ async def get_solr_luke_info():
 
 
 # TODO: Don't blindly accept user input!
-@app.get("/thing/select", response_model=typing.Any)
+@app.get(f"/{THING_URL_PATH}/select", response_model=typing.Any)
 async def get_solr_select(request: fastapi.Request):
     """Send select request to the Solr isb_core_records collection.
 
@@ -360,21 +364,21 @@ async def get_solr_select(request: fastapi.Request):
     return isb_solr_query.solr_query(params)
 
 
-@app.post("/thing/select", response_model=typing.Any)
+@app.post(f"/{THING_URL_PATH}/select", response_model=typing.Any)
 async def get_solr_query(
     request: fastapi.Request, query: typing.Any = fastapi.Body(...)
 ):
     #logging.warning(query)
     return isb_solr_query.solr_query(request.query_params, query=query)
 
-@app.get("/thing/stream", response_model=typing.Any)
+@app.get(f"/{THING_URL_PATH}/stream", response_model=typing.Any)
 async def get_solr_stream(request: fastapi.Request):
     #logging.warning("Query params: ", request.query_params)
     return isb_solr_query.solr_searchStream(request.query_params)
 
 
 
-@app.get("/thing/select/info", response_model=typing.Any)
+@app.get(f"/{THING_URL_PATH}/select/info", response_model=typing.Any)
 async def get_solr_luke_info():
     """Retrieve information about the record schema.
 
@@ -383,7 +387,7 @@ async def get_solr_luke_info():
     return isb_solr_query.solr_luke()
 
 
-@app.get("/thing/{identifier:path}", response_model=typing.Any)
+@app.get(f"/{THING_URL_PATH}/{{identifier:path}}", response_model=typing.Any)
 async def get_thing(
     identifier: str,
     full: bool = False,
@@ -439,7 +443,7 @@ async def get_thing(
     )
 
 
-@app.get("/stac_item/{identifier:path}", response_model=typing.Any)
+@app.get(f"/{STAC_ITEM_URL_PATH}/{{identifier:path}}", response_model=typing.Any)
 async def get_stac_item(
     identifier: str,
     session: Session = Depends(get_session),
@@ -465,7 +469,7 @@ async def get_stac_item(
         detail=f"Unable to retrieve stac item for identifier: {identifier}"
     )
 
-@app.get("/stac_collection/{filename:path}", response_model=typing.Any)
+@app.get(f"/{STAC_COLLECTION_URL_PATH}/{{filename:path}}", response_model=typing.Any)
 def get_stac_collection(
     offset: int = fastapi.Query(0, ge=0),
     limit: int = fastapi.Query(1000, lt=10000, gt=0),

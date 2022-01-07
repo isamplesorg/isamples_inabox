@@ -3,7 +3,13 @@ import urllib.parse
 
 import geojson
 
-from isb_lib.core import MEDIA_GEO_JSON, MEDIA_JSON, parsed_datetime_from_isamples_format, datetimeToSolrStr
+from isb_lib.core import (
+    MEDIA_GEO_JSON,
+    MEDIA_JSON,
+    parsed_datetime_from_isamples_format,
+    datetimeToSolrStr,
+)
+from isb_web import config
 
 STAC_FEATURE_TYPE = "Feature"
 STAC_COLLECTION_TYPE = "Collection"
@@ -76,17 +82,14 @@ def stac_item_from_solr_dict(
     return stac_item
 
 
-# TODO: consolidate link with main.py
 def thing_href(identifier: str):
-    return f"/thing/{identifier}"
+    return f"/{config.Settings().thing_url_path}/{identifier}"
 
 
-# TODO: consolidate link with main.py
 def item_href(identifier: str):
-    return f"/stac_item/{identifier}.json"
+    return f"/{config.Settings().stac_item_url_path}/{identifier}.json"
 
 
-# TODO: consolidate link with main.py
 def collection_href(offset: int, limit: int, authority: typing.Optional[str]) -> str:
     href = "./collection.json"
     query_params = {}
@@ -98,6 +101,7 @@ def collection_href(offset: int, limit: int, authority: typing.Optional[str]) ->
         query_params["authority"] = authority
     query = urllib.parse.urlencode(query_params)
     return href + f"?{query}"
+
 
 def stac_collection_from_solr_dicts(
     solr_dicts: typing.List[typing.Dict],
@@ -116,12 +120,10 @@ def stac_collection_from_solr_dicts(
             "rel": "root",
             "href": self_href,
             "type": MEDIA_JSON,
-            "title": COLLECTION_TITLE
+            "title": COLLECTION_TITLE,
         }
     ]
-    extent = {
-
-    }
+    extent = {}
     # Loop through the records to produce links and determine the spatial and temporal extents
     min_lat = None
     max_lat = None
@@ -131,21 +133,31 @@ def stac_collection_from_solr_dicts(
     max_time = None
     for item_dict in solr_dicts:
         links.append(
-            {
-                "rel": "item",
-                "href": item_href(item_dict["id"]),
-                "type": MEDIA_GEO_JSON
-            }
+            {"rel": "item", "href": item_href(item_dict["id"]), "type": MEDIA_GEO_JSON}
         )
-        time_str = item_dict.get("producedBy_resultTime") or item_dict.get("sourceUpdatedTime")
+        time_str = item_dict.get("producedBy_resultTime") or item_dict.get(
+            "sourceUpdatedTime"
+        )
         parsed_date = parsed_datetime_from_isamples_format(time_str)
-        if min_lat is None or item_dict["producedBy_samplingSite_location_latitude"] < min_lat:
+        if (
+            min_lat is None
+            or item_dict["producedBy_samplingSite_location_latitude"] < min_lat
+        ):
             min_lat = item_dict["producedBy_samplingSite_location_latitude"]
-        if max_lat is None or item_dict["producedBy_samplingSite_location_latitude"] > max_lat:
+        if (
+            max_lat is None
+            or item_dict["producedBy_samplingSite_location_latitude"] > max_lat
+        ):
             max_lat = item_dict["producedBy_samplingSite_location_latitude"]
-        if min_lon is None or item_dict["producedBy_samplingSite_location_longitude"] < min_lon:
+        if (
+            min_lon is None
+            or item_dict["producedBy_samplingSite_location_longitude"] < min_lon
+        ):
             min_lon = item_dict["producedBy_samplingSite_location_longitude"]
-        if max_lon is None or item_dict["producedBy_samplingSite_location_longitude"] > max_lon:
+        if (
+            max_lon is None
+            or item_dict["producedBy_samplingSite_location_longitude"] > max_lon
+        ):
             max_lon = item_dict["producedBy_samplingSite_location_longitude"]
         if min_time is None or parsed_date < min_time:
             min_time = parsed_date
@@ -153,40 +165,26 @@ def stac_collection_from_solr_dicts(
             max_time = parsed_date
     if offset > 0:
         previous_href = collection_href(offset - limit, limit, authority)
-        links.append(
-            {
-                "rel": "previous",
-                "href": previous_href,
-                "type": MEDIA_JSON
-            }
-        )
+        links.append({"rel": "previous", "href": previous_href, "type": MEDIA_JSON})
     if has_next:
         next_href = collection_href(offset + limit, limit, authority)
-        links.append(
-            {
-                "rel": "next",
-                "href": next_href,
-                "type": MEDIA_JSON
-            }
-        )
+        links.append({"rel": "next", "href": next_href, "type": MEDIA_JSON})
 
-    spatial_dict = {
-        "bbox": [min_lon, min_lat, max_lon, max_lat]
-    }
+    spatial_dict = {"bbox": [[min_lon, min_lat, max_lon, max_lat]]}
     extent["spatial"] = spatial_dict
     temporal_dict = {
-        "interval": [datetimeToSolrStr(min_time), datetimeToSolrStr(max_time)]
+        "interval": [[datetimeToSolrStr(min_time), datetimeToSolrStr(max_time)]]
     }
     extent["temporal"] = temporal_dict
 
     stac_collection = {
         "id": COLLECTION_ID,
-        "type": STAC_FEATURE_TYPE,
+        "type": STAC_COLLECTION_TYPE,
         "stac_version": STAC_VERSION,
         "description": COLLECTION_DESCRIPTION,
         "title": COLLECTION_TITLE,
         "extent": extent,
         "license": COLLECTION_LICENSE,
-        "links": links
+        "links": links,
     }
     return stac_collection
