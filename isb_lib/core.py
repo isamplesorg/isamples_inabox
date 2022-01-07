@@ -280,7 +280,7 @@ def parsed_date(raw_date_str):
     return date_time
 
 
-def parsed_date_from_isamples_format(raw_date_str) -> datetime.datetime:
+def parsed_datetime_from_isamples_format(raw_date_str) -> datetime.datetime:
     """dateparser was very slow on dates like this: 2006-03-22T12:00:00Z, so roll our own"""
     components = raw_date_str.split("T")
     date = components[0]
