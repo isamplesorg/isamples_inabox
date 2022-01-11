@@ -91,7 +91,7 @@ def item_href(identifier: str):
 
 
 def collection_href(offset: int, limit: int, authority: typing.Optional[str]) -> str:
-    href = "./collection.json"
+    href = "/stac_collection/"
     query_params = {}
     if offset > 0:
         query_params["offset"] = offset
