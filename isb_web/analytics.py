@@ -3,7 +3,7 @@ import typing
 import requests
 import json
 import isb_web.config
-from isb_format import _NoValue
+from isb_web.isb_format import _NoValue
 from isb_lib.core import MEDIA_JSON
 
 ANALYTICS_URL = isb_web.config.Settings().analytics_url
@@ -46,6 +46,10 @@ def record_analytics_event(
     Returns: true if plausible responds with a 202, false otherwise
 
     """
+    if ANALYTICS_URL == "UNSET":
+        logging.error("Analytics URL is not configured.  Please check isb_web_config.env.")
+        return False
+
     headers = {
         "Content-Type": MEDIA_JSON,
         "User-Agent": caller_user_agent,

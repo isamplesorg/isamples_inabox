@@ -17,7 +17,7 @@ import isb_web
 import isamples_metadata.GEOMETransformer
 from isb_lib.core import MEDIA_GEO_JSON, MEDIA_JSON, MEDIA_NQUADS
 from isb_web import sqlmodel_database, analytics
-from analytics import AnalyticsEvent
+from isb_web.analytics import AnalyticsEvent
 from isb_web import schemas
 from isb_web import crud
 from isb_web import config
