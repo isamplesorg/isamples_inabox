@@ -10,13 +10,14 @@ import fastapi.templating
 import fastapi.middleware.cors
 import fastapi.responses
 import accept_types
-from fastapi.params import Query, Depends
+from fastapi.params import Query, Depends, Header
 from sqlmodel import Session
 
 import isb_web
 import isamples_metadata.GEOMETransformer
 from isb_lib.core import MEDIA_GEO_JSON, MEDIA_JSON, MEDIA_NQUADS
-from isb_web import sqlmodel_database
+from isb_web import sqlmodel_database, analytics
+from analytics import AnalyticsEvent
 from isb_web import schemas
 from isb_web import crud
 from isb_web import config
@@ -253,6 +254,8 @@ async def thing_list_metadata(
 
 @app.get(f"/{THING_URL_PATH}/", response_model=ThingPage)
 def thing_list(
+    user_agent: typing.Optional[str] = Header("no_user_agent"),
+    x_forwarded_for: typing.Optional[str] = Header("no_ip"),
     offset: int = fastapi.Query(0, ge=0),
     limit: int = fastapi.Query(1000, lt=10000, gt=0),
     status: int = 200,
@@ -262,7 +265,10 @@ def thing_list(
     total_records, npages, things = sqlmodel_database.read_things_summary(
         session, offset, limit, status, authority
     )
-
+    properties = {
+        "authority": authority or "None"
+    }
+    analytics.record_analytics_event(AnalyticsEvent.THING_LIST, user_agent, x_forwarded_for, "http://isamples.org", properties)
     params = {
         "limit": limit,
         "offset": offset,
