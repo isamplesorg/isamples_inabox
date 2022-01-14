@@ -54,7 +54,10 @@ def record_analytics_event(
     }
     logging.error(f"Request url is {request.url}")
     logging.error(f"Analytics request headers would be {headers}")
+    referer = request.headers.get("referer")
     data_dict = {"name": event.value, "domain": ANALYTICS_DOMAIN, "url": str(request.url)}
+    if referer is not None:
+        data_dict["referrer"] = referer
     if properties is not None:
         # plausible.io has a bug where it needs the props to be stringified when posted in the data
         # https://github.com/plausible/analytics/discussions/1570
