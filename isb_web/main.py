@@ -254,8 +254,7 @@ async def thing_list_metadata(
 
 @app.get(f"/{THING_URL_PATH}/", response_model=ThingPage)
 def thing_list(
-    user_agent: typing.Optional[str] = Header("no_user_agent"),
-    x_forwarded_for: typing.Optional[str] = Header("no_ip"),
+    request: fastapi.Request,
     offset: int = fastapi.Query(0, ge=0),
     limit: int = fastapi.Query(1000, lt=10000, gt=0),
     status: int = 200,
@@ -268,7 +267,7 @@ def thing_list(
     properties = {
         "authority": authority or "None"
     }
-    analytics.record_analytics_event(AnalyticsEvent.THING_LIST, user_agent, x_forwarded_for, "http://isamples.org", properties)
+    analytics.record_analytics_event(AnalyticsEvent.THING_LIST, request, properties)
     params = {
         "limit": limit,
         "offset": offset,

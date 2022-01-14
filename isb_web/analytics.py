@@ -1,5 +1,7 @@
 import logging
 import typing
+
+import fastapi
 import requests
 import json
 import isb_web.config
@@ -29,18 +31,14 @@ class AnalyticsEvent(_NoValue):
 
 def record_analytics_event(
     event: AnalyticsEvent,
-    caller_user_agent: str,
-    caller_ip: str,
-    caller_url: str,
+    request: fastapi.Request,
     properties: typing.Optional[typing.Dict] = None,
 ) -> bool:
     """
     Records an analytics event in plausible.io
     Args:
         event: The event to record
-        caller_user_agent: User agent of the caller
-        caller_ip: IP of the caller
-        caller_url: URL the caller used to invoke the event
+        request: The fastapi.Request object containing all the caller info
         properties: Custom event properties
 
     Returns: true if plausible responds with a 202, false otherwise
@@ -49,13 +47,15 @@ def record_analytics_event(
     if ANALYTICS_URL == "UNSET":
         logging.error("Analytics URL is not configured.  Please check isb_web_config.env.")
         return False
-
+    logging.error(f"Request headers are {request.headers}")
+    logging.error(f"Request client is {request.client}")
+    logging.error(f"Request url is {request.url}")
     headers = {
         "Content-Type": MEDIA_JSON,
-        "User-Agent": caller_user_agent,
-        "X-Forwarded-For": caller_ip,
+        "User-Agent": request.headers.get("user-agent", "no-user-agent"),
+        "X-Forwarded-For": request.client.host or "no-client-ip",
     }
-    data_dict = {"name": event.value, "domain": ANALYTICS_DOMAIN, "url": caller_url}
+    data_dict = {"name": event.value, "domain": ANALYTICS_DOMAIN, "url": str(request.url)}
     if properties is not None:
         # plausible.io has a bug where it needs the props to be stringified when posted in the data
         # https://github.com/plausible/analytics/discussions/1570
