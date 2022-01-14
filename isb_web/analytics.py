@@ -25,7 +25,7 @@ class AnalyticsEvent(_NoValue):
     THING_BY_IDENTIFIER = "thing_by_identifier"
     STAC_ITEM_BY_IDENTIFIER = "stac_item_by_identifier"
     STAC_COLLECTION = "stac_collection"
-    RELATED_METADATA = "related_metadata"
+    RELATION_METADATA = "relation_metadata"
     RELATED_SOLR = "related_solr"
 
 
@@ -44,31 +44,37 @@ def record_analytics_event(
     Returns: true if plausible responds with a 202, false otherwise
 
     """
-    logging.debug(f"Request headers are {request.headers}")
-    logging.debug(f"Request client is {request.client}")
-    logging.debug(f"Request url is {request.url}")
+    try:
+        logging.debug(f"Request headers are {request.headers}")
+        logging.debug(f"Request client is {request.client}")
+        logging.debug(f"Request url is {request.url}")
 
-    if ANALYTICS_URL == "UNSET":
-        logging.error("Analytics URL is not configured.  Please check isb_web_config.env.")
+        if ANALYTICS_URL == "UNSET":
+            logging.error("Analytics URL is not configured.  Please check isb_web_config.env.")
+            return False
+
+        headers = {
+            "Content-Type": MEDIA_JSON,
+            "User-Agent": request.headers.get("user-agent", "no-user-agent"),
+            "X-Forwarded-For": request.headers.get("x-forwarded-for", "no-client-ip")
+        }
+        logging.debug(f"Analytics request headers would be {headers}")
+
+        referer = request.headers.get("referer")
+        data_dict = {"name": event.value, "domain": ANALYTICS_DOMAIN, "url": str(request.url)}
+        if referer is not None:
+            data_dict["referrer"] = referer
+        if properties is not None:
+            # plausible.io has a bug where it needs the props to be stringified when posted in the data
+            # https://github.com/plausible/analytics/discussions/1570
+            data_dict["props"] = json.dumps(properties)
+        post_data_str = json.dumps(data_dict).encode("utf-8")
+        response = requests.post(ANALYTICS_URL, headers=headers, data=post_data_str)
+        if response.status_code != 202:
+            logging.error("Error recording analytics event %s, status code: %s", event.value, response.status_code)
+        return response.status_code == 202
+    except Exception as e:
+        logging.error("Exception recording analytics event %s, exception: %s", event.value, e)
         return False
 
-    headers = {
-        "Content-Type": MEDIA_JSON,
-        "User-Agent": request.headers.get("user-agent", "no-user-agent"),
-        "X-Forwarded-For": request.headers.get("x-forwarded-for", "no-client-ip")
-    }
-    logging.debug(f"Analytics request headers would be {headers}")
 
-    referer = request.headers.get("referer")
-    data_dict = {"name": event.value, "domain": ANALYTICS_DOMAIN, "url": str(request.url)}
-    if referer is not None:
-        data_dict["referrer"] = referer
-    if properties is not None:
-        # plausible.io has a bug where it needs the props to be stringified when posted in the data
-        # https://github.com/plausible/analytics/discussions/1570
-        data_dict["props"] = json.dumps(properties)
-    post_data_str = json.dumps(data_dict).encode("utf-8")
-    response = requests.post(ANALYTICS_URL, headers=headers, data=post_data_str)
-    if response.status_code != 202:
-        logging.error("Error recording analytics event %s, status code: %s", event.value, response.status_code)
-    return response.status_code == 202
