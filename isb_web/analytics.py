@@ -44,12 +44,12 @@ def record_analytics_event(
     Returns: true if plausible responds with a 202, false otherwise
 
     """
-    if ANALYTICS_URL == "UNSET":
-        logging.error("Analytics URL is not configured.  Please check isb_web_config.env.")
-        return False
     logging.error(f"Request headers are {request.headers}")
     logging.error(f"Request client is {request.client}")
     logging.error(f"Request url is {request.url}")
+    if ANALYTICS_URL == "UNSET":
+        logging.error("Analytics URL is not configured.  Please check isb_web_config.env.")
+        return False
     headers = {
         "Content-Type": MEDIA_JSON,
         "User-Agent": request.headers.get("user-agent", "no-user-agent"),
