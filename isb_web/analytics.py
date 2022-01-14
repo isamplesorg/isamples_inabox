@@ -76,5 +76,3 @@ def record_analytics_event(
     except Exception as e:
         logging.error("Exception recording analytics event %s, exception: %s", event.value, e)
         return False
-
-

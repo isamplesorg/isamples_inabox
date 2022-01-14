@@ -579,7 +579,7 @@ async def get_things_leaflet_heatmap(
 async def relation_metadata(request: fastapi.Request):
     """List of predicates with counts"""
     # return crud.getPredicateCounts(db)
-    analytics.record_analytics_event(AnalyticsEvent.RELATION_METADATA, request, properties)
+    analytics.record_analytics_event(AnalyticsEvent.RELATION_METADATA, request)
     session = requests.session()
     return crud.getPredicateCountsSolr(session)
 
@@ -662,7 +662,7 @@ async def get_related_solr(
 
     Each property is optional. Exact matches only.
     """
-    analytics.record_analytics_event(AnalyticsEvent.RELATED_SOLR, request, properties)
+    analytics.record_analytics_event(AnalyticsEvent.RELATED_SOLR, request)
     return_type = accept_types.get_best_match(accept, [MEDIA_JSON, MEDIA_NQUADS])
     rsession = requests.Session()
     res = crud.getRelationsSolr(rsession, s, p, o, source, name, offset, limit)
