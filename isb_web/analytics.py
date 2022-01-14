@@ -50,18 +50,24 @@ def record_analytics_event(
         logging.debug(f"Request url is {request.url}")
 
         if ANALYTICS_URL == "UNSET":
-            logging.error("Analytics URL is not configured.  Please check isb_web_config.env.")
+            logging.error(
+                "Analytics URL is not configured.  Please check isb_web_config.env."
+            )
             return False
 
         headers = {
             "Content-Type": MEDIA_JSON,
             "User-Agent": request.headers.get("user-agent", "no-user-agent"),
-            "X-Forwarded-For": request.headers.get("x-forwarded-for", "no-client-ip")
+            "X-Forwarded-For": request.headers.get("x-forwarded-for", "no-client-ip"),
         }
         logging.debug(f"Analytics request headers would be {headers}")
 
         referer = request.headers.get("referer")
-        data_dict = {"name": event.value, "domain": ANALYTICS_DOMAIN, "url": str(request.url)}
+        data_dict = {
+            "name": event.value,
+            "domain": ANALYTICS_DOMAIN,
+            "url": str(request.url),
+        }
         if referer is not None:
             data_dict["referrer"] = referer
         if properties is not None:
@@ -71,8 +77,14 @@ def record_analytics_event(
         post_data_str = json.dumps(data_dict).encode("utf-8")
         response = requests.post(ANALYTICS_URL, headers=headers, data=post_data_str)
         if response.status_code != 202:
-            logging.error("Error recording analytics event %s, status code: %s", event.value, response.status_code)
+            logging.error(
+                "Error recording analytics event %s, status code: %s",
+                event.value,
+                response.status_code,
+            )
         return response.status_code == 202
     except Exception as e:
-        logging.error("Exception recording analytics event %s, exception: %s", event.value, e)
+        logging.error(
+            "Exception recording analytics event %s, exception: %s", event.value, e
+        )
         return False
