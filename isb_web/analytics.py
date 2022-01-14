@@ -47,20 +47,23 @@ def record_analytics_event(
     logging.error(f"Request headers are {request.headers}")
     logging.error(f"Request client is {request.client}")
     logging.error(f"Request url is {request.url}")
-    if ANALYTICS_URL == "UNSET":
-        logging.error("Analytics URL is not configured.  Please check isb_web_config.env.")
-        return False
     headers = {
         "Content-Type": MEDIA_JSON,
         "User-Agent": request.headers.get("user-agent", "no-user-agent"),
-        "X-Forwarded-For": request.client.host or "no-client-ip",
+        "X-Forwarded-For": request.headers.get("x-forwarded-for", "no-client-ip")
     }
+    logging.error(f"Request url is {request.url}")
+    logging.error(f"Analytics request headers would be {headers}")
     data_dict = {"name": event.value, "domain": ANALYTICS_DOMAIN, "url": str(request.url)}
     if properties is not None:
         # plausible.io has a bug where it needs the props to be stringified when posted in the data
         # https://github.com/plausible/analytics/discussions/1570
         data_dict["props"] = json.dumps(properties)
     post_data_str = json.dumps(data_dict).encode("utf-8")
+    logging.error(f"Would be posting {post_data_str}")
+    if ANALYTICS_URL == "UNSET":
+        logging.error("Analytics URL is not configured.  Please check isb_web_config.env.")
+        return False
     response = requests.post(ANALYTICS_URL, headers=headers, data=post_data_str)
     if response.status_code != 202:
         logging.error("Error recording analytics event %s, status code: %s", event.value, response.status_code)
