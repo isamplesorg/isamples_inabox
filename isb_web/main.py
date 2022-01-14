@@ -10,7 +10,7 @@ import fastapi.templating
 import fastapi.middleware.cors
 import fastapi.responses
 import accept_types
-from fastapi.params import Query, Depends, Header
+from fastapi.params import Query, Depends
 from sqlmodel import Session
 
 import isb_web
