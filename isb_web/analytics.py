@@ -60,7 +60,7 @@ def record_analytics_event(
             "User-Agent": request.headers.get("user-agent", "no-user-agent"),
             "X-Forwarded-For": request.headers.get("x-forwarded-for", "no-client-ip"),
         }
-        logging.debug(f"Analytics request headers would be {headers}")
+        logging.debug(f"Analytics request headers are {headers}")
 
         referer = request.headers.get("referer")
         data_dict = {
@@ -74,6 +74,7 @@ def record_analytics_event(
             # plausible.io has a bug where it needs the props to be stringified when posted in the data
             # https://github.com/plausible/analytics/discussions/1570
             data_dict["props"] = json.dumps(properties)
+        logging.debug(f"Analytics request body is {data_dict}")
         post_data_str = json.dumps(data_dict).encode("utf-8")
         response = requests.post(ANALYTICS_URL, headers=headers, data=post_data_str)
         if response.status_code != 202:
