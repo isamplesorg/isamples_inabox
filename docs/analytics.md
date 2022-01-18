@@ -99,6 +99,15 @@ curl -i -X POST https://metrics.isample.xyz/api/event \
   -H 'Content-Type: application/json' \
   --data '{"name":"thing_list","props":"{\"authority\":\"SMITHSONIAN\"}","url":"http://isamples.org","domain":"isamples.org"}'
 ```
+11. Before you'll be able to see any data on the dashboard, you'll need to hit the special "pageview" event in the domain.  
+    You can do so as follows:
+```
+curl -i -X POST https://metrics.isample.xyz/api/event \
+  -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36 OPR/71.0.3770.284' \
+  -H 'X-Forwarded-For: 127.0.0.1' \
+  -H 'Content-Type: application/json' \
+  --data '{"name":"pageview","url":"http://isamples.org","domain":"opencontext.isamples.org"}'
+```
 ## iSamples Setup
 At this point, you just need to point the iSamples web services to the deployed plausible installation.  There are two 
 keys to edit in `isb_web_config.env`:
