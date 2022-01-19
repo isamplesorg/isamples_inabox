@@ -14,15 +14,13 @@ TEST_URL = "http://foo.bar"
 
 @pytest.fixture()
 def request_fixture() -> fastapi.Request:
-    scope = {
-        "type": "http"
-    }
+    scope = {"type": "http"}
     request = fastapi.Request(scope)
 
     headers = {
         "user-agent": TEST_USER_AGENT,
         "x-forwarded-for": TEST_FORWARDED_FOR,
-        "referer": TEST_REFERRER
+        "referer": TEST_REFERRER,
     }
     request.__setattr__("_headers", headers)
     request.__setattr__("_url", starlette.datastructures.URL(TEST_URL))
@@ -38,7 +36,9 @@ def test_analytics_request_headers(request_fixture: fastapi.Request):
 
 
 def test_analytics_request_data(request_fixture: fastapi.Request):
-    data = isb_web.analytics._analytics_request_data(AnalyticsEvent.THING_LIST, request_fixture, None)
+    data = isb_web.analytics._analytics_request_data(
+        AnalyticsEvent.THING_LIST, request_fixture, None
+    )
     assert data is not None
     assert data["name"] == AnalyticsEvent.THING_LIST.value
     assert data["domain"] == "UNSET"
@@ -48,12 +48,11 @@ def test_analytics_request_data(request_fixture: fastapi.Request):
 
 
 def test_analytics_request_data_custom_properties(request_fixture: fastapi.Request):
-    props = {
-        "foo": "bar"
-    }
-    data = isb_web.analytics._analytics_request_data(AnalyticsEvent.THING_LIST, request_fixture, props)
+    props = {"foo": "bar"}
+    data = isb_web.analytics._analytics_request_data(
+        AnalyticsEvent.THING_LIST, request_fixture, props
+    )
     props_string = data.get("props")
     assert props_string is not None
     props_dict = json.loads(props_string)
     assert props_dict["foo"] == "bar"
-
