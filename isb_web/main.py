@@ -128,6 +128,7 @@ app.mount(
     name="ui",
 )
 
+
 def isAllowedReferer(referer):
     """
     Checks referer against oauth_allowed_origins patterns
