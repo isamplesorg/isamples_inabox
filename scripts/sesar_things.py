@@ -131,7 +131,7 @@ async def _loadSesarEntries(session, max_count, start_from=None, manual_ids:typi
             )
 
 
-def loadSesarEntries(session, max_count, start_from=None, manual_ids: typing.List[str] = None):
+def loadSesarEntries(session, max_count, start_from=None, manual_ids: typing.List[typing.List[str]] = None):
     loop = asyncio.get_event_loop()
     future = asyncio.ensure_future(
         _loadSesarEntries(session, max_count, start_from=start_from, manual_ids=manual_ids)
