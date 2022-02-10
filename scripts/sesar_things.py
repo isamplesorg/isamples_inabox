@@ -193,8 +193,6 @@ def loadRecords(ctx, max_records):
 )
 @click.pass_context
 def manual_load_records(ctx, filename):
-    L = getLogger()
-    # L.info("loadRecords, max = %s", max_records)
     session = SQLModelDAO(ctx.obj["db_url"]).get_session()
     try:
         igsn_list = []
