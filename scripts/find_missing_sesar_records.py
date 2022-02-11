@@ -1,5 +1,5 @@
-import sqlite3
-from isb_web.sqlmodel_database import SQLModelDAO
+# import sqlite3
+# from isb_web.sqlmodel_database import SQLModelDAO
 
 
 # Manual script to dump and compare records between SESAR and iSamples
@@ -70,5 +70,3 @@ if __name__ == "__main__":
     #             last_slash_index = loc.rfind("/") + 1
     #             after_last_slash = loc[last_slash_index:]
     #             sesar_file.write(f"{after_last_slash},{lastmod}\n")
-
-
