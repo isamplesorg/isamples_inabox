@@ -41,7 +41,7 @@ def countThings(session):
     return cnt
 
 
-async def _loadSesarEntries(session, max_count, start_from=None, manual_ids:typing.List[typing.List[str]] = None):  # noqa: C901 -- need to examine computational complexity
+async def _loadSesarEntries(session, max_count, start_from=None, manual_ids: typing.List[typing.List[str]] = None):  # noqa: C901 -- need to examine computational complexity
     L = getLogger()
     futures = []
     working = {}
