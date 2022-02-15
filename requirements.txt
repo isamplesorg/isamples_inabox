@@ -2,6 +2,7 @@
 accept-types==0.4.1
 aiofile==3.7.4; python_version > "3.4" and python_version < "4"
 aiofiles==0.6.0
+anyio==3.5.0; python_full_version >= "3.6.2" and python_version >= "3.6"
 astropy==4.3.1; python_version >= "3.8" and python_version < "4.0"
 asttokens==2.0.5
 atomicwrites==1.4.0; python_version >= "3.8" and python_full_version < "3.0.0" and sys_platform == "win32" and python_version < "4.0" or sys_platform == "win32" and python_version >= "3.8" and python_version < "4.0" and python_full_version >= "3.4.0"
@@ -10,7 +11,7 @@ authlib==0.15.5
 caio==0.9.5; python_version >= "3.5" and python_version < "4"
 certifi==2021.10.8; python_version >= "3.8" and python_full_version < "3.0.0" and python_version < "4.0" or python_version >= "3.8" and python_version < "4.0" and python_full_version >= "3.6.0"
 cffi==1.15.0; python_version >= "3.6"
-charset-normalizer==2.0.12; python_version >= "3.8" and python_version < "4.0" and python_full_version >= "3.6.0"
+charset-normalizer==2.0.12; python_full_version >= "3.6.0" and python_version >= "3.8" and python_version < "4.0"
 click-config-file==0.6.0
 click==7.1.2; (python_version >= "2.7" and python_full_version < "3.0.0") or (python_full_version >= "3.5.0")
 colorama==0.4.4; python_version >= "3.8" and python_full_version < "3.0.0" and sys_platform == "win32" and python_version < "4.0" or sys_platform == "win32" and python_full_version >= "3.5.0" and python_version >= "3.8" and python_version < "4.0"
@@ -23,10 +24,12 @@ fasttext==0.9.2
 flask==2.0.3; python_version >= "3.6"
 geojson==2.5.0
 greenlet==1.1.2; python_version >= "3" and (platform_machine == "aarch64" or platform_machine == "ppc64le" or platform_machine == "x86_64" or platform_machine == "amd64" or platform_machine == "AMD64" or platform_machine == "win32" or platform_machine == "WIN32") and python_full_version >= "3.6.1" and python_full_version < "4.0.0"
-h11==0.13.0; python_version >= "3.6"
+h11==0.12.0; python_version >= "3.6"
 heartrate==0.2.2
+httpcore==0.13.7; python_version >= "3.6"
 httptools==0.1.2; sys_platform != "win32" and sys_platform != "cygwin" and platform_python_implementation != "PyPy"
-idna==3.3; python_version >= "3.8" and python_full_version < "3.0.0" and python_version < "4.0" or python_version >= "3.8" and python_version < "4.0" and python_full_version >= "3.6.0"
+httpx==0.20.0; python_version >= "3.6"
+idna==3.3; python_version >= "3.8" and python_version < "4.0" and python_full_version >= "3.6.2"
 igsn-lib @ git+https://github.com/isamplesorg/igsn_lib.git@develop ; python_version >= "3.8" and python_version < "4.0"
 iniconfig==1.1.1; python_version >= "3.8" and python_version < "4.0"
 itsdangerous==2.0.1; python_version >= "3.6"
@@ -52,9 +55,11 @@ pytz==2021.3; python_version >= "3.8" and python_version < "4.0"
 pyyaml==6.0; python_version >= "3.6"
 regex==2022.1.18; python_version >= "3.8" and python_version < "4.0"
 requests==2.27.1; python_version >= "3.8" and python_full_version < "3.0.0" and python_version < "4.0" or python_version >= "3.8" and python_version < "4.0" and python_full_version >= "3.6.0"
+rfc3986==1.5.0; python_version >= "3.6"
 shapely==1.8.0; python_version >= "3.6"
 sickle==0.7.0; python_version >= "3.8" and python_version < "4.0"
 six==1.16.0; python_version >= "3.8" and python_full_version < "3.0.0" and python_version < "4.0" or python_version >= "3.8" and python_version < "4.0" and python_full_version >= "3.3.0"
+sniffio==1.2.0; python_full_version >= "3.6.2" and python_version >= "3.6"
 sqlalchemy2-stubs==0.0.2a19; python_full_version >= "3.6.1" and python_full_version < "4.0.0" and python_version >= "3.6"
 sqlalchemy==1.4.31; python_full_version >= "3.6.1" and python_full_version < "4.0.0"
 sqlmodel==0.0.4; python_full_version >= "3.6.1" and python_full_version < "4.0.0"
