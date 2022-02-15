@@ -1,6 +1,7 @@
 # Generated with poetry export -f requirements.txt --output requirements.txt --without-hashes
 accept-types==0.4.1
 aiofile==3.7.4; python_version > "3.4" and python_version < "4"
+aiofiles==0.6.0
 astropy==4.3.1; python_version >= "3.8" and python_version < "4.0"
 asttokens==2.0.5
 atomicwrites==1.4.0; python_version >= "3.8" and python_full_version < "3.0.0" and sys_platform == "win32" and python_version < "4.0" or sys_platform == "win32" and python_version >= "3.8" and python_version < "4.0" and python_full_version >= "3.4.0"
