@@ -3,7 +3,7 @@ accept-types==0.4.1
 aiofile==3.7.4; python_version > "3.4" and python_version < "4"
 aiofiles==0.6.0
 anyio==3.5.0; python_full_version >= "3.6.2" and python_version >= "3.6"
-astropy==4.3.1; python_version >= "3.8" and python_version < "4.0"
+astropy==5.0; python_version >= "3.8" and python_version < "4.0"
 asttokens==2.0.5
 authlib==0.15.5
 caio==0.9.5; python_version >= "3.5" and python_version < "4"
