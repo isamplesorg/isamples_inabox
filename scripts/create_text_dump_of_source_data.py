@@ -4,6 +4,8 @@ import click_config_file
 import isb_lib.core
 import csv
 from isb_web.sqlmodel_database import SQLModelDAO
+import zipfile
+from zipfile import ZipFile
 
 excluded_keys = ["id", "bcid", "uri", "@id"]
 
@@ -15,7 +17,7 @@ def process_dictionary(
     out_dict: typing.Dict,
 ):
     """Process all the keys in a dictionary while populating field_names and out_dict, and recursing through embedded
-     dicts"""
+    dicts"""
     for key in in_dict:
         out_dict_key = key if base_key is None else f"{base_key}_{key}"
         field_names.add(out_dict_key)
@@ -39,19 +41,6 @@ def process_dictionary(
                     out_dict[out_dict_key] = total_value
             else:
                 out_dict[out_dict_key] = str(value)
-
-
-# Don't assume every record has all the fields -- check each one and pick the one with the most
-def max_fieldnames(
-    current_fieldnames: typing.Optional[typing.List], new_dict: typing.Dict
-):
-    new_fieldnames = []
-    for key in new_dict:
-        new_fieldnames.append(key)
-    if current_fieldnames is None or len(new_fieldnames) > len(current_fieldnames):
-        return new_fieldnames
-    else:
-        return current_fieldnames
 
 
 @click.command()
@@ -79,7 +68,7 @@ def max_fieldnames(
 def main(ctx, db_url, verbosity, heart_rate, authority):
     isb_lib.core.things_main(ctx, db_url, None, verbosity, heart_rate)
     session = SQLModelDAO((ctx.obj["db_url"])).get_session()
-    sql = f"""select resolved_content from thing tablesample system(0.5) where
+    sql = f"""select resolved_content from thing tablesample system(10) where
     resolved_status=200 and authority_id='{authority}'"""
     rs = session.execute(sql)
     filename = f"{authority}.txt"
@@ -95,11 +84,19 @@ def main(ctx, db_url, verbosity, heart_rate, authority):
 
     with open(filename, "w", newline="") as file:
         writer = csv.DictWriter(
-            file, delimiter="#", quoting=csv.QUOTE_ALL, fieldnames=list(header_fieldnames)
+            file,
+            delimiter="#",
+            quoting=csv.QUOTE_ALL,
+            fieldnames=list(header_fieldnames),
         )
         writer.writeheader()
         for result_set_dict in result_set_dicts:
             writer.writerow(result_set_dict)
+
+    with ZipFile(
+        filename + ".zip", "w", compression=zipfile.ZIP_DEFLATED
+    ) as out_zipfile:
+        out_zipfile.write(filename)
 
 
 """
