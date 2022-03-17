@@ -1,7 +1,9 @@
 import concurrent.futures
+import typing
 import urllib.parse
 
 import click
+import httpx
 import requests
 
 import isb_lib
@@ -16,8 +18,11 @@ from isb_lib.sitemaps.sitemap_fetcher import (
 )
 from isb_web import sqlmodel_database
 from isb_web.sqlmodel_database import SQLModelDAO
+from isb_lib.models.thing import Thing
+from itertools import islice
+import asyncio
 
-CONCURRENT_DOWNLOADS = 20
+CONCURRENT_DOWNLOADS = 100
 
 
 @click.command()
@@ -45,10 +50,10 @@ CONCURRENT_DOWNLOADS = 20
 def main(ctx, url: str, authority: str, ignore_last_modified: bool):
     solr_url = isb_web.config.Settings().solr_url
     rsession = requests.session()
-    adapter = requests.adapters.HTTPAdapter(
-        pool_connections=CONCURRENT_DOWNLOADS * 2, pool_maxsize=CONCURRENT_DOWNLOADS * 2
-    )
-    rsession.mount("http://", adapter)
+    # adapter = requests.adapters.HTTPAdapter(
+    #     pool_connections=CONCURRENT_DOWNLOADS * 2, pool_maxsize=CONCURRENT_DOWNLOADS * 2
+    # )
+    # rsession.mount("http://", adapter)
     db_url = isb_web.config.Settings().database_url
     db_session = SQLModelDAO(db_url).get_session()
     if authority is not None:
@@ -68,15 +73,30 @@ def main(ctx, url: str, authority: str, ignore_last_modified: bool):
     fetch_sitemap_files(authority, last_updated_date, rsession, url, db_session)
 
 
-def thing_fetcher_for_url(thing_url: str, rsession) -> ThingFetcher:
+def massaged_url_for_url(thing_url: str) -> str:
     # At this point, we need to massage the URLs a bit, the sitemap publishes them like so:
     # https://mars.cyverse.org/thing/ark:/21547/DxI2SKS002?full=false&amp;format=core
     # We need to change full to true to get all the metadata, as well as the original format
     parsed_url = urllib.parse.urlparse(thing_url)
     parsed_url = parsed_url._replace(query="full=true&format=original")
-    thing_fetcher = ThingFetcher(parsed_url.geturl(), rsession)
-    logging.info(f"Constructed ThingFetcher for {parsed_url.geturl()}")
-    return thing_fetcher
+    massaged_url = parsed_url.geturl()
+    logging.info(f"Return massaged url for {massaged_url}")
+    return massaged_url
+
+
+async def thing(url) -> typing.Tuple[Thing, str, str]:
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url)
+    json_dict = response.json()
+    fetched_thing = Thing()
+    fetched_thing.take_values_from_json_dict(json_dict)
+    return fetched_thing, json_dict["primary_key"], url
+
+
+async def get_records(urls: typing.List[str]):
+    def _rmap(url):
+        return thing(massaged_url_for_url(url))
+    return await asyncio.gather(*map(_rmap, urls))
 
 
 def fetch_sitemap_files(authority, last_updated_date, rsession, url, db_session):
@@ -84,59 +104,40 @@ def fetch_sitemap_files(authority, last_updated_date, rsession, url, db_session)
         url, authority, last_updated_date, rsession
     )
     # fetch the index file, and iterate over the individual sitemap files serially so we preserve order
+    num_things_fetched = 0
     sitemap_index_fetcher.fetch_index_file()
     for url in sitemap_index_fetcher.urls_to_fetch:
+        things_for_file = 0
         sitemap_file_fetcher = SitemapFileFetcher(
             url, authority, last_updated_date, rsession
         )
         sitemap_file_fetcher.fetch_sitemap_file()
-        fetched_all_things_for_current_sitemap_file = False
-        sitemap_file_iterator = sitemap_file_fetcher.url_iterator()
-        with concurrent.futures.ThreadPoolExecutor(
-            max_workers=CONCURRENT_DOWNLOADS
-        ) as thing_executor:
-            while not fetched_all_things_for_current_sitemap_file:
-                thing_futures = []
-                # While the queue is less than the max, add things to the queue
-                while (
-                    len(thing_futures) < CONCURRENT_DOWNLOADS
-                    and not fetched_all_things_for_current_sitemap_file
-                ):
-                    try:
-                        thing_fetcher = thing_fetcher_for_url(
-                            next(sitemap_file_iterator), rsession
-                        )
-                        # Add the download job to the queue and remember it
-                        thing_future = thing_executor.submit(thing_fetcher.fetch_thing)
-                        thing_futures.append(thing_future)
-                    except StopIteration:
-                        logging.info(
-                            f"Finished all the requests for f{sitemap_file_fetcher.url}"
-                        )
-                        fetched_all_things_for_current_sitemap_file = True
-                # Then read out results and save to the database after the queue is filled to capacity.
-                # Provided there are more urls in the iterator, return to the top of the loop to fill the queue again
-                for thing_fut in concurrent.futures.as_completed(thing_futures):
-                    thing_fetcher = thing_fut.result()
-                    if thing_fetcher.thing is not None:
-                        logging.info(
-                            f"Finished fetching thing {thing_fetcher.thing.id}"
-                        )
-                        if (
-                            thing_fetcher.primary_key_fetched
+        # sitemap_file_iterator = sitemap_file_fetcher.url_iterator()
+        # iterator = iter(sitemap_file_fetcher.urls_to_fetch)
+        while things_for_file < len(sitemap_file_fetcher.urls_to_fetch):
+            batch = sitemap_file_fetcher.urls_to_fetch[things_for_file: things_for_file + CONCURRENT_DOWNLOADS]
+            for (thing, primary_key, url) in asyncio.run(get_records(batch)):
+                if thing is not None:
+                    logging.info(
+                        f"Finished fetching thing {primary_key}"
+                    )
+                    num_things_fetched += 1
+                    things_for_file += 1
+                    if (
+                            primary_key
                             not in sitemap_index_fetcher.primary_keys_fetched
-                        ):
-                            sqlmodel_database.save_or_update_thing(
-                                db_session, thing_fetcher.thing
-                            )
-                            sitemap_index_fetcher.primary_keys_fetched.add(
-                                thing_fetcher.primary_key_fetched
-                            )
-                    else:
-                        logging.error(f"Error fetching thing for {thing_fetcher.url}")
-                        thing_id = thing_fetcher.thing_identifier()
-                        sqlmodel_database.mark_thing_not_found(db_session, thing_id, thing_fetcher.url)
-                    thing_futures.remove(thing_fut)
+                    ):
+                        sqlmodel_database.save_or_update_thing(
+                            db_session, thing
+                        )
+                        sitemap_index_fetcher.primary_keys_fetched.add(
+                            primary_key
+                        )
+                    if num_things_fetched % 1000 == 0:
+                        logging.info(f"Have fetched {num_things_fetched} things")
+                else:
+                    logging.error(f"Error fetching thing for {url}")
+                    sqlmodel_database.mark_thing_not_found(db_session, primary_key, url)
 
 
 if __name__ == "__main__":
