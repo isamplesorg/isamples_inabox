@@ -19,7 +19,7 @@ from isb_lib.sitemaps.sitemap_fetcher import (
 from isb_web import sqlmodel_database
 from isb_web.sqlmodel_database import SQLModelDAO
 
-CONCURRENT_DOWNLOADS = 20
+CONCURRENT_DOWNLOADS = 50
 # when we hit this length, add some more to the queue
 REFETCH_LENGTH = CONCURRENT_DOWNLOADS / 2
 
