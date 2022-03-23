@@ -37,7 +37,9 @@ SOLR_TO_SQLITE_FIELD_MAPPINGS = {
     "curation_label": "curation_label",
     "curation_description": "curation_description",
     "curation_accessConstraints": "curation_access_constraints",
-    "curation_location": "curation_location"
+    "curation_location": "curation_location",
+    "curation_responsibility": "curation_responsibility",
+    "relatedResource_isb_core_id": "related_resources_isb_core_id"
 }
 
 NUMERIC_COLUMNS = ["produced_by_sampling_site_elevation_in_meters"]

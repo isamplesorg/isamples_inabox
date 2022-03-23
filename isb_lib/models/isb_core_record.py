@@ -171,3 +171,15 @@ class ISBCoreRecord(SQLModel, table=True):
         description="Where the sample is curated",
         index=False
     ),
+    curation_responsibility: Optional[str] = Field(
+        default=None,
+        nullable=True,
+        description="The institution or people responsible for curation",
+        index=False
+    ),
+    related_resources_isb_core_id: Optional[str] = Field(
+        default=None,
+        nullable=True,
+        description="Identifiers for related resources, semicolon-delimited",
+        index=False
+    ),
