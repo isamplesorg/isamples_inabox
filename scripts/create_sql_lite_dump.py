@@ -31,6 +31,7 @@ SOLR_TO_SQLITE_FIELD_MAPPINGS = {
     "producedBy_samplingSite_description": "produced_by_sampling_site_description",
     "producedBy_samplingSite_label": "produced_by_sampling_site_label",
     "producedBy_samplingSite_location_elevationInMeters": "produced_by_sampling_site_elevation_in_meters",
+    "producedBy_samplingSite_location_ll": "produced_by_sampling_site_location_ll",
     "producedBy_samplingSite_placeName": "produced_by_sampling_site_place_name",
     "registrant": "registrant",
     "samplingPurpose": "sampling_purpose",
@@ -39,7 +40,7 @@ SOLR_TO_SQLITE_FIELD_MAPPINGS = {
     "curation_accessConstraints": "curation_access_constraints",
     "curation_location": "curation_location",
     "curation_responsibility": "curation_responsibility",
-    "relatedResource_isb_core_id": "related_resources_isb_core_id"
+    "relatedResource_isb_core_id": "related_resources_isb_core_id",
 }
 
 NUMERIC_COLUMNS = ["produced_by_sampling_site_elevation_in_meters"]
@@ -54,11 +55,12 @@ def _filtered_value(value):
 
 @click.command()
 @click.option(
-    "-d", "--db_url", default=None, help="The SQLite database file URL for storage.  Doesn't need to exist beforehand."
+    "-d",
+    "--db_url",
+    default=None,
+    help="The SQLite database file URL for storage.  Doesn't need to exist beforehand.",
 )
-@click.option(
-    "-s", "--solr_url", default=None, help="Solr index URL"
-)
+@click.option("-s", "--solr_url", default=None, help="Solr index URL")
 @click.option(
     "-v",
     "--verbosity",
@@ -83,7 +85,7 @@ def main(ctx, db_url, solr_url, verbosity, heart_rate, authority):
     SQLModel.metadata.drop_all(engine, tables=[ISBCoreRecord.__table__])
     SQLModel.metadata.create_all(engine, tables=[ISBCoreRecord.__table__])
     session = Session(engine)
-    batch_size = 1000
+    batch_size = 50000
     rsession = requests.session()
     iterator = ISBCoreSolrRecordIterator(rsession, authority, batch_size, 0, "id asc")
     for solr_record in iterator:
@@ -103,7 +105,7 @@ def main(ctx, db_url, solr_url, verbosity, heart_rate, authority):
                 # There was weirdness here where if we set None, the insert statement broke.  A hack!
                 if value in NUMERIC_COLUMNS:
                     new_record.__setattr__(value, 0.0)
-                if value != "produced_by_sampling_site_elevation_in_meters":
+                else:
                     new_record.__setattr__(value, "")
         session.add(new_record)
         session.commit()

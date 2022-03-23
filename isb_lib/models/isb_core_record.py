@@ -129,6 +129,12 @@ class ISBCoreRecord(SQLModel, table=True):
         description="The elevation in meters of the sampling site",
         index=False
     ),
+    produced_by_sampling_site_location_ll: Optional[str] = Field(
+        default=None,
+        nullable=True,
+        description="The latitude and longitude of the sampling site, in a comma-separated string",
+        index=False
+    ),
     produced_by_sampling_site_place_name: Optional[str] = Field(
         default=None,
         nullable=True,
