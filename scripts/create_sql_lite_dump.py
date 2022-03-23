@@ -6,6 +6,7 @@ from isb_lib.models.isb_core_record import ISBCoreRecord
 from isb_web.isb_solr_query import ISBCoreSolrRecordIterator
 import requests
 from sqlmodel import SQLModel, create_engine, Session
+import logging
 
 # Use this to map between the solr column names and the sqlite column names and control what is
 # written to the dump.
@@ -41,6 +42,7 @@ SOLR_TO_SQLITE_FIELD_MAPPINGS = {
     "curation_location": "curation_location",
     "curation_responsibility": "curation_responsibility",
     "relatedResource_isb_core_id": "related_resources_isb_core_id",
+    "source": "source"
 }
 
 NUMERIC_COLUMNS = ["produced_by_sampling_site_elevation_in_meters"]
@@ -86,8 +88,10 @@ def main(ctx, db_url, solr_url, verbosity, heart_rate, authority):
     SQLModel.metadata.create_all(engine, tables=[ISBCoreRecord.__table__])
     session = Session(engine)
     batch_size = 50000
+    session_commit_frequency = 50000
     rsession = requests.session()
     iterator = ISBCoreSolrRecordIterator(rsession, authority, batch_size, 0, "id asc")
+    num_records = 0
     for solr_record in iterator:
         new_record = ISBCoreRecord()
         for key, value in SOLR_TO_SQLITE_FIELD_MAPPINGS.items():
@@ -108,7 +112,10 @@ def main(ctx, db_url, solr_url, verbosity, heart_rate, authority):
                 else:
                     new_record.__setattr__(value, "")
         session.add(new_record)
-        session.commit()
+        num_records += 1
+        if num_records % session_commit_frequency == 0:
+            logging.info(f"Committing records, have processed {num_records}")
+            session.commit()
 
 
 """
