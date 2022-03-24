@@ -116,6 +116,8 @@ def main(ctx, db_url, solr_url, verbosity, heart_rate, authority):
         if num_records % session_commit_frequency == 0:
             logging.info(f"Committing records, have processed {num_records}")
             session.commit()
+    # Commit any remainder
+    session.commit()
 
 
 """
