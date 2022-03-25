@@ -7,6 +7,10 @@ from isb_web.isb_solr_query import ISBCoreSolrRecordIterator
 import requests
 from sqlmodel import SQLModel, create_engine, Session
 import logging
+import cProfile
+import pstats
+from pstats import SortKey
+import io
 
 # Use this to map between the solr column names and the sqlite column names and control what is
 # written to the dump.
@@ -90,34 +94,52 @@ def main(ctx, db_url, solr_url, verbosity, heart_rate, authority):
     batch_size = 50000
     session_commit_frequency = 50000
     rsession = requests.session()
-    iterator = ISBCoreSolrRecordIterator(rsession, authority, batch_size, 0, "id asc")
-    num_records = 0
-    for solr_record in iterator:
-        new_record = ISBCoreRecord()
-        for key, value in SOLR_TO_SQLITE_FIELD_MAPPINGS.items():
-            solr_value = solr_record.get(key)
-            if type(solr_value) is list:
-                filtered_solr_values = [_filtered_value(value) for value in solr_value]
-                solr_value = "; ".join(filtered_solr_values)
-            elif type(solr_value) is str:
-                # Don't include placeholder empty values in the dump
-                solr_value = _filtered_value(solr_value)
-            # Key is source column solr name, value is dest column sqlite name in sqlite
-            if solr_value is not None:
-                new_record.__setattr__(value, solr_value)
-            else:
-                # There was weirdness here where if we set None, the insert statement broke.  A hack!
-                if value in NUMERIC_COLUMNS:
-                    new_record.__setattr__(value, 0.0)
+    with cProfile.Profile() as pr:
+        iterator = ISBCoreSolrRecordIterator(rsession, authority, batch_size, 0, "id asc")
+        iterator.__next__()
+        pr.enable()
+        num_records = 0
+        current_batch = []
+        for solr_record in iterator:
+            # We ended up using the core API as creating new records was too slow…
+            # https://docs.sqlalchemy.org/en/14/core/tutorial.html
+            # new_record = ISBCoreRecord()
+            new_record = {}
+            for key, value in SOLR_TO_SQLITE_FIELD_MAPPINGS.items():
+                solr_value = solr_record.get(key)
+                if type(solr_value) is list:
+                    filtered_solr_values = [_filtered_value(value) for value in solr_value]
+                    solr_value = "; ".join(filtered_solr_values)
+                elif type(solr_value) is str:
+                    # Don't include placeholder empty values in the dump
+                    solr_value = _filtered_value(solr_value)
+                # Key is source column solr name, value is dest column sqlite name in sqlite
+                if solr_value is not None:
+                    new_record[value] = solr_value
                 else:
-                    new_record.__setattr__(value, "")
-        session.add(new_record)
-        num_records += 1
-        if num_records % session_commit_frequency == 0:
-            logging.info(f"Committing records, have processed {num_records}")
-            session.commit()
-    # Commit any remainder
-    session.commit()
+                    # There was weirdness here where if we set None, the insert statement broke.  A hack!
+                    if value in NUMERIC_COLUMNS:
+                        new_record[value] = 0.0
+                    else:
+                        new_record[value] = ""
+            current_batch.append(new_record)
+            num_records += 1
+            if num_records % session_commit_frequency == 0:
+                logging.info(f"Committing records, have processed {num_records}")
+                session.bulk_insert_mappings(mapper=ISBCoreRecord, mappings=current_batch, return_defaults=False)
+                session.commit()
+                current_batch = []
+            if num_records == 5000:
+                break
+            # Commit any remainder
+        session.commit()
+        s = io.StringIO()
+        ps = pstats.Stats(pr, stream=s).sort_stats(SortKey.CUMULATIVE)
+        # ps.strip_dirs()
+        ps.print_stats()
+        print(s.getvalue())
+        ps.print_callers()
+        print(s.getvalue())
 
 
 """
