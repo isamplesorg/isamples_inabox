@@ -1,3 +1,5 @@
+import json
+
 import click
 import click_config_file
 import isb_lib.core
@@ -7,10 +9,6 @@ from isb_web.isb_solr_query import ISBCoreSolrRecordIterator
 import requests
 from sqlmodel import SQLModel, create_engine, Session
 import logging
-import cProfile
-import pstats
-from pstats import SortKey
-import io
 
 # Use this to map between the solr column names and the sqlite column names and control what is
 # written to the dump.
@@ -26,20 +24,20 @@ SOLR_TO_SQLITE_FIELD_MAPPINGS = {
     "hasMaterialCategory": "material_categories",
     "hasSpecimenCategory": "specimen_categories",
     "keywords": "keywords",
-    "informalClassification": "informal_classification",
+    "informalClassification": "informal_classifications",
     "producedBy_isb_core_id": "produced_by_isb_core_id",
     "producedBy_label": "produced_by_label",
     "producedBy_description": "produced_by_description",
     "producedBy_hasFeatureOfInterest": "produced_by_feature_of_interest",
-    "producedBy_responsibility": "produced_by_responsibility",
+    "producedBy_responsibility": "produced_by_responsibilities",
     "producedBy_resultTime": "produced_by_result_time",
     "producedBy_samplingSite_description": "produced_by_sampling_site_description",
     "producedBy_samplingSite_label": "produced_by_sampling_site_label",
     "producedBy_samplingSite_location_elevationInMeters": "produced_by_sampling_site_elevation_in_meters",
     "producedBy_samplingSite_location_ll": "produced_by_sampling_site_location_ll",
-    "producedBy_samplingSite_placeName": "produced_by_sampling_site_place_name",
-    "registrant": "registrant",
-    "samplingPurpose": "sampling_purpose",
+    "producedBy_samplingSite_placeName": "produced_by_sampling_site_place_names",
+    "registrant": "registrants",
+    "samplingPurpose": "sampling_purposes",
     "curation_label": "curation_label",
     "curation_description": "curation_description",
     "curation_accessConstraints": "curation_access_constraints",
@@ -106,7 +104,7 @@ def main(ctx, db_url, solr_url, verbosity, heart_rate, authority):
             solr_value = solr_record.get(key)
             if type(solr_value) is list:
                 filtered_solr_values = [_filtered_value(value) for value in solr_value]
-                solr_value = "; ".join(filtered_solr_values)
+                solr_value = json.dumps(filtered_solr_values)
             elif type(solr_value) is str:
                 # Don't include placeholder empty values in the dump
                 solr_value = _filtered_value(solr_value)

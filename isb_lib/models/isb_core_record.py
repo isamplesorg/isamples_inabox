@@ -1,5 +1,5 @@
 from typing import Optional
-
+import sqlalchemy
 from sqlmodel import SQLModel, Field
 
 
@@ -37,12 +37,14 @@ class ISBCoreRecord(SQLModel, table=True):
             index=False,
         ),
     )
-    search_text: Optional[str] = (
-        Field(
-            default=None,
+    # Use the raw SQLAlchemy column in order to get the proper JSON behavior
+    search_text: Optional[list] = Field(
+        # Use the raw SQLAlchemy column in order to get the proper JSON behavior
+        sa_column=sqlalchemy.Column(
+            sqlalchemy.JSON,
             nullable=True,
-            description="A collection of text suitable for use in a full-text search index, semicolon delimited",
-            index=False,
+            default=None,
+            doc="A collection of text suitable for use in a full-text search index",
         ),
     )
     sample_description: Optional[str] = (
@@ -53,44 +55,49 @@ class ISBCoreRecord(SQLModel, table=True):
             index=False,
         ),
     )
-    context_categories: Optional[str] = (
-        Field(
-            default=None,
+    context_categories: Optional[list] = Field(
+        # Use the raw SQLAlchemy column in order to get the proper JSON behavior
+        sa_column=sqlalchemy.Column(
+            sqlalchemy.JSON,
             nullable=True,
-            description="The context categories from the iSamples controlled vocabulary, semicolon delimited",
-            index=False,
+            default=None,
+            doc="The context categories from the iSamples controlled vocabulary",
         ),
     )
-    material_categories: Optional[str] = (
-        Field(
-            default=None,
+    material_categories: Optional[list] = Field(
+        # Use the raw SQLAlchemy column in order to get the proper JSON behavior
+        sa_column=sqlalchemy.Column(
+            sqlalchemy.JSON,
             nullable=True,
-            description="The material categories from the iSamples controlled vocabulary, semicolon delimited",
-            index=False,
+            default=None,
+            doc="The material categories from the iSamples controlled vocabulary",
         ),
     )
-    specimen_categories: Optional[str] = (
-        Field(
-            default=None,
+    specimen_categories: Optional[list] = Field(
+        # Use the raw SQLAlchemy column in order to get the proper JSON behavior
+        sa_column=sqlalchemy.Column(
+            sqlalchemy.JSON,
             nullable=True,
-            description="The material categories from the iSamples controlled vocabulary, semicolon delimited",
-            index=False,
+            default=None,
+            doc="The specimen categories from the iSamples controlled vocabulary",
         ),
     )
-    keywords: Optional[str] = (
-        Field(
-            default=None,
+    keywords: Optional[list] = Field(
+        # Use the raw SQLAlchemy column in order to get the proper JSON behavior
+        sa_column=sqlalchemy.Column(
+            sqlalchemy.JSON,
             nullable=True,
-            description="Keywords for searching, semicolon delimited",
-            index=False,
+            default=None,
+            doc="Keywords for searching",
         ),
     )
-    informal_classification: Optional[str] = (
-        Field(
-            default=None,
+    informal_classifications: Optional[list] = Field(
+        # Use the raw SQLAlchemy column in order to get the proper JSON behavior
+        sa_column=sqlalchemy.Column(
+            sqlalchemy.JSON,
             nullable=True,
-            description="Informal scientific classification of the sample",
-            index=False,
+            default=None,
+            doc="Informal scientific classification of the sample",
         ),
     )
     produced_by_isb_core_id: Optional[str] = (
@@ -125,12 +132,13 @@ class ISBCoreRecord(SQLModel, table=True):
             index=False,
         ),
     )
-    produced_by_responsibility: Optional[str] = (
-        Field(
-            default=None,
+    produced_by_responsibilities: Optional[list] = Field(
+        # Use the raw SQLAlchemy column in order to get the proper JSON behavior
+        sa_column=sqlalchemy.Column(
+            sqlalchemy.JSON,
             nullable=True,
-            description="The name of the people or institution responsible for producing the sample, semicolon-delimited",
-            index=False,
+            default=None,
+            doc="The name of the people or institution responsible for producing the sample",
         ),
     )
     produced_by_result_time: Optional[str] = (
@@ -173,28 +181,31 @@ class ISBCoreRecord(SQLModel, table=True):
             index=False,
         ),
     )
-    produced_by_sampling_site_place_name: Optional[str] = (
-        Field(
-            default=None,
+    produced_by_sampling_site_place_names: Optional[list] = Field(
+        # Use the raw SQLAlchemy column in order to get the proper JSON behavior
+        sa_column=sqlalchemy.Column(
+            sqlalchemy.JSON,
             nullable=True,
-            description="The place name of the sampling site",
-            index=False,
+            default=None,
+            doc="The place names of the sampling site",
         ),
     )
-    registrant: Optional[str] = (
-        Field(
-            default=None,
+    registrants: Optional[list] = Field(
+        # Use the raw SQLAlchemy column in order to get the proper JSON behavior
+        sa_column=sqlalchemy.Column(
+            sqlalchemy.JSON,
             nullable=True,
-            description="The registrant of the sample",
-            index=False,
+            default=None,
+            doc="The registrants of the sample",
         ),
     )
-    sampling_purpose: Optional[str] = (
-        Field(
-            default=None,
+    sampling_purposes: Optional[list] = Field(
+        # Use the raw SQLAlchemy column in order to get the proper JSON behavior
+        sa_column=sqlalchemy.Column(
+            sqlalchemy.JSON,
             nullable=True,
-            description="Why the sample was collected",
-            index=False,
+            default=None,
+            doc="Why the sample was collected",
         ),
     )
     curation_label: Optional[str] = (
@@ -237,12 +248,13 @@ class ISBCoreRecord(SQLModel, table=True):
             index=False,
         ),
     )
-    related_resources_isb_core_id: Optional[str] = (
-        Field(
-            default=None,
+    related_resources_isb_core_id:  Optional[list] = Field(
+        # Use the raw SQLAlchemy column in order to get the proper JSON behavior
+        sa_column=sqlalchemy.Column(
+            sqlalchemy.JSON,
             nullable=True,
-            description="Identifiers for related resources, semicolon-delimited",
-            index=False,
+            default=None,
+            doc="Identifiers for related resources",
         ),
     )
     source: Optional[str] = (
