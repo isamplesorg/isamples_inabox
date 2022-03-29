@@ -34,7 +34,8 @@ SOLR_TO_SQLITE_FIELD_MAPPINGS = {
     "producedBy_samplingSite_description": "produced_by_sampling_site_description",
     "producedBy_samplingSite_label": "produced_by_sampling_site_label",
     "producedBy_samplingSite_location_elevationInMeters": "produced_by_sampling_site_elevation_in_meters",
-    "producedBy_samplingSite_location_ll": "produced_by_sampling_site_location_ll",
+    "producedBy_samplingSite_location_latitude": "produced_by_sampling_site_location_latitude",
+    "producedBy_samplingSite_location_longitude": "produced_by_sampling_site_location_longitude",
     "producedBy_samplingSite_placeName": "produced_by_sampling_site_place_names",
     "registrant": "registrants",
     "samplingPurpose": "sampling_purposes",
@@ -44,10 +45,14 @@ SOLR_TO_SQLITE_FIELD_MAPPINGS = {
     "curation_location": "curation_location",
     "curation_responsibility": "curation_responsibility",
     "relatedResource_isb_core_id": "related_resources_isb_core_id",
-    "source": "source"
+    "source": "source",
 }
 
-NUMERIC_COLUMNS = ["produced_by_sampling_site_elevation_in_meters"]
+NUMERIC_COLUMNS = [
+    "produced_by_sampling_site_elevation_in_meters",
+    "producedBy_samplingSite_location_latitude",
+    "producedBy_samplingSite_location_longitude",
+]
 
 
 # Filter out any placeholder values that shouldn't appear in the dump
@@ -121,11 +126,15 @@ def main(ctx, db_url, solr_url, verbosity, heart_rate, query):
         num_records += 1
         if num_records % session_commit_frequency == 0:
             logging.info(f"Committing records, have processed {num_records}")
-            session.bulk_insert_mappings(mapper=ISBCoreRecord, mappings=current_batch, return_defaults=False)
+            session.bulk_insert_mappings(
+                mapper=ISBCoreRecord, mappings=current_batch, return_defaults=False
+            )
             session.commit()
             current_batch = []
     # Commit any remainder
-    session.bulk_insert_mappings(mapper=ISBCoreRecord, mappings=current_batch, return_defaults=False)
+    session.bulk_insert_mappings(
+        mapper=ISBCoreRecord, mappings=current_batch, return_defaults=False
+    )
     session.commit()
 
 

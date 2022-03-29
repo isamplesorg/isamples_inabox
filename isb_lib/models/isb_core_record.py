@@ -173,11 +173,19 @@ class ISBCoreRecord(SQLModel, table=True):
             index=False,
         ),
     )
-    produced_by_sampling_site_location_ll: Optional[str] = (
+    produced_by_sampling_site_location_latitude: Optional[float] = (
         Field(
             default=None,
             nullable=True,
-            description="The latitude and longitude of the sampling site, in a comma-separated string",
+            description="The latitude of the sampling site",
+            index=False,
+        ),
+    )
+    produced_by_sampling_site_location_longitude: Optional[float] = (
+        Field(
+            default=None,
+            nullable=True,
+            description="The longitude of the sampling site",
             index=False,
         ),
     )
