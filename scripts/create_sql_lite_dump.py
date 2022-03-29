@@ -8,6 +8,7 @@ from isb_lib.models.isb_core_record import ISBCoreRecord
 from isb_web.isb_solr_query import ISBCoreSolrRecordIterator
 import requests
 from sqlmodel import SQLModel, create_engine, Session
+from sqlalchemy import update
 import logging
 
 # Use this to map between the solr column names and the sqlite column names and control what is
@@ -50,8 +51,8 @@ SOLR_TO_SQLITE_FIELD_MAPPINGS = {
 
 NUMERIC_COLUMNS = [
     "produced_by_sampling_site_elevation_in_meters",
-    "producedBy_samplingSite_location_latitude",
-    "producedBy_samplingSite_location_longitude",
+    "produced_by_sampling_site_location_latitude",
+    "produced_by_sampling_site_location_longitude",
 ]
 
 
@@ -114,13 +115,17 @@ def main(ctx, db_url, solr_url, verbosity, heart_rate, query):
                 # Don't include placeholder empty values in the dump
                 solr_value = _filtered_value(solr_value)
             # Key is source column solr name, value is dest column sqlite name in sqlite
-            if solr_value is not None:
-                new_record[value] = solr_value
-            else:
-                # There was weirdness here where if we set None, the insert statement broke.  A hack!
-                if value in NUMERIC_COLUMNS:
-                    new_record[value] = 0.0
+            if value in NUMERIC_COLUMNS:
+                if type(solr_value) is float:
+                    new_record[value] = solr_value
                 else:
+                    # There was weirdness here where if we set None, the insert statement broke.  A hack!
+                    new_record[value] = 0.0
+            else:
+                if solr_value is not None:
+                    new_record[value] = solr_value
+                else:
+                    # There was weirdness here where if we set None, the insert statement broke.  A hack!
                     new_record[value] = ""
         current_batch.append(new_record)
         num_records += 1
@@ -135,6 +140,29 @@ def main(ctx, db_url, solr_url, verbosity, heart_rate, query):
     session.bulk_insert_mappings(
         mapper=ISBCoreRecord, mappings=current_batch, return_defaults=False
     )
+    cleanup_inserted_zeros(session)
+
+
+def cleanup_inserted_zeros(session):
+    # Manually update numeric 0s to None since we can't insert them that way.  Don't want to have lat/lon set to 0.0,0.0
+    statement = (
+        update(ISBCoreRecord)
+        .where(ISBCoreRecord.produced_by_sampling_site_location_latitude == 0.0)
+        .values(produced_by_sampling_site_location_latitude=None)
+    )
+    session.execute(statement)
+    statement = (
+        update(ISBCoreRecord)
+        .where(ISBCoreRecord.produced_by_sampling_site_location_longitude == 0.0)
+        .values(produced_by_sampling_site_location_longitude=None)
+    )
+    session.execute(statement)
+    statement = (
+        update(ISBCoreRecord)
+        .where(ISBCoreRecord.produced_by_sampling_site_elevation_in_meters == 0.0)
+        .values(produced_by_sampling_site_elevation_in_meters=None)
+    )
+    session.execute(statement)
     session.commit()
 
 
