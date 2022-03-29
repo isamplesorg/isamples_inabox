@@ -76,14 +76,14 @@ def _filtered_value(value):
     "-H", "--heart_rate", is_flag=True, help="Show heartrate diagnostics on 9999"
 )
 @click.option(
-    "-a",
-    "--authority",
+    "-q",
+    "--query",
     default=None,
-    help="Which authority to use when selecting and dumping the resolved_content",
+    help="The solr query to use when fetching the records for the dump",
 )
 @click_config_file.configuration_option(config_file_name="isb.cfg")
 @click.pass_context
-def main(ctx, db_url, solr_url, verbosity, heart_rate, authority):
+def main(ctx, db_url, solr_url, verbosity, heart_rate, query):
     isb_lib.core.things_main(ctx, db_url, solr_url, verbosity, heart_rate)
     engine = create_engine(ctx.obj["db_url"], echo=False)
     SQLModel.metadata.drop_all(engine, tables=[ISBCoreRecord.__table__])
@@ -92,7 +92,7 @@ def main(ctx, db_url, solr_url, verbosity, heart_rate, authority):
     batch_size = 50000
     session_commit_frequency = 50000
     rsession = requests.session()
-    iterator = ISBCoreSolrRecordIterator(rsession, authority, batch_size, 0, "id asc")
+    iterator = ISBCoreSolrRecordIterator(rsession, query, batch_size, 0, "id asc")
     num_records = 0
     current_batch = []
     for solr_record in iterator:
