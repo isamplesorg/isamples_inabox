@@ -248,7 +248,7 @@ class ISBCoreRecord(SQLModel, table=True):
             index=False,
         ),
     )
-    related_resources_isb_core_id:  Optional[list] = Field(
+    related_resources_isb_core_id: Optional[list] = Field(
         # Use the raw SQLAlchemy column in order to get the proper JSON behavior
         sa_column=sqlalchemy.Column(
             sqlalchemy.JSON,
