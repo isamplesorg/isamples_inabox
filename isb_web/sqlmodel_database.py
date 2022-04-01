@@ -122,6 +122,21 @@ def get_thing_with_id(session: Session, identifier: str) -> Optional[Thing]:
     return result
 
 
+def get_things_with_ids(session: Session, identifiers: list[str]) -> list[Thing]:
+    statement = select(Thing).where(Thing.id.in_(identifiers))
+    result = session.exec(statement).all()
+    # TODO fall back on identifiers
+    # if result is None:
+    #     # Fall back to querying the Identifiers table
+    #     join_statement = (
+    #         select(Thing)
+    #         .join(ThingIdentifier)
+    #         .where(ThingIdentifier.guid == identifier)
+    #     )
+    #     result = session.exec(join_statement).first()
+    return result
+
+
 def get_thing_identifiers_for_thing(session: Session, thing_id: int) -> typing.List[ThingIdentifier]:
     statement = select(ThingIdentifier).filter(ThingIdentifier.thing_id == thing_id)
     return session.exec(statement).all()

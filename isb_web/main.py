@@ -394,13 +394,14 @@ async def get_things_for_sitemap(
         params: Class that contains the identifier list, JSON-encoded in the request body
         session: The database session to use to fetch things
     """
-    content = []
-    for identifier in params.identifiers:
-        thing = sqlmodel_database.get_thing_with_id(session, identifier)
-        if thing is not None:
-            content.append(thing)
-        else:
-            logging.error(f"No thing with identifier {identifier}")
+    content = sqlmodel_database.get_things_with_ids(session, params.identifiers)
+    # things
+    # for identifier in params.identifiers:
+    #     thing = sqlmodel_database.get_thing_with_id(session, identifier)
+    #     if thing is not None:
+    #         content.append(thing)
+    #     else:
+    #         logging.error(f"No thing with identifier {identifier}")
     return content
 
 @app.get(f"/{THING_URL_PATH}/{{identifier:path}}", response_model=typing.Any)
