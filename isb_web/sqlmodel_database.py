@@ -124,17 +124,18 @@ def get_thing_with_id(session: Session, identifier: str) -> Optional[Thing]:
 
 def get_things_with_ids(session: Session, identifiers: list[str]) -> list[Thing]:
     statement = select(Thing).where(Thing.id.in_(identifiers))
-    result = session.exec(statement).all()
-    # TODO fall back on identifiers
-    # if result is None:
-    #     # Fall back to querying the Identifiers table
-    #     join_statement = (
-    #         select(Thing)
-    #         .join(ThingIdentifier)
-    #         .where(ThingIdentifier.guid == identifier)
-    #     )
-    #     result = session.exec(join_statement).first()
-    return result
+    things = session.exec(statement).all()
+    for thing in things:
+        try:
+            identifiers.remove(thing.id)
+        except ValueError:
+            pass
+    if len(identifiers) > 0:
+        # didn't find all the things, so we need to do an additional query against the remainder
+        statement = select(Thing).join(ThingIdentifier).where(ThingIdentifier.guid.in_(identifiers))
+        things_by_identifier = session.exec(statement).all()
+        things.extend(things_by_identifier)
+    return things
 
 
 def get_thing_identifiers_for_thing(session: Session, thing_id: int) -> typing.List[ThingIdentifier]:
@@ -319,6 +320,16 @@ def save_or_update_thing(session: Session, thing: Thing):
                 logging.error(
                     f"Got error attempting to save existing thing {thing.id}, exception: {integrity_error}"
                 )
+
+
+def all_thing_identifiers(session: Session) -> set[str]:
+    thing_identifiers_select = select(ThingIdentifier.guid)
+    thing_identifiers = session.execute(thing_identifiers_select).fetchall()
+    thing_identifiers_set = set()
+    # TODO this seems lame but I can't figure out the damn syntax to get this working straight…
+    for row in thing_identifiers:
+        thing_identifiers_set.add(row[0])
+    return thing_identifiers_set
 
 
 def mark_thing_not_found(session: Session, thing_id: str, resolved_url: str):

@@ -17,7 +17,7 @@ from isb_web.sqlmodel_database import (
     things_for_sitemap,
     mark_thing_not_found,
     save_or_update_thing,
-    get_thing_identifiers_for_thing,
+    get_thing_identifiers_for_thing, get_things_with_ids,
 )
 from test_utils import _add_some_things
 
@@ -383,3 +383,25 @@ def test_take_values_from_other_thing():
     assert thing1.tresolved == thing2.tresolved
     assert thing1.tcreated == thing2.tcreated
     assert thing1.tstamp == thing2.tstamp
+
+
+def test_get_things_with_ids(session: Session):
+    _add_some_things(session, 10, "authority", datetime.datetime.now())
+    # test adder assigns ids via numeric string, e.g. 0…n
+    ids_to_assert = ["0", "1", "2"]
+    things = get_things_with_ids(session, ids_to_assert)
+    assert len(things) == 3
+
+
+def test_get_things_with_ids_with_identifier(session: Session):
+    _add_some_things(session, 10, "authority", datetime.datetime.now())
+    guid = "12345"
+    should_be_empty = get_things_with_ids(session, [guid])
+    assert 0 == len(should_be_empty)
+    thing = get_thing_with_id(session, "0")
+    thing_identifier = ThingIdentifier(guid=guid, thing_id=thing.primary_key)
+    thing.identifiers.append(thing_identifier)
+    save_thing(session, thing)
+    ids_to_assert = [guid, "1"]
+    things = get_things_with_ids(session, ids_to_assert)
+    assert len(things) == 2

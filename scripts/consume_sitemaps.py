@@ -26,7 +26,7 @@ from isb_lib.sitemaps.sitemap_fetcher import (
     ThingFetcher, ThingsFetcher,
 )
 from isb_web import sqlmodel_database
-from isb_web.sqlmodel_database import SQLModelDAO
+from isb_web.sqlmodel_database import SQLModelDAO, all_thing_identifiers
 
 CONCURRENT_DOWNLOADS = 1000
 # when we hit this length, add some more to the queue
@@ -70,6 +70,7 @@ def main(ctx, url: str, authority: str, ignore_last_modified: bool):
     isb_lib.core.things_main(ctx, db_url, solr_url, "INFO", False)
     if ignore_last_modified:
         last_updated_date = None
+        thing_ids = all_thing_identifiers(db_session)
     else:
         # Smithsonian's dump has dates marked in the future.  So, Smithsonian will never update.  For the purposes
         # of iSamples Central, this is actually ok as we don't have an automated import pipeline for Smithsonian.
@@ -81,7 +82,7 @@ def main(ctx, url: str, authority: str, ignore_last_modified: bool):
     logging.info(
         f"Going to fetch records for authority {authority} with updated date > {last_updated_date}"
     )
-    fetch_sitemap_files(authority, last_updated_date, rsession, url, db_session)
+    fetch_sitemap_files(authority, last_updated_date, thing_ids, rsession, url, db_session)
 
 
 def thing_fetcher_for_url(thing_url: str, rsession) -> ThingFetcher:
@@ -134,7 +135,7 @@ def construct_thing_futures(
     return constructed_all_futures_for_sitemap_file
 
 
-def fetch_sitemap_files(authority, last_updated_date, rsession, url, db_session):
+def fetch_sitemap_files(authority, last_updated_date, thing_ids: set[str], rsession, url, db_session):
     sitemap_index_fetcher = SitemapIndexFetcher(
         url, authority, last_updated_date, rsession
     )
@@ -158,7 +159,8 @@ def fetch_sitemap_files(authority, last_updated_date, rsession, url, db_session)
                     rsession,
                     thing_executor,
                 )
-                # current_things_batch = []
+                current_existing_things_batch = []
+                current_new_things_batch = []
                 # pks_to_delete = []
                 while not fetched_all_things_for_current_sitemap_file:
                     # Then read out results and save to the database after the queue is filled to capacity.
@@ -192,11 +194,25 @@ def fetch_sitemap_files(authority, last_updated_date, rsession, url, db_session)
                         things_fetcher = thing_fut.result()
                         if things_fetcher is not None and things_fetcher.json_things is not None:
                             num_things_fetched += len(things_fetcher.json_things)
+                            logging.info(f"About to process {len(things_fetcher.json_things)} things")
                             for json_thing in things_fetcher.json_things:
-                                thing_model = Thing()
-                                thing_model.take_values_from_json_dict(json_thing)
-                                sqlmodel_database.save_or_update_thing(
-                                    db_session, thing_model)
+                                json_thing["tstamp"] = datetime.datetime.now()
+                                # TODO: replicate this logic for ThingIdentifiers!!!!
+                                if thing_ids.__contains__(json_thing["id"]):
+                                    current_existing_things_batch.append(json_thing)
+                                else:
+                                    current_new_things_batch.append(json_thing)
+                            db_session.bulk_insert_mappings(
+                                mapper=Thing, mappings=current_new_things_batch, return_defaults=False
+                            )
+                            db_session.bulk_update_mappings(
+                                mapper=Thing, mappings=current_existing_things_batch, return_defaults=False
+                            )
+
+                                # thing_model = Thing()
+                                # thing_model.take_values_from_json_dict(json_thing)
+                                # sqlmodel_database.save_or_update_thing(
+                                #     db_session, thing_model)
                                 # json_thing["tstamp"] = datetime.datetime.now()
                                 # primary_key = json_thing["primary_key"]
                                 # if (
