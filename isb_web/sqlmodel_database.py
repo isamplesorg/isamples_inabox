@@ -16,12 +16,12 @@ from isb_web.schemas import ThingPage
 
 
 class SQLModelDAO:
-    def __init__(self, db_url: str):
+    def __init__(self, db_url: str, echo: bool = False):
         # This is a strange initializer, but FastAPI wants us to construct the object before we know we
         # want to use it.  So, separate out the object construction from the database connection.
         # In unit tests, this ends up getting swapped out and unused, which is the source of the confusion.
         if db_url is not None:
-            self.connect_sqlmodel(db_url)
+            self.connect_sqlmodel(db_url, echo)
         else:
             self.engine = None
 
@@ -32,8 +32,8 @@ class SQLModelDAO:
         except ProgrammingError:
             pass
 
-    def connect_sqlmodel(self, db_url: str):
-        self.engine = create_engine(db_url, echo=False)
+    def connect_sqlmodel(self, db_url: str, echo: bool = False):
+        self.engine = create_engine(db_url, echo=echo)
         SQLModel.metadata.create_all(self.engine)
         # There doesn't appear to be a SQLModel-native way of creating those, so fall back to SQLAlchemy
         id_resolved_status_authority_id_idx = Index(

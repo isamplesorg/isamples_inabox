@@ -73,7 +73,7 @@ class Thing(SQLModel, table=True):
         default=None, nullable=True, description="Media type of resolved content"
     )
     identifiers: List["ThingIdentifier"] = Relationship(
-        back_populates="thing", sa_relationship_kwargs={"cascade": "all,delete-orphan", "passive_deletes": True},
+        back_populates="thing", sa_relationship_kwargs={"cascade": "all,delete-orphan"},
     )
 
     def insert_thing_identifier_if_not_present(self, identifier: "ThingIdentifier"):

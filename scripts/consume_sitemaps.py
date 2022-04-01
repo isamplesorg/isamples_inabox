@@ -1,4 +1,5 @@
 import concurrent.futures
+import datetime
 import urllib.parse
 from concurrent.futures import ThreadPoolExecutor
 from pstats import SortKey
@@ -66,7 +67,7 @@ def main(ctx, url: str, authority: str, ignore_last_modified: bool):
     db_session = SQLModelDAO(db_url).get_session()
     if authority is not None:
         authority = authority.upper()
-    isb_lib.core.things_main(ctx, db_url, solr_url, "CRITICAL", False)
+    isb_lib.core.things_main(ctx, db_url, solr_url, "INFO", False)
     if ignore_last_modified:
         last_updated_date = None
     else:
@@ -116,18 +117,21 @@ def construct_thing_futures(
     sitemap_file_iterator: Iterator,
     rsession: requests.sessions,
     thing_executor: ThreadPoolExecutor,
-    sitemap_file_fetcher: SitemapFileFetcher,
 ) -> bool:
-    fetched_all_things_for_current_sitemap_file = False
+    constructed_all_futures_for_sitemap_file = False
     thing_ids = []
     while len(thing_ids) < CONCURRENT_DOWNLOADS:
-        url = next(sitemap_file_iterator)
-        identifier = thing_identifier_from_thing_url(url)
-        thing_ids.append(identifier)
+        try:
+            url = next(sitemap_file_iterator)
+            identifier = thing_identifier_from_thing_url(url)
+            thing_ids.append(identifier)
+        except StopIteration:
+            constructed_all_futures_for_sitemap_file = True
+            break
     things_fetcher = ThingsFetcher("http://localhost:8000/things", thing_ids, rsession)
     things_future = thing_executor.submit(things_fetcher.fetch_things)
     thing_futures.append(things_future)
-    return fetched_all_things_for_current_sitemap_file
+    return constructed_all_futures_for_sitemap_file
 
 
 def fetch_sitemap_files(authority, last_updated_date, rsession, url, db_session):
@@ -153,32 +157,30 @@ def fetch_sitemap_files(authority, last_updated_date, rsession, url, db_session)
                     sitemap_file_iterator,
                     rsession,
                     thing_executor,
-                    sitemap_file_fetcher,
                 )
-                current_things_batch = []
-                pks_to_delete = []
+                # current_things_batch = []
+                # pks_to_delete = []
                 while not fetched_all_things_for_current_sitemap_file:
                     # Then read out results and save to the database after the queue is filled to capacity.
                     # Provided there are more urls in the iterator, return to the top of the loop to fill the queue again
                     for thing_fut in concurrent.futures.as_completed(thing_futures):
-
-                        if num_things_fetched % 1000 == 0:
+                        if num_things_fetched % 2 == 0:
                             logging.critical(f"Have fetched {num_things_fetched} things")
-                            if num_things_fetched > 0:
-                                thing_delete = (
-                                    delete(Thing)
-                                        .where(Thing.primary_key == bindparam('pk'))
-                                )
-                                # db_session.execute(thing_identifier_delete)
-                                db_session.execute(thing_delete, [{"pk": primary_key} for primary_key in pks_to_delete])
-                                db_session.commit()
-                                db_session.bulk_insert_mappings(
-                                    mapper=Thing, mappings=current_things_batch, return_defaults=False
-                                )
-                                db_session.commit()
-                                current_things_batch = []
-                                pks_to_delete = []
-                                logging.critical(f"Have fetched {num_things_fetched} things")
+                            # if num_things_fetched > 0:
+                            #     thing_delete = (
+                            #         delete(Thing)
+                            #             .where(Thing.primary_key == bindparam('pk'))
+                            #     )
+                            #     # db_session.execute(thing_identifier_delete)
+                            #     db_session.execute(thing_delete, [{"pk": primary_key} for primary_key in pks_to_delete])
+                            #     db_session.commit()
+                            #     db_session.bulk_insert_mappings(
+                            #         mapper=Thing, mappings=current_things_batch, return_defaults=False
+                            #     )
+                            #     db_session.commit()
+                            #     current_things_batch = []
+                            #     pks_to_delete = []
+                            #     logging.critical(f"Have fetched {num_things_fetched} things")
                                 # s = io.StringIO()
                                 # ps = pstats.Stats(pr, stream=s).sort_stats(SortKey.CUMULATIVE)
                                 # # ps.strip_dirs()
@@ -188,19 +190,24 @@ def fetch_sitemap_files(authority, last_updated_date, rsession, url, db_session)
                                 # print(s.getvalue())
 
                         things_fetcher = thing_fut.result()
-                        if len(things_fetcher.json_things) > 0:
+                        if things_fetcher is not None and things_fetcher.json_things is not None:
                             num_things_fetched += len(things_fetcher.json_things)
                             for json_thing in things_fetcher.json_things:
-                                primary_key = json_thing["primary_key"]
-                                if (
-                                    primary_key
-                                    not in sitemap_index_fetcher.primary_keys_fetched
-                                ):
-                                    pks_to_delete.append(primary_key)
-                                    current_things_batch.append(json_thing)
-                                    sitemap_index_fetcher.primary_keys_fetched.add(
-                                        primary_key
-                                    )
+                                thing_model = Thing()
+                                thing_model.take_values_from_json_dict(json_thing)
+                                sqlmodel_database.save_or_update_thing(
+                                    db_session, thing_model)
+                                # json_thing["tstamp"] = datetime.datetime.now()
+                                # primary_key = json_thing["primary_key"]
+                                # if (
+                                #     primary_key
+                                #     not in sitemap_index_fetcher.primary_keys_fetched
+                                # ):
+                                #     pks_to_delete.append(primary_key)
+                                #     current_things_batch.append(json_thing)
+                                #     sitemap_index_fetcher.primary_keys_fetched.add(
+                                #         primary_key
+                                #     )
                         else:
                             logging.error(f"Error fetching thing for {things_fetcher.url}")
                         thing_futures.remove(thing_fut)
@@ -212,10 +219,8 @@ def fetch_sitemap_files(authority, last_updated_date, rsession, url, db_session)
                                     sitemap_file_iterator,
                                     rsession,
                                     thing_executor,
-                                    sitemap_file_fetcher,
                                 )
                             )
-
 
 
 if __name__ == "__main__":
