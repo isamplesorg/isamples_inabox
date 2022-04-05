@@ -5,6 +5,9 @@ import typing
 from sqlmodel import Field, SQLModel, Relationship
 from datetime import datetime
 import sqlalchemy
+import sys
+
+from isb_lib.models.string_list_type import StringListType
 
 
 class Thing(SQLModel, table=True):
@@ -72,9 +75,9 @@ class Thing(SQLModel, table=True):
     resolved_media_type: Optional[str] = Field(
         default=None, nullable=True, description="Media type of resolved content"
     )
-    identifiers: list[str] = Field(
+    identifiers: Optional[list[str]] = Field(
         sa_column=sqlalchemy.Column(
-            sqlalchemy.ARRAY(sqlalchemy.TEXT),
+            StringListType,
             nullable=True,
             default=None,
             doc="Additional identifiers used to look up the Thing"

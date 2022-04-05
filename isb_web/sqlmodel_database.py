@@ -111,14 +111,10 @@ def read_things_summary(
 def get_thing_with_id(session: Session, identifier: str) -> Optional[Thing]:
     statement = select(Thing).filter(Thing.id == identifier).order_by(Thing.primary_key.asc())
     result = session.exec(statement).first()
-    # if result is None:
+    if result is None:
         # Fall back to querying the Identifiers table
-        # join_statement = (
-        #     select(Thing)
-        #     .join(ThingIdentifier)
-        #     .where(ThingIdentifier.guid == identifier)
-        # )
-        # result = session.exec(join_statement).first()
+        identifiers_statement = select(Thing).where(Thing.identifiers.like(identifier))
+        result = session.exec(identifiers_statement).first()
     return result
 
 
