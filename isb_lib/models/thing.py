@@ -72,11 +72,16 @@ class Thing(SQLModel, table=True):
     resolved_media_type: Optional[str] = Field(
         default=None, nullable=True, description="Media type of resolved content"
     )
-    identifiers: List["ThingIdentifier"] = Relationship(
-        back_populates="thing", sa_relationship_kwargs={"cascade": "all,delete-orphan"},
+    identifiers: list[str] = Field(
+        sa_column=sqlalchemy.Column(
+            sqlalchemy.ARRAY(sqlalchemy.TEXT),
+            nullable=True,
+            default=None,
+            doc="Additional identifiers used to look up the Thing"
+        )
     )
 
-    def insert_thing_identifier_if_not_present(self, identifier: "ThingIdentifier"):
+    def insert_thing_identifier_if_not_present(self, identifier: str):
         for existing_identifier in self.identifiers:
             if identifier.semantically_equals(existing_identifier):
                 # Already have it, no need to do anything so bail
@@ -125,28 +130,3 @@ class Thing(SQLModel, table=True):
         self.resolve_elapsed = json_dict["resolve_elapsed"]
         # Update the tstamp to now, to indicate this is the last modified date from an iSamples perspective
         self.tstamp = datetime.now()
-
-
-class ThingIdentifier(SQLModel, table=True):
-    guid: Optional[str] = Field(
-        primary_key=True,
-        default=None,
-        nullable=False,
-        index=False,
-        description="The String GUID",
-    )
-    tstamp: datetime = Field(
-        default=igsn_lib.time.dtnow(),
-        description="When the identifier was added to this database",
-        index=False,
-    )
-    thing_id: Optional[int] = Field(
-        default=None, nullable=False, foreign_key="thing._id", index=False
-    )
-    thing: Optional[Thing] = Relationship(
-        back_populates="identifiers", sa_relationship_kwargs={"cascade": "all"}
-    )
-
-    def semantically_equals(self, other: "ThingIdentifier") -> bool:
-        """Method to check if two identifiers are semantically equal ignoring bookkeeping fields"""
-        return self.thing_id == other.thing_id and self.guid == other.guid

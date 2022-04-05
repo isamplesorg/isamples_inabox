@@ -11,7 +11,7 @@ from sqlmodel import SQLModel, create_engine, Session, select
 from sqlmodel.sql.expression import SelectOfScalar
 
 import isb_lib
-from isb_lib.models.thing import Thing, ThingIdentifier
+from isb_lib.models.thing import Thing
 from isb_web.schemas import ThingPage
 
 
@@ -62,10 +62,10 @@ class SQLModelDAO:
         )
         self._create_index(resolved_status_authority_id_idx)
 
-        guid_thing_id_idx = Index(
-            "guid_thing_id_idx", ThingIdentifier.guid, ThingIdentifier.thing_id
-        )
-        self._create_index(guid_thing_id_idx)
+        # guid_thing_id_idx = Index(
+        #     "guid_thing_id_idx", ThingIdentifier.guid, ThingIdentifier.thing_id
+        # )
+        # self._create_index(guid_thing_id_idx)
 
     def get_session(self) -> Session:
         return Session(self.engine)
@@ -111,14 +111,14 @@ def read_things_summary(
 def get_thing_with_id(session: Session, identifier: str) -> Optional[Thing]:
     statement = select(Thing).filter(Thing.id == identifier).order_by(Thing.primary_key.asc())
     result = session.exec(statement).first()
-    if result is None:
+    # if result is None:
         # Fall back to querying the Identifiers table
-        join_statement = (
-            select(Thing)
-            .join(ThingIdentifier)
-            .where(ThingIdentifier.guid == identifier)
-        )
-        result = session.exec(join_statement).first()
+        # join_statement = (
+        #     select(Thing)
+        #     .join(ThingIdentifier)
+        #     .where(ThingIdentifier.guid == identifier)
+        # )
+        # result = session.exec(join_statement).first()
     return result
 
 
@@ -130,17 +130,17 @@ def get_things_with_ids(session: Session, identifiers: list[str]) -> list[Thing]
             identifiers.remove(thing.id)
         except ValueError:
             pass
-    if len(identifiers) > 0:
+    # if len(identifiers) > 0:
         # didn't find all the things, so we need to do an additional query against the remainder
-        statement = select(Thing).join(ThingIdentifier).where(ThingIdentifier.guid.in_(identifiers))
-        things_by_identifier = session.exec(statement).all()
-        things.extend(things_by_identifier)
+        # statement = select(Thing).join(ThingIdentifier).where(ThingIdentifier.guid.in_(identifiers))
+        # things_by_identifier = session.exec(statement).all()
+        # things.extend(things_by_identifier)
     return things
 
 
-def get_thing_identifiers_for_thing(session: Session, thing_id: int) -> typing.List[ThingIdentifier]:
-    statement = select(ThingIdentifier).filter(ThingIdentifier.thing_id == thing_id)
-    return session.exec(statement).all()
+# def get_thing_identifiers_for_thing(session: Session, thing_id: int) -> typing.List[ThingIdentifier]:
+#     statement = select(ThingIdentifier).filter(ThingIdentifier.thing_id == thing_id)
+#     return session.exec(statement).all()
 
 
 def last_time_thing_created(
@@ -257,25 +257,25 @@ def _insert_geome_identifiers(thing: Thing):
     if children is not None:
         for child in children:
             child_ark = child["bcid"]
-            child_identifier = ThingIdentifier(
-                guid=child_ark, thing_id=thing.primary_key
-            )
-            thing.insert_thing_identifier_if_not_present(child_identifier)
+            # child_identifier = ThingIdentifier(
+            #     guid=child_ark, thing_id=thing.primary_key
+            # )
+            thing.insert_thing_identifier_if_not_present(child_ark)
 
 
 def _insert_open_context_identifiers(thing: Thing):
     citation_uri = thing.resolved_content["citation uri"]
     if citation_uri is not None and type(citation_uri) is str:
         open_context_uri = isb_lib.normalized_id(citation_uri)
-        open_context_identifier = ThingIdentifier(
-            guid=open_context_uri, thing_id=thing.primary_key
-        )
-        thing.insert_thing_identifier_if_not_present(open_context_identifier)
+        # open_context_identifier = ThingIdentifier(
+        #     guid=open_context_uri, thing_id=thing.primary_key
+        # )
+        thing.insert_thing_identifier_if_not_present(open_context_uri)
 
 
 def _insert_standard_identifier(thing: Thing):
-    thing_identifier = ThingIdentifier(guid=thing.id, thing_id=thing.primary_key)
-    thing.insert_thing_identifier_if_not_present(thing_identifier)
+    # thing_identifier = ThingIdentifier(guid=thing.id, thing_id=thing.primary_key)
+    thing.insert_thing_identifier_if_not_present(thing.id)
 
 
 def insert_identifiers(thing: Thing):
@@ -305,7 +305,7 @@ def save_or_update_thing(session: Session, thing: Thing):
         logging.info(f"Thing already exists {thing.id}, will recreate record")
         logging.info(f"Thing already exists with primary key {thing.primary_key}, will update record")
         existing_thing = get_thing_with_id(session, thing.id)
-        thing_identifiers = get_thing_identifiers_for_thing(session, existing_thing.primary_key)
+        thing_identifiers = []#get_thing_identifiers_for_thing(session, existing_thing.primary_key)
         existing_thing.identifiers = thing_identifiers
         if existing_thing is None:
             logging.error(
@@ -323,13 +323,13 @@ def save_or_update_thing(session: Session, thing: Thing):
 
 
 def all_thing_identifiers(session: Session) -> set[str]:
-    thing_identifiers_select = select(ThingIdentifier.guid)
-    thing_identifiers = session.execute(thing_identifiers_select).fetchall()
-    thing_identifiers_set = set()
-    # TODO this seems lame but I can't figure out the damn syntax to get this working straight…
-    for row in thing_identifiers:
-        thing_identifiers_set.add(row[0])
-    return thing_identifiers_set
+    # thing_identifiers_select = select(ThingIdentifier.guid)
+    # thing_identifiers = session.execute(thing_identifiers_select).fetchall()
+    # thing_identifiers_set = set()
+    # # TODO this seems lame but I can't figure out the damn syntax to get this working straight…
+    # for row in thing_identifiers:
+    #     thing_identifiers_set.add(row[0])
+    return set()
 
 
 def mark_thing_not_found(session: Session, thing_id: str, resolved_url: str):
