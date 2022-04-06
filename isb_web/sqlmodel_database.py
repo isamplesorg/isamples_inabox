@@ -135,8 +135,13 @@ def get_things_with_ids(session: Session, identifiers: list[str]) -> list[Thing]
 
 
 def get_thing_identifiers_for_thing(session: Session, thing_id: int) -> list[str]:
-    statement = select(Thing.identifiers).filter(Thing.id == thing_id)
-    return session.exec(statement).all()
+    statement = select(Thing.identifiers).where(Thing.primary_key == thing_id)
+    session_exec = session.exec(statement)
+    allrows = session_exec.all()
+    thing_identifiers = []
+    for row in allrows:
+        thing_identifiers.append(row[0])
+    return thing_identifiers
 
 
 def last_time_thing_created(
