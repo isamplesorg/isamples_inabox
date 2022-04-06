@@ -85,11 +85,10 @@ class Thing(SQLModel, table=True):
     )
 
     def insert_thing_identifier_if_not_present(self, identifier: str):
-        for existing_identifier in self.identifiers:
-            if identifier.semantically_equals(existing_identifier):
-                # Already have it, no need to do anything so bail
-                return
-        identifier.thing = self
+        if self.identifiers is None:
+            self.identifiers = []
+        if identifier not in self.identifiers:
+            self.identifiers.append(identifier)
 
     def take_values_from_other_thing(self, other_thing: "Thing"):
         self.id = other_thing.id

@@ -113,7 +113,7 @@ def get_thing_with_id(session: Session, identifier: str) -> Optional[Thing]:
     result = session.exec(statement).first()
     if result is None:
         # Fall back to querying the Identifiers table
-        identifiers_statement = select(Thing).where(Thing.identifiers.like(identifier))
+        identifiers_statement = select(Thing).where(Thing.identifiers.like(f"%{identifier}%"))
         result = session.exec(identifiers_statement).first()
     return result
 
@@ -126,17 +126,17 @@ def get_things_with_ids(session: Session, identifiers: list[str]) -> list[Thing]
             identifiers.remove(thing.id)
         except ValueError:
             pass
-    # if len(identifiers) > 0:
+    if len(identifiers) > 0:
         # didn't find all the things, so we need to do an additional query against the remainder
-        # statement = select(Thing).join(ThingIdentifier).where(ThingIdentifier.guid.in_(identifiers))
-        # things_by_identifier = session.exec(statement).all()
-        # things.extend(things_by_identifier)
+        statement = select(Thing).where(Thing.identifiers.in_(identifiers))
+        things_by_identifier = session.exec(statement).all()
+        things.extend(things_by_identifier)
     return things
 
 
-# def get_thing_identifiers_for_thing(session: Session, thing_id: int) -> typing.List[ThingIdentifier]:
-#     statement = select(ThingIdentifier).filter(ThingIdentifier.thing_id == thing_id)
-#     return session.exec(statement).all()
+def get_thing_identifiers_for_thing(session: Session, thing_id: int) -> list[str]:
+    statement = select(Thing.identifiers).filter(Thing.id == thing_id)
+    return session.exec(statement).all()
 
 
 def last_time_thing_created(
@@ -253,9 +253,6 @@ def _insert_geome_identifiers(thing: Thing):
     if children is not None:
         for child in children:
             child_ark = child["bcid"]
-            # child_identifier = ThingIdentifier(
-            #     guid=child_ark, thing_id=thing.primary_key
-            # )
             thing.insert_thing_identifier_if_not_present(child_ark)
 
 
@@ -263,14 +260,10 @@ def _insert_open_context_identifiers(thing: Thing):
     citation_uri = thing.resolved_content["citation uri"]
     if citation_uri is not None and type(citation_uri) is str:
         open_context_uri = isb_lib.normalized_id(citation_uri)
-        # open_context_identifier = ThingIdentifier(
-        #     guid=open_context_uri, thing_id=thing.primary_key
-        # )
         thing.insert_thing_identifier_if_not_present(open_context_uri)
 
 
 def _insert_standard_identifier(thing: Thing):
-    # thing_identifier = ThingIdentifier(guid=thing.id, thing_id=thing.primary_key)
     thing.insert_thing_identifier_if_not_present(thing.id)
 
 
@@ -319,13 +312,12 @@ def save_or_update_thing(session: Session, thing: Thing):
 
 
 def all_thing_identifiers(session: Session) -> set[str]:
-    # thing_identifiers_select = select(ThingIdentifier.guid)
-    # thing_identifiers = session.execute(thing_identifiers_select).fetchall()
-    # thing_identifiers_set = set()
-    # # TODO this seems lame but I can't figure out the damn syntax to get this working straight…
-    # for row in thing_identifiers:
-    #     thing_identifiers_set.add(row[0])
-    return set()
+    thing_identifiers_select = select(Thing.identifiers)
+    thing_identifiers = session.execute(thing_identifiers_select).fetchall()
+    thing_identifiers_set = set()
+    for row in thing_identifiers:
+        thing_identifiers_set.update(row[0])
+    return thing_identifiers_set
 
 
 def mark_thing_not_found(session: Session, thing_id: str, resolved_url: str):

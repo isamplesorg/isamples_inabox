@@ -12,7 +12,7 @@ class StringListType(TypeDecorator):
     cache_ok = True
 
     def process_bind_param(self, value, dialect):
-        if value is not None:
+        if value is not None and type(value) is list:
             value = json.dumps(value)
         return value
 
