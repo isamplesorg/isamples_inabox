@@ -250,6 +250,16 @@ def get_sample_types(session: Session):
     return dbq.all()
 
 
+def geome_identifiers_from_resolved_content(resolved_content: typing.Dict) -> list[str]:
+    children = resolved_content.get("children")
+    identifiers = []
+    if children is not None:
+        for child in children:
+            child_ark = child["bcid"]
+            identifiers.append(child_ark)
+    return identifiers
+
+
 def _insert_geome_identifiers(thing: Thing):
     # For now, we will fail all requests for parent IDs, because events appear in multiple samples
     # and would violate referential integrity if we made pointers to children from the event ID
@@ -260,11 +270,17 @@ def _insert_geome_identifiers(thing: Thing):
     #         print()
     #     event_identifier = ThingIdentifier(guid=event_ark, thing_id=thing.primary_key)
     #     session.add(event_identifier)
-    children = thing.resolved_content.get("children")
-    if children is not None:
-        for child in children:
-            child_ark = child["bcid"]
-            thing.insert_thing_identifier_if_not_present(child_ark)
+    identifiers = geome_identifiers_from_resolved_content(thing.resolved_content)
+    for identifier in identifiers:
+        thing.insert_thing_identifier_if_not_present(identifier)
+
+
+def opencontext_identifiers_from_resolved_content(resolved_content: typing.Dict) -> list[str]:
+    identifiers = []
+    citation_uri = resolved_content["citation uri"]
+    if citation_uri is not None and type(citation_uri) is str:
+        identifiers.append(isb_lib.normalized_id(citation_uri))
+    return identifiers
 
 
 def _insert_open_context_identifiers(thing: Thing):
@@ -274,16 +290,19 @@ def _insert_open_context_identifiers(thing: Thing):
         thing.insert_thing_identifier_if_not_present(open_context_uri)
 
 
-def _insert_standard_identifier(thing: Thing):
-    thing.insert_thing_identifier_if_not_present(thing.id)
+def _standard_identifier(thing: Thing) -> str:
+    return thing.id
 
 
 def insert_identifiers(thing: Thing):
+    identifiers = []
     if thing.authority_id == "GEOME":
-        _insert_geome_identifiers(thing)
+        identifiers += geome_identifiers_from_resolved_content(thing.resolved_content)
     elif thing.authority_id == "OPENCONTEXT":
-        _insert_open_context_identifiers(thing)
-    _insert_standard_identifier(thing)
+        identifiers += opencontext_identifiers_from_resolved_content(thing.resolved_content)
+    identifiers.append(_standard_identifier(thing))
+    for identifier in identifiers:
+        thing.insert_thing_identifier_if_not_present(identifier)
 
 
 def save_thing(session: Session, thing: Thing):
