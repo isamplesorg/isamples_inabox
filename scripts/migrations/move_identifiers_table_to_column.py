@@ -41,13 +41,17 @@ def main(ctx, db_url, verbosity):
             last_thing_id = identifier.thing_id
         append_identifiers(current_identifier_strings, last_thing_id, update_batch_values)
         total_processed += batch_size
-        last_id = last_thing_id
         logging.info(f"About to run bulk update of {batch_size} records")
         session.bulk_update_mappings(
             mapper=Thing, mappings=update_batch_values
         )
         session.commit()
         logging.info(f"Finished bulk update, have processed {total_processed} records")
+        if last_id == last_thing_id:
+            # Hit loop termination condition because we didn't advance the identifier
+            logging.info(f"Done.  Processed {total_processed} records")
+            break
+        last_id = last_thing_id
         all_thing_identifiers = all_thing_identifier_objects(session, last_id, batch_size)
         current_identifier_strings = []
         logging.info(f"Selected next {batch_size} identifiers")
