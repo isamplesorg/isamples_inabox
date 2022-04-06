@@ -1,11 +1,10 @@
 import igsn_lib.time
 import json
-from typing import Optional, List
+from typing import Optional
 import typing
-from sqlmodel import Field, SQLModel, Relationship
+from sqlmodel import Field, SQLModel
 from datetime import datetime
 import sqlalchemy
-import sys
 
 from isb_lib.models.string_list_type import StringListType
 
@@ -133,3 +132,21 @@ class Thing(SQLModel, table=True):
         self.resolve_elapsed = json_dict["resolve_elapsed"]
         # Update the tstamp to now, to indicate this is the last modified date from an iSamples perspective
         self.tstamp = datetime.now()
+
+
+class ThingIdentifier(SQLModel, table=True):
+    guid: Optional[str] = Field(
+        primary_key=True,
+        default=None,
+        nullable=False,
+        index=False,
+        description="The String GUID",
+    )
+    tstamp: datetime = Field(
+        default=igsn_lib.time.dtnow(),
+        description="When the identifier was added to this database",
+        index=False,
+    )
+    thing_id: Optional[int] = Field(
+        default=None, nullable=False, foreign_key="thing._id", index=False
+    )

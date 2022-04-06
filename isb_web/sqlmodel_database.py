@@ -11,7 +11,7 @@ from sqlmodel import SQLModel, create_engine, Session, select
 from sqlmodel.sql.expression import SelectOfScalar
 
 import isb_lib
-from isb_lib.models.thing import Thing
+from isb_lib.models.thing import Thing, ThingIdentifier
 from isb_web.schemas import ThingPage
 
 
@@ -109,11 +109,15 @@ def read_things_summary(
 
 
 def get_thing_with_id(session: Session, identifier: str) -> Optional[Thing]:
-    statement = select(Thing).filter(Thing.id == identifier).order_by(Thing.primary_key.asc())
+    statement = (
+        select(Thing).filter(Thing.id == identifier).order_by(Thing.primary_key.asc())
+    )
     result = session.exec(statement).first()
     if result is None:
         # Fall back to querying the Identifiers table
-        identifiers_statement = select(Thing).where(Thing.identifiers.like(f"%{identifier}%"))
+        identifiers_statement = select(Thing).where(
+            Thing.identifiers.like(f"%{identifier}%")
+        )
         result = session.exec(identifiers_statement).first()
     return result
 
@@ -152,12 +156,14 @@ def last_time_thing_created(
     one_year_ago = datetime.datetime(
         year=datetime.date.today().year - 1, month=1, day=1
     )
-    created_select = (
-        select(Thing.tcreated)
-    )
+    created_select = select(Thing.tcreated)
     if authority_id is not None:
         created_select = created_select.filter(Thing.authority_id == authority_id)
-    created_select = created_select.filter(Thing.tcreated >= one_year_ago).limit(1).order_by(Thing.tcreated.desc())
+    created_select = (
+        created_select.filter(Thing.tcreated >= one_year_ago)
+        .limit(1)
+        .order_by(Thing.tcreated.desc())
+    )
     result = session.exec(created_select).first()
     return result
 
@@ -297,9 +303,13 @@ def save_or_update_thing(session: Session, thing: Thing):
     except sqlalchemy.exc.IntegrityError as e:
         session.rollback()
         logging.info(f"Thing already exists {thing.id}, will recreate record")
-        logging.info(f"Thing already exists with primary key {thing.primary_key}, will update record")
+        logging.info(
+            f"Thing already exists with primary key {thing.primary_key}, will update record"
+        )
         existing_thing = get_thing_with_id(session, thing.id)
-        thing_identifiers = []#get_thing_identifiers_for_thing(session, existing_thing.primary_key)
+        thing_identifiers = (
+            []
+        )  # get_thing_identifiers_for_thing(session, existing_thing.primary_key)
         existing_thing.identifiers = thing_identifiers
         if existing_thing is None:
             logging.error(
@@ -314,6 +324,17 @@ def save_or_update_thing(session: Session, thing: Thing):
                 logging.error(
                     f"Got error attempting to save existing thing {thing.id}, exception: {integrity_error}"
                 )
+
+
+def all_thing_identifier_objects(session: Session, min_id: int, batch_size: int) -> list[ThingIdentifier]:
+    thing_identifiers_select = (
+        select(ThingIdentifier)
+        .filter(ThingIdentifier.thing_id >= min_id)
+        .order_by(ThingIdentifier.thing_id.asc())
+        .limit(batch_size)
+    )
+    thing_identifiers = session.exec(thing_identifiers_select).all()
+    return thing_identifiers
 
 
 def all_thing_identifiers(session: Session) -> set[str]:
