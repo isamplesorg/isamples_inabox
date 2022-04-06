@@ -5,7 +5,8 @@ import click
 
 import isb_lib.core
 from isb_lib.models.thing import Thing
-from isb_web.sqlmodel_database import SQLModelDAO, all_thing_identifier_objects
+from isb_web.sqlmodel_database import SQLModelDAO, all_thing_identifier_objects, things_with_null_identifiers, \
+    insert_identifiers
 
 
 @click.command()
@@ -23,6 +24,20 @@ from isb_web.sqlmodel_database import SQLModelDAO, all_thing_identifier_objects
 def main(ctx, db_url, verbosity):
     isb_lib.core.things_main(ctx, db_url, None, verbosity)
     session = SQLModelDAO((ctx.obj["db_url"]), echo=True).get_session()
+    transform_thing_identifiers(session)
+    update_null_thing_identifiers(session)
+
+
+def update_null_thing_identifiers(session):
+    """Hit any remainders that didn't get their identifiers updated in the first batch"""
+    things = things_with_null_identifiers(session)
+    for thing in things:
+        insert_identifiers(thing)
+        session.add(thing)
+    session.commit()
+
+
+def transform_thing_identifiers(session):
     last_id = 0
     batch_size = 100000
     total_processed = 0

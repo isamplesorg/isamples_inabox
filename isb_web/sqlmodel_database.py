@@ -326,7 +326,9 @@ def save_or_update_thing(session: Session, thing: Thing):
                 )
 
 
-def all_thing_identifier_objects(session: Session, min_id: int, batch_size: int) -> list[ThingIdentifier]:
+def all_thing_identifier_objects(
+    session: Session, min_id: int, batch_size: int
+) -> list[ThingIdentifier]:
     thing_identifiers_select = (
         select(ThingIdentifier)
         .filter(ThingIdentifier.thing_id >= min_id)
@@ -335,6 +337,13 @@ def all_thing_identifier_objects(session: Session, min_id: int, batch_size: int)
     )
     thing_identifiers = session.exec(thing_identifiers_select).all()
     return thing_identifiers
+
+
+def things_with_null_identifiers(session: Session) -> list[Thing]:
+    # noinspection PyComparisonWithNone
+    things_select = select(Thing).filter(Thing.identifiers == None)
+    things = session.exec(things_select).all()
+    return things
 
 
 def all_thing_identifiers(session: Session) -> set[str]:
