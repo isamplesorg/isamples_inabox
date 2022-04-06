@@ -91,6 +91,7 @@ class Thing(SQLModel, table=True):
             self.identifiers.append(identifier)
 
     def take_values_from_other_thing(self, other_thing: "Thing"):
+        self.primary_key = other_thing.primary_key
         self.id = other_thing.id
         self.resolved_content = other_thing.resolved_content
         self.resolved_url = other_thing.resolved_url
