@@ -125,6 +125,7 @@ def get_thing_with_id(session: Session, identifier: str) -> Optional[Thing]:
 def get_things_with_ids(session: Session, identifiers: list[str]) -> list[Thing]:
     statement = select(Thing).where(Thing.id.in_(identifiers))
     things = session.exec(statement).all()
+
     for thing in things:
         try:
             identifiers.remove(thing.id)
@@ -135,7 +136,17 @@ def get_things_with_ids(session: Session, identifiers: list[str]) -> list[Thing]
         statement = select(Thing).where(Thing.identifiers.in_(identifiers))
         things_by_identifier = session.exec(statement).all()
         things.extend(things_by_identifier)
-    return things
+    filtered_things = []
+    primary_keys = set()
+    identifiers = set()
+    for thing in things:
+        # Check to see if we already have the thing in the list -- multiple identifiers can collapse to a single
+        # thing, and we don't want to include the thing in the list more than once.
+        if thing.primary_key not in primary_keys and thing.id not in identifiers:
+            filtered_things.append(thing)
+        primary_keys.add(thing.primary_key)
+        identifiers.add(thing.id)
+    return filtered_things
 
 
 def get_thing_identifiers_for_thing(session: Session, thing_id: int) -> list[str]:
@@ -294,12 +305,17 @@ def _standard_identifier(thing: Thing) -> str:
     return thing.id
 
 
-def insert_identifiers(thing: Thing):
+def thing_identifiers_from_resolved_content(authority_id: str, resolved_content: typing.Dict) -> list[str]:
     identifiers = []
-    if thing.authority_id == "GEOME":
-        identifiers += geome_identifiers_from_resolved_content(thing.resolved_content)
-    elif thing.authority_id == "OPENCONTEXT":
-        identifiers += opencontext_identifiers_from_resolved_content(thing.resolved_content)
+    if authority_id == "GEOME":
+        identifiers += geome_identifiers_from_resolved_content(resolved_content)
+    elif authority_id == "OPENCONTEXT":
+        identifiers += opencontext_identifiers_from_resolved_content(resolved_content)
+    return identifiers
+
+
+def insert_identifiers(thing: Thing):
+    identifiers = thing_identifiers_from_resolved_content(thing.authority_id, thing.resolved_content)
     identifiers.append(_standard_identifier(thing))
     for identifier in identifiers:
         thing.insert_thing_identifier_if_not_present(identifier)
@@ -365,8 +381,10 @@ def things_with_null_identifiers(session: Session) -> list[Thing]:
     return things
 
 
-def all_thing_identifiers(session: Session) -> set[str]:
+def all_thing_identifiers(session: Session, authority: typing.Optional[str] = None) -> set[str]:
     thing_identifiers_select = select(Thing.identifiers)
+    if authority is not None:
+        thing_identifiers_select = thing_identifiers_select.where(Thing.authority_id == authority)
     thing_identifiers = session.execute(thing_identifiers_select).fetchall()
     thing_identifiers_set = set()
     for row in thing_identifiers:

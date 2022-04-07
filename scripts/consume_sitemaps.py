@@ -1,5 +1,6 @@
 import concurrent.futures
 import datetime
+import json
 import urllib.parse
 from concurrent.futures import ThreadPoolExecutor
 from pstats import SortKey
@@ -26,9 +27,9 @@ from isb_lib.sitemaps.sitemap_fetcher import (
     ThingFetcher, ThingsFetcher,
 )
 from isb_web import sqlmodel_database
-from isb_web.sqlmodel_database import SQLModelDAO, all_thing_identifiers
+from isb_web.sqlmodel_database import SQLModelDAO, all_thing_identifiers, thing_identifiers_from_resolved_content
 
-CONCURRENT_DOWNLOADS = 1000
+CONCURRENT_DOWNLOADS = 50000
 # when we hit this length, add some more to the queue
 REFETCH_LENGTH = CONCURRENT_DOWNLOADS / 2
 
@@ -70,7 +71,6 @@ def main(ctx, url: str, authority: str, ignore_last_modified: bool):
     isb_lib.core.things_main(ctx, db_url, solr_url, "INFO", False)
     if ignore_last_modified:
         last_updated_date = None
-        thing_ids = all_thing_identifiers(db_session)
     else:
         # Smithsonian's dump has dates marked in the future.  So, Smithsonian will never update.  For the purposes
         # of iSamples Central, this is actually ok as we don't have an automated import pipeline for Smithsonian.
@@ -79,6 +79,7 @@ def main(ctx, url: str, authority: str, ignore_last_modified: bool):
         last_updated_date = sqlmodel_database.last_time_thing_created(
             db_session, authority
         )
+    thing_ids = all_thing_identifiers(db_session, authority)
     logging.info(
         f"Going to fetch records for authority {authority} with updated date > {last_updated_date}"
     )
@@ -106,7 +107,7 @@ def thing_identifier_from_thing_url(thing_url: str) -> str:
     url_path = urllib.parse.urlparse(thing_url).path
     match = IDENTIFIER_REGEX.search(url_path)
     if match is None:
-        logging.critical(f"Didn't find identifier in URL {self.url}")
+        logging.critical(f"Didn't find identifier in URL {thing_url}")
         return None
     else:
         identifier = match.group(1)
@@ -129,6 +130,7 @@ def construct_thing_futures(
         except StopIteration:
             constructed_all_futures_for_sitemap_file = True
             break
+    # TODO: this needs to figure out the right base host -- we are cheating at the moment
     things_fetcher = ThingsFetcher("http://localhost:8000/things", thing_ids, rsession)
     things_future = thing_executor.submit(things_fetcher.fetch_things)
     thing_futures.append(things_future)
@@ -197,7 +199,9 @@ def fetch_sitemap_files(authority, last_updated_date, thing_ids: set[str], rsess
                             logging.info(f"About to process {len(things_fetcher.json_things)} things")
                             for json_thing in things_fetcher.json_things:
                                 json_thing["tstamp"] = datetime.datetime.now()
-                                # TODO: replicate this logic for ThingIdentifiers!!!!
+                                identifiers = thing_identifiers_from_resolved_content(authority, json_thing["resolved_content"])
+                                identifiers.append(json_thing["id"])
+                                json_thing["identifiers"] = json.dumps(identifiers)
                                 if thing_ids.__contains__(json_thing["id"]):
                                     current_existing_things_batch.append(json_thing)
                                 else:
@@ -206,9 +210,10 @@ def fetch_sitemap_files(authority, last_updated_date, thing_ids: set[str], rsess
                                 mapper=Thing, mappings=current_new_things_batch, return_defaults=False
                             )
                             db_session.bulk_update_mappings(
-                                mapper=Thing, mappings=current_existing_things_batch, return_defaults=False
+                                mapper=Thing, mappings=current_existing_things_batch
                             )
-
+                            db_session.commit()
+                            logging.info(f"Just processed {len(things_fetcher.json_things)} things")
                                 # thing_model = Thing()
                                 # thing_model.take_values_from_json_dict(json_thing)
                                 # sqlmodel_database.save_or_update_thing(
