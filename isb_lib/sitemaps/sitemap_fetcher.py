@@ -18,6 +18,7 @@ from isb_lib.models.thing import Thing
 class ThingFetcher:
     pass
 
+
 class ThingsFetcher:
     pass
 
@@ -26,7 +27,12 @@ IDENTIFIER_REGEX = re.compile(r".*/thing/(.*)")
 
 
 class ThingsFetcher:
-    def __init__(self, url: str, identifiers: list[str], session: requests.sessions = requests.session()):
+    def __init__(
+        self,
+        url: str,
+        identifiers: list[str],
+        session: requests.sessions = requests.session(),
+    ):
         self.url = url
         self._session = session
         self.identifiers = identifiers
@@ -40,11 +46,16 @@ class ThingsFetcher:
                 "identifiers": self.identifiers,
             }
             data = json.dumps(params).encode("utf-8")
+            logging.info(f"Going to fetch things from {self.url}")
             response = self._session.post(self.url, data=data)
             self.json_things = response.json()
-            self.primary_keys_fetched = [json_thing["primary_key"] for json_thing in self.json_things]
+            self.primary_keys_fetched = [
+                json_thing["primary_key"] for json_thing in self.json_things
+            ]
         except Exception as e:
-            logging.critical(f"Error fetching things from: url: {self.url} exception is {e}")
+            logging.critical(
+                f"Error fetching things from: url: {self.url} exception is {e}"
+            )
         return self
 
 
@@ -147,7 +158,6 @@ class SitemapFetcher(ABC):
 
 
 class SitemapFileFetcher(SitemapFetcher):
-
     def fetch_sitemap_file(self) -> SitemapFetcher:
         """Fetches the contents of the particular sitemap file and stores the URLs to fetch"""
         self._fetch_file()
@@ -170,7 +180,6 @@ class SitemapFileFetcher(SitemapFetcher):
 
 
 class SitemapIndexFetcher(SitemapFetcher):
-
     def __init__(
         self,
         url: str,
