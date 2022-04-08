@@ -381,15 +381,16 @@ def things_with_null_identifiers(session: Session) -> list[Thing]:
     return things
 
 
-def all_thing_identifiers(session: Session, authority: typing.Optional[str] = None) -> set[str]:
-    thing_identifiers_select = select(Thing.identifiers)
+def all_thing_identifiers(session: Session, authority: typing.Optional[str] = None) -> typing.Dict[str, int]:
+    thing_identifiers_select = select(Thing.primary_key, Thing.identifiers)
     if authority is not None:
         thing_identifiers_select = thing_identifiers_select.where(Thing.authority_id == authority)
     thing_identifiers = session.execute(thing_identifiers_select).fetchall()
-    thing_identifiers_set = set()
+    thing_identifiers_dict = {}
     for row in thing_identifiers:
-        thing_identifiers_set.update(row[0])
-    return thing_identifiers_set
+        for identifier in row[1]:
+            thing_identifiers_dict[identifier] = row[0]
+    return thing_identifiers_dict
 
 
 def mark_thing_not_found(session: Session, thing_id: str, resolved_url: str):

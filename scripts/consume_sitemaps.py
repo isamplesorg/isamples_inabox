@@ -76,11 +76,11 @@ def main(ctx, url: str, authority: str, ignore_last_modified: bool):
         last_updated_date = sqlmodel_database.last_time_thing_created(
             db_session, authority
         )
-    thing_ids = all_thing_identifiers(db_session, authority)
+    thing_ids_to_pks = all_thing_identifiers(db_session, authority)
     logging.info(
         f"Going to fetch records for authority {authority} with updated date > {last_updated_date}"
     )
-    fetch_sitemap_files(authority, last_updated_date, thing_ids, rsession, url, db_session)
+    fetch_sitemap_files(authority, last_updated_date, thing_ids_to_pks, rsession, url, db_session)
     logging.info(f"Completed.  Fetched {__NUM_THINGS_FETCHED} things total.")
 
 
@@ -159,7 +159,7 @@ def construct_thing_futures(
     return constructed_all_futures_for_sitemap_file
 
 
-def fetch_sitemap_files(authority, last_updated_date, thing_ids: set[str], rsession, url, db_session):
+def fetch_sitemap_files(authority, last_updated_date, thing_ids: typing.Dict[str, int], rsession, url, db_session):
     sitemap_index_fetcher = SitemapIndexFetcher(
         url, authority, last_updated_date, rsession
     )
@@ -175,7 +175,9 @@ def fetch_sitemap_files(authority, last_updated_date, thing_ids: set[str], rsess
         with concurrent.futures.ThreadPoolExecutor(
             max_workers=CONCURRENT_DOWNLOADS
         ) as thing_executor:
-            fetched_all_things_for_current_sitemap_file = construct_thing_futures(
+            # Initialize to false because we want to process everything at least once even if we hit the end
+            fetched_all_things_for_current_sitemap_file = False
+            construct_thing_futures(
                 thing_futures,
                 sitemap_file_iterator,
                 rsession,
@@ -183,7 +185,6 @@ def fetch_sitemap_files(authority, last_updated_date, thing_ids: set[str], rsess
             )
             current_existing_things_batch = []
             current_new_things_batch = []
-            # pks_to_delete = []
             while not fetched_all_things_for_current_sitemap_file:
                 # Then read out results and save to the database after the queue is filled to capacity.
                 # Provided there are more urls in the iterator, return to the top of the loop to fill the queue again
@@ -198,7 +199,11 @@ def fetch_sitemap_files(authority, last_updated_date, thing_ids: set[str], rsess
                             identifiers = thing_identifiers_from_resolved_content(authority, json_thing["resolved_content"])
                             identifiers.append(json_thing["id"])
                             json_thing["identifiers"] = json.dumps(identifiers)
+                            # remove the pk as that isn't guaranteed to be the same
+                            del json_thing["primary_key"]
                             if thing_ids.__contains__(json_thing["id"]):
+                                # existing row in the db, for the update to work we need to insert the pk into the dict
+                                json_thing["primary_key"] = thing_ids[json_thing["id"]]
                                 current_existing_things_batch.append(json_thing)
                             else:
                                 current_new_things_batch.append(json_thing)

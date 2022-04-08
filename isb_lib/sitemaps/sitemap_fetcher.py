@@ -46,7 +46,7 @@ class ThingsFetcher:
                 "identifiers": self.identifiers,
             }
             data = json.dumps(params).encode("utf-8")
-            logging.info(f"Going to fetch things from {self.url}")
+            logging.info(f"Going to fetch {len(self.identifiers)} things from {self.url}")
             response = self._session.post(self.url, data=data)
             self.json_things = response.json()
             self.primary_keys_fetched = [
