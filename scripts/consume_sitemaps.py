@@ -151,9 +151,7 @@ def construct_thing_futures(
         except StopIteration:
             constructed_all_futures_for_sitemap_file = True
             break
-    # TODO: swap out the real url once we have pushed to remote servers
-    # things_fetcher = ThingsFetcher(things_url, thing_ids, rsession)
-    things_fetcher = ThingsFetcher("http://localhost:8000/things", thing_ids, rsession)
+    things_fetcher = ThingsFetcher(things_url, thing_ids, rsession)
     things_future = thing_executor.submit(things_fetcher.fetch_things)
     thing_futures.append(things_future)
     return constructed_all_futures_for_sitemap_file

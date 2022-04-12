@@ -147,16 +147,6 @@ def test_sitemap_fetcher(
         # and the individual child files, so this assertion is valid -- otherwise this wouldn't necessarily work
         assert expected_num_urls == len(child_fetcher.urls_to_fetch)
 
-        thing_fetchers = child_fetcher.fetch_child_files()
-        for thing_fetcher in thing_fetchers:
-            thing = thing_fetcher.thing
-            assert thing is not None
-            # postgres will do the type coercion from string to timestamp, sqlite will not, so manually
-            # convert these to datetime objects for test purposes
-            thing.tcreated = dateparser.parse(thing.tcreated)
-            thing.tresolved = dateparser.parse(thing.tresolved)
-            sqlmodel_database.save_thing(sqlmodel_session, thing_fetcher.thing)
-
 
 def test_thing_fetcher_thing_identifier():
     thing_fetcher = ThingFetcher(
