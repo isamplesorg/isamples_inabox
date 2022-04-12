@@ -9,10 +9,8 @@ import requests
 import typing
 import logging
 
-import re
 import isb_lib.core
 import json
-from isb_lib.models.thing import Thing
 
 
 class ThingFetcher:
