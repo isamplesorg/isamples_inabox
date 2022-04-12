@@ -31,6 +31,7 @@ REFETCH_LENGTH = CONCURRENT_DOWNLOADS / 2
 
 __NUM_THINGS_FETCHED = 0
 
+
 @click.command()
 @click.pass_context
 @click.option(

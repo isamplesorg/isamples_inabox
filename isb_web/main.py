@@ -1,5 +1,4 @@
 import os
-from typing import Optional, List
 
 import uvicorn
 import typing
@@ -382,7 +381,7 @@ class ThingsSitemapParams(BaseModel):
     identifiers: list[str]
 
 
-@app.post(f"/things", response_model=typing.Any)
+@app.post("/things", response_model=typing.Any)
 async def get_things_for_sitemap(
     request: fastapi.Request,
     params: ThingsSitemapParams,
@@ -403,6 +402,7 @@ async def get_things_for_sitemap(
     #     else:
     #         logging.error(f"No thing with identifier {identifier}")
     return content
+
 
 @app.get(f"/{THING_URL_PATH}/{{identifier:path}}", response_model=typing.Any)
 async def get_thing(

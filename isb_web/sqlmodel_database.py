@@ -375,8 +375,8 @@ def all_thing_identifier_objects(
 
 
 def things_with_null_identifiers(session: Session) -> list[Thing]:
-    # noinspection PyComparisonWithNone
-    things_select = select(Thing).filter(Thing.identifiers == None)
+    # Note that SQLAlchemy needs things to be written this way but it triggers flake8 so manually override
+    things_select = select(Thing).filter(Thing.identifiers == None)  # noqa: E711
     things = session.exec(things_select).all()
     return things
 

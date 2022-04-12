@@ -3,7 +3,6 @@ import requests
 import os
 from urllib.request import url2pathname
 import datetime
-import dateparser
 from sqlalchemy.pool import StaticPool
 from sqlmodel import SQLModel, create_engine, Session
 
@@ -12,7 +11,6 @@ from isb_lib.sitemaps.sitemap_fetcher import (
     SitemapFileFetcher,
     ThingFetcher,
 )
-from isb_web import sqlmodel_database
 
 
 class LocalFileSitemapIndexFetcher(SitemapIndexFetcher):
