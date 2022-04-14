@@ -171,13 +171,11 @@ def fetch_sitemap_files(authority, last_updated_date, thing_ids: typing.Dict[str
         sitemap_file_fetcher.fetch_sitemap_file()
         sitemap_file_iterator = sitemap_file_fetcher.url_iterator()
         thing_futures = []
-        # max_workers is 1 so that we may execute one request at a time in order to avoid overwhelming the serve
-        # we still gain benefits as the next things request executes while the database is being updated
+        # max_workers is 1 so that we may execute one request at a time in order to avoid overwhelming the server
+        # We still gain benefits as the next things request executes while the local processing is occurring
         with concurrent.futures.ThreadPoolExecutor(
             max_workers=1
         ) as thing_executor:
-            # Initialize to false because we want to process everything at least once even if we hit the end
-            fetched_all_things_for_current_sitemap_file = False
             construct_thing_futures(
                 thing_futures,
                 sitemap_file_iterator,
