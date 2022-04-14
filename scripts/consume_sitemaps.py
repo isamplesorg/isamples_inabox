@@ -25,7 +25,7 @@ from isb_lib.sitemaps.sitemap_fetcher import (
 from isb_web import sqlmodel_database
 from isb_web.sqlmodel_database import SQLModelDAO, all_thing_identifiers, thing_identifiers_from_resolved_content
 
-BATCH_SIZE = 25000
+BATCH_SIZE = 20000
 
 __NUM_THINGS_FETCHED = 0
 
