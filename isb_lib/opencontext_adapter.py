@@ -191,7 +191,12 @@ def load_thing(
         Instance of Thing
     """
     L = get_logger()
-    id = thing_dict["uri"]
+    id = thing_dict["citation uri"]
+    if id is not None:
+        id = isb_lib.normalized_id(id)
+    else:
+        id = thing_dict["uri"]
+        L.error("Received OpenContext record without citation uri -- this is going to be problematic but will save.")
     t_created = dateparser.parse(thing_dict.get("updated"))
     L.info("loadThing: %s", id)
     item = OpenContextItem(id, thing_dict)
