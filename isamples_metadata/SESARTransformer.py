@@ -1,5 +1,6 @@
 import typing
 import logging
+import geohash
 
 from isamples_metadata.Transformer import (
     Transformer,
@@ -436,24 +437,11 @@ class SESARTransformer(Transformer):
             return self.elevation_str(elevation_value, elevation_unit)
         return Transformer.NOT_PROVIDED
 
-    def _geo_location_float_value(self, key_name: typing.AnyStr) -> typing.Optional[typing.SupportsFloat]:
-        if "geoLocation" in self._source_record_description():
-            geo_location = self._source_record_description()["geoLocation"]
-            if geo_location is not None:
-                first_geo = geo_location["geo"][0]
-                # Ignore things that aren't lat/long for now, e.g.
-                # https://github.com/isamplesorg/metadata/issues/20
-                if key_name in first_geo:
-                    string_val = first_geo[key_name]
-                    if string_val is not None:
-                        return float(string_val)
-        return None
-
     def sampling_site_latitude(self) -> typing.Optional[typing.SupportsFloat]:
-        return self._geo_location_float_value("latitude")
+        return _content_latitude(self.source_record)
 
     def sampling_site_longitude(self) -> typing.Optional[typing.SupportsFloat]:
-        return self._geo_location_float_value("longitude")
+        return _content_longitude(self.source_record)
 
     def sampling_site_place_names(self) -> typing.List:
         place_names = list()
@@ -482,3 +470,30 @@ class SESARTransformer(Transformer):
                 if "lastUpdated" == record.get("type"):
                     return record["timestamp"]
         return None
+
+
+def _geo_location_float_value(source_record: typing.Dict, key_name: typing.AnyStr) -> typing.Optional[float]:
+    description = source_record.get("description")
+    if "geoLocation" in description:
+        geo_location = description["geoLocation"]
+        if geo_location is not None:
+            first_geo = geo_location["geo"][0]
+            # Ignore things that aren't lat/long for now, e.g.
+            # https://github.com/isamplesorg/metadata/issues/20
+            if key_name in first_geo:
+                string_val = first_geo[key_name]
+                if string_val is not None:
+                    return float(string_val)
+    return None
+
+
+def _content_latitude(source_record: typing.Dict) -> typing.Optional[float]:
+    return _geo_location_float_value(source_record, "latitude")
+
+
+def _content_longitude(source_record: typing.Dict) -> typing.Optional[float]:
+    return _geo_location_float_value(source_record, "longitude")
+
+
+def geohash_for_content(content: typing.Dict) -> typing.Optional[str]:
+    return geohash.encode(_content_latitude(content), _content_longitude(content), Transformer.GEOHASH_PRECISION)

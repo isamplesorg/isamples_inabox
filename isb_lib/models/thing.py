@@ -82,6 +82,9 @@ class Thing(SQLModel, table=True):
             doc="Additional identifiers used to look up the Thing"
         )
     )
+    geohash: Optional[str] = Field(
+        default=None, nullable=True, description="Geohash of resolved content"
+    )
 
     def insert_thing_identifier_if_not_present(self, identifier: str):
         if self.identifiers is None:

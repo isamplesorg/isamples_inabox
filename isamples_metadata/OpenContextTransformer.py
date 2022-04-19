@@ -1,4 +1,5 @@
 import typing
+import geohash
 
 from isamples_metadata.Transformer import (
     Transformer,
@@ -217,10 +218,10 @@ class OpenContextTransformer(Transformer):
         Transformer.NOT_PROVIDED
 
     def sampling_site_latitude(self) -> typing.Optional[typing.SupportsFloat]:
-        return self.source_record.get("latitude", None)
+        return _content_latitude(self.source_record)
 
     def sampling_site_longitude(self) -> typing.Optional[typing.SupportsFloat]:
-        return self.source_record.get("longitude", None)
+        return _content_longitude(self.source_record)
 
     def sampling_site_place_names(self) -> typing.List:
         return self._context_label_pieces()
@@ -233,3 +234,15 @@ class OpenContextTransformer(Transformer):
 
     def last_updated_time(self) -> typing.Optional[typing.AnyStr]:
         return self.source_record.get("updated", None)
+
+
+def _content_latitude(content: typing.Dict) -> typing.Optional[float]:
+    return content.get("latitude", None)
+
+
+def _content_longitude(content: typing.Dict) -> typing.Optional[float]:
+    return content.get("longitude", None)
+
+
+def geohash_for_content(content: typing.Dict) -> typing.Optional[str]:
+    return geohash.encode(_content_latitude(content), _content_longitude(content), Transformer.GEOHASH_PRECISION)

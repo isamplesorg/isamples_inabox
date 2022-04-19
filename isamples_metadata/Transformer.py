@@ -22,6 +22,8 @@ class Transformer(ABC):
 
     N2T_ARK_NO_HTTPS_PREFIX = f"{N2T_NO_HTTPS_PREFIX}ark:/"
 
+    GEOHASH_PRECISION = 11
+
     @staticmethod
     def _transform_key_to_label(
         key: typing.AnyStr,
