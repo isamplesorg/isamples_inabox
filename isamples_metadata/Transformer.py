@@ -400,6 +400,9 @@ class StringPairedCategoryMapper(AbstractCategoryMapper):
         )
 
 
-def geo_to_h3(latitude: float, longitude: float) -> str:
-    # Set the resolution value to 15, which is the maximum
-    return h3.geo_to_h3(latitude, longitude, 15)
+def geo_to_h3(latitude: typing.Optional[float], longitude: typing.Optional[float]) -> typing.Optional[str]:
+    if latitude is not None and longitude is not None:
+        # Set the resolution value to 15, which is the maximum
+        return h3.geo_to_h3(latitude, longitude, 15)
+    else:
+        return None

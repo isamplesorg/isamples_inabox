@@ -475,16 +475,19 @@ class SESARTransformer(Transformer):
 
 def _geo_location_float_value(source_record: typing.Dict, key_name: typing.AnyStr) -> typing.Optional[float]:
     description = source_record.get("description")
+    geo_location = None
     if "geoLocation" in description:
         geo_location = description["geoLocation"]
-        if geo_location is not None:
-            first_geo = geo_location["geo"][0]
-            # Ignore things that aren't lat/long for now, e.g.
-            # https://github.com/isamplesorg/metadata/issues/20
-            if key_name in first_geo:
-                string_val = first_geo[key_name]
-                if string_val is not None:
-                    return float(string_val)
+    elif "spatialCoverage" in description:
+        geo_location = description["spatialCoverage"]
+    if geo_location is not None:
+        first_geo = geo_location["geo"][0]
+        # Ignore things that aren't lat/long for now, e.g.
+        # https://github.com/isamplesorg/metadata/issues/20
+        if key_name in first_geo:
+            string_val = first_geo[key_name]
+            if string_val is not None:
+                return float(string_val)
     return None
 
 
