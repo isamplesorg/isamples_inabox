@@ -1,6 +1,6 @@
 import typing
-import geohash
 
+import isamples_metadata.Transformer
 from isamples_metadata.Transformer import (
     Transformer,
     AbstractCategoryMetaMapper,
@@ -215,7 +215,7 @@ class OpenContextTransformer(Transformer):
         return self.source_record.get("context label", Transformer.NOT_PROVIDED)
 
     def sampling_site_elevation(self) -> typing.AnyStr:
-        Transformer.NOT_PROVIDED
+        return Transformer.NOT_PROVIDED
 
     def sampling_site_latitude(self) -> typing.Optional[typing.SupportsFloat]:
         return _content_latitude(self.source_record)
@@ -244,5 +244,5 @@ def _content_longitude(content: typing.Dict) -> typing.Optional[float]:
     return content.get("longitude", None)
 
 
-def geohash_for_content(content: typing.Dict) -> typing.Optional[str]:
-    return geohash.encode(_content_latitude(content), _content_longitude(content), Transformer.GEOHASH_PRECISION)
+def geo_to_h3(content: typing.Dict) -> typing.Optional[str]:
+    return isamples_metadata.Transformer.geo_to_h3(_content_latitude(content), _content_longitude(content))

@@ -1,7 +1,7 @@
 import datetime
 import logging
 import typing
-import geohash
+import isamples_metadata
 from isamples_metadata.Transformer import (
     Transformer,
 )
@@ -510,7 +510,8 @@ class GEOMEChildTransformer(GEOMETransformer):
         return [parent_dict]
 
 
-# Function to iterate through the identifiers and instantiate the proper GEOME Transformer based on the identifier used for lookup
+# Function to iterate through the identifiers and instantiate the proper GEOME Transformer based on the identifier
+# used for lookup
 def geome_transformer_for_identifier(
     identifier: str, source_record: typing.Dict
 ) -> GEOMETransformer:
@@ -550,5 +551,5 @@ def _content_longitude(content: typing.Dict) -> typing.Optional[float]:
     return _geo_location_float_value(content, "decimalLongitude")
 
 
-def geohash_for_content(content: typing.Dict) -> typing.Optional[str]:
-    return geohash.encode(_content_latitude(content), _content_longitude(content), Transformer.GEOHASH_PRECISION)
+def geo_to_h3(content: typing.Dict) -> typing.Optional[str]:
+    return isamples_metadata.Transformer.geo_to_h3(_content_longitude(content), _content_longitude(content))

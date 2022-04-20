@@ -1,7 +1,7 @@
 import typing
 import logging
-import geohash
 
+import isamples_metadata.Transformer
 from isamples_metadata.Transformer import (
     Transformer,
     AbstractCategoryMapper,
@@ -259,7 +259,8 @@ class SESARTransformer(Transformer):
     def sample_identifier_string(self) -> typing.AnyStr:
         return f"{self.sample_identifier_scheme().upper()}:{self.sample_identifier_value()}"
 
-    def sample_identifier_scheme(self) -> typing.AnyStr:
+    @staticmethod
+    def sample_identifier_scheme() -> typing.AnyStr:
         return "igsn"
 
     def sample_identifier_value(self) -> typing.AnyStr:
@@ -495,5 +496,5 @@ def _content_longitude(source_record: typing.Dict) -> typing.Optional[float]:
     return _geo_location_float_value(source_record, "longitude")
 
 
-def geohash_for_content(content: typing.Dict) -> typing.Optional[str]:
-    return geohash.encode(_content_latitude(content), _content_longitude(content), Transformer.GEOHASH_PRECISION)
+def geo_to_h3(content: typing.Dict) -> typing.Optional[str]:
+    return isamples_metadata.Transformer.geo_to_h3(_content_latitude(content), _content_longitude(content))

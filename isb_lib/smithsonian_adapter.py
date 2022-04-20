@@ -45,7 +45,7 @@ class SmithsonianItem(object):
         # Note that this field doesn't make sense for Smithsonian as the information is coming from a local file
         # _thing.resolve_elapsed = resolve_elapsed
         _thing.resolved_content = self.source_item
-        _thing.geohash = SmithsonianTransformer.geohash_for_content(_thing.resolved_content)
+        _thing.h3 = SmithsonianTransformer.geo_to_h3(_thing.resolved_content)
         return _thing
 
 

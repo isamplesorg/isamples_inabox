@@ -1,8 +1,8 @@
 import typing
 import re
-import geohash
 
 from isamples_metadata.isamplesfasttext import SMITHSONIAN_FEATURE_PREDICTOR
+import isamples_metadata.Transformer
 from isamples_metadata.Transformer import (
     Transformer,
     AbstractCategoryMetaMapper,
@@ -300,5 +300,5 @@ def _content_longitude(source_record: typing.Dict) -> typing.Optional[float]:
     return SmithsonianTransformer._float_or_none(source_record.get("decimalLongitude"))
 
 
-def geohash_for_content(content: typing.Dict) -> typing.Optional[str]:
-    return geohash.encode(_content_latitude(content), _content_longitude(content), Transformer.GEOHASH_PRECISION)
+def geo_to_h3(content: typing.Dict) -> typing.Optional[str]:
+    return isamples_metadata.Transformer.geo_to_h3(_content_latitude(content), _content_longitude(content))

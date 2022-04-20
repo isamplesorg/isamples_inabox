@@ -82,8 +82,8 @@ class Thing(SQLModel, table=True):
             doc="Additional identifiers used to look up the Thing"
         )
     )
-    geohash: Optional[str] = Field(
-        default=None, nullable=True, description="Geohash of resolved content"
+    h3: Optional[str] = Field(
+        default=None, nullable=True, description="The h3 value (https://uber.github.io/h3-py/intro.html)"
     )
 
     def insert_thing_identifier_if_not_present(self, identifier: str):

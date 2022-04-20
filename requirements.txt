@@ -23,6 +23,7 @@ flask==2.0.3; python_version >= "3.6"
 geojson==2.5.0
 greenlet==1.1.2; python_version >= "3" and (platform_machine == "aarch64" or platform_machine == "ppc64le" or platform_machine == "x86_64" or platform_machine == "amd64" or platform_machine == "AMD64" or platform_machine == "win32" or platform_machine == "WIN32") and python_full_version >= "3.6.1" and python_full_version < "4.0.0"
 h11==0.12.0; python_version >= "3.6"
+h3==3.7.4
 heartrate==0.2.2
 httpcore==0.13.7; python_version >= "3.6"
 httptools==0.1.2; sys_platform != "win32" and sys_platform != "cygwin" and platform_python_implementation != "PyPy"
@@ -44,7 +45,6 @@ pygments==2.11.2; python_version >= "3.5"
 pyparsing==3.0.8; python_version >= "3.8" and python_version < "4.0" and python_full_version >= "3.6.8"
 python-dateutil==2.8.2; python_version >= "3.8" and python_full_version < "3.0.0" and python_version < "4.0" or python_version >= "3.8" and python_version < "4.0" and python_full_version >= "3.3.0"
 python-dotenv==0.20.0; python_version >= "3.5"
-python-geohash==0.8.5
 pytz-deprecation-shim==0.1.0.post0; python_version >= "3.8" and python_full_version < "3.0.0" and python_version < "4.0" or python_version >= "3.8" and python_version < "4.0" and python_full_version >= "3.6.0"
 pytz==2022.1; python_version >= "3.8" and python_version < "4.0"
 pyyaml==6.0; python_version >= "3.8" and python_version < "4.0"

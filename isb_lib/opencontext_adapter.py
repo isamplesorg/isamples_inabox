@@ -56,7 +56,7 @@ class OpenContextItem(object):
         # to the raw http response here.
         # _thing.resolve_elapsed = resolve_elapsed
         _thing.resolved_content = self.item
-        _thing.geohash = OpenContextTransformer.geohash_for_content(_thing.resolved_content)
+        _thing.h3 = OpenContextTransformer.geo_to_h3(_thing.resolved_content)
         return _thing
 
 

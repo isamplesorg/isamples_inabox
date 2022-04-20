@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 import typing
 
+import h3
 
 NOT_PROVIDED = "Not Provided"
 
@@ -21,8 +22,6 @@ class Transformer(ABC):
     N2T_NO_HTTPS_PREFIX = "http://n2t.net/"
 
     N2T_ARK_NO_HTTPS_PREFIX = f"{N2T_NO_HTTPS_PREFIX}ark:/"
-
-    GEOHASH_PRECISION = 11
 
     @staticmethod
     def _transform_key_to_label(
@@ -399,3 +398,8 @@ class StringPairedCategoryMapper(AbstractCategoryMapper):
             and potential_match.lower().strip() == self._primaryMatch
             and auxiliary_match.lower().strip() == self._auxiliaryMatch
         )
+
+
+def geo_to_h3(latitude: float, longitude: float) -> str:
+    # Set the resolution value to 15, which is the maximum
+    return h3.geo_to_h3(latitude, longitude, 15)
