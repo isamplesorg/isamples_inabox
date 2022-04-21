@@ -153,3 +153,22 @@ class ThingIdentifier(SQLModel, table=True):
     thing_id: Optional[int] = Field(
         default=None, nullable=False, foreign_key="thing._id", index=False
     )
+
+
+class Point(SQLModel, table=True):
+    h3: Optional[str] = Field(
+        primary_key=True,
+        default=None,
+        nullable=False,
+        index=False,
+        description="The h3 value representing the geo"
+    )
+    longitude: Optional[float] = Field(
+        default=None, nullable=False, description="Longitude of the geo", index=False
+    )
+    latitude: Optional[float] = Field(
+        default=None, nullable=False, description="Latitude of the geo", index=False
+    )
+    height: Optional[float] = Field(
+        default=None, nullable=True, description="Height of the geo, as returned by Cesium.  Null if uncalculated."
+    )
