@@ -378,7 +378,6 @@ def h3_values_without_points(session: Session, all_h3_values: set) -> list:
     return all_h3_values - h3_with_points_set
 
 
-
 def mark_thing_not_found(session: Session, thing_id: str, resolved_url: str):
     """In case we get an error fetching a thing, mark it as not found in the database"""
     existing_thing = get_thing_with_id(session, thing_id)
