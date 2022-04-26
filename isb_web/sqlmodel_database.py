@@ -379,7 +379,7 @@ def h3_values_without_points(session: Session, all_h3_values: set) -> list:
 
 
 def h3_to_height(session: Session) -> typing.Dict:
-    h3_select = select(Point.h3, Point.height).filter(Point.height != None) # noqa: E711
+    h3_select = select(Point.h3, Point.height).filter(Point.height != None)  # noqa: E711
     point_rows = session.execute(h3_select).fetchall()
     point_dict = {}
     for row in point_rows:
