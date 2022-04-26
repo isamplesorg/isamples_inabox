@@ -378,6 +378,15 @@ def h3_values_without_points(session: Session, all_h3_values: set) -> list:
     return all_h3_values - h3_with_points_set
 
 
+def h3_to_height(session: Session) -> typing.Dict:
+    h3_select = select(Point.h3, Point.height).filter(Point.height != None) # noqa: E711
+    point_rows = session.execute(h3_select).fetchall()
+    point_dict = {}
+    for row in point_rows:
+        point_dict[row[0]] = row[1]
+    return point_dict
+
+
 def mark_thing_not_found(session: Session, thing_id: str, resolved_url: str):
     """In case we get an error fetching a thing, mark it as not found in the database"""
     existing_thing = get_thing_with_id(session, thing_id)
