@@ -1,4 +1,5 @@
 import click
+import click_config_file
 from sqlmodel import Session, select
 
 import isb_lib
@@ -30,6 +31,7 @@ BATCH_SIZE = 50000
     help="Specify logging level",
     show_default=True,
 )
+@click_config_file.configuration_option(config_file_name="isb.cfg")
 @click.pass_context
 def main(ctx, db_url, verbosity):
     isb_lib.core.things_main(ctx, db_url, None, verbosity)
