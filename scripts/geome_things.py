@@ -321,7 +321,7 @@ def populateIsbCoreSolr(ctx, ignore_last_modified: bool):
     solr_url = ctx.obj["solr_url"]
     if ignore_last_modified:
         max_solr_updated_date = None
-    else
+    else:
         max_solr_updated_date = isb_lib.core.solr_max_source_updated_time(
             url=solr_url,
             authority_id=isb_lib.geome_adapter.GEOMEItem.AUTHORITY_ID,
