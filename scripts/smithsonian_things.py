@@ -42,7 +42,7 @@ def load_smithsonian_entries(db_session, file_path, start_from=None):
                     current_existing_things_batch.append(thing_dict)
                 else:
                     current_new_things_batch.append(thing_dict)
-                all_ids.add(thing_id)
+            all_ids.add(thing_id)
 
         # get the remainder
         save_to_db(db_session, i, num_newer)
@@ -57,7 +57,7 @@ def process_keys(column_headers, current_record, current_values, start_from):
             thing_id = isb_lib.normalized_id(current_values[index])
         elif key == "modified":
             modified_date = datetime.datetime.strptime(current_values[index], "%Y-%m-%d %H:%M:%S")
-            if modified_date is None or modified_date >= start_from:
+            if start_from is None or modified_date >= start_from:
                 newer_than_start_from = True
             else:
                 return False, None
@@ -75,11 +75,11 @@ def process_keys(column_headers, current_record, current_values, start_from):
 def thing_dict_for_db(resolved_content: typing.Dict, file_path: str, thing_id: str, primary_keys_by_id: typing.Dict):
     try:
         t_created = datetime.datetime(
-            year=int(resolved_content["year"]),
-            month=int(resolved_content["month"]),
-            day=int(resolved_content["day"]),
+            year=int(resolved_content.get("year")),
+            month=int(resolved_content.get("month")),
+            day=int(resolved_content.get("day")),
         )
-    except ValueError:
+    except Exception:
         # In many cases, these don't seem to be populated.  There's nothing we can do if they aren't there, so just
         # leave it as None.
         t_created = None
