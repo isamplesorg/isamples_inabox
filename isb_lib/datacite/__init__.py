@@ -15,7 +15,7 @@ def create_draft_doi(
     prefix: str,
     username: str,
     password: str,
-) -> typing.Dict:
+) -> typing.Optional[str]:
     dois_url = f"{DATACITE_URL}/dois"
     headers = {"content-type": CONTENT_TYPE}
     request_data = {
@@ -31,9 +31,12 @@ def create_draft_doi(
     response = rsession.post(
         dois_url, headers=headers, data=post_data_str, auth=auth
     )
-    if response.status_code != 200:
+    if response.status_code < 200 or response.status_code >= 300:
         logging.error(
-            "Error requesting new DOI, status code: %s",
+            "Error requesting new DOI, status code: %s, response %s",
             response.status_code,
+            str(response.json())
         )
-    return response.json()
+        return None
+    json_response = response.json()
+    return json_response["data"]["id"]
