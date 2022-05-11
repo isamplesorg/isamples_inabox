@@ -9,7 +9,7 @@ CONTENT_TYPE = "application/vnd.api+json"
 DATACITE_URL = "https://api.test.datacite.org"
 
 
-def _dois_url():
+def dois_url():
     dois_url = f"{DATACITE_URL}/dois"
     return dois_url
 
@@ -39,12 +39,21 @@ def _post_to_datacite(
     rsession: requests.session, post_data_str: str, username: str, password: str
 ) -> Response:
     response = rsession.post(
-        _dois_url(),
+        dois_url(),
         headers=_dois_headers(),
         data=post_data_str,
         auth=_dois_auth(password, username),
     )
     return response
+
+
+def _doi_or_none(response: Response) -> typing.Optional[str]:
+    if not _validate_response(response):
+        return None
+    json_response = response.json()
+    draft_id = json_response["data"]["id"]
+    # use the DOI prefix since we creating DOIs with datacite
+    return doi_from_id(draft_id)
 
 
 def create_draft_doi(
@@ -63,19 +72,14 @@ def create_draft_doi(
     request_data = {"data": data_dict}
     post_data_str = json.dumps(request_data).encode("utf-8")
     response = _post_to_datacite(rsession, post_data_str, username, password)
-    if not _validate_response(response):
-        return None
-    json_response = response.json()
-    draft_id = json_response["data"]["id"]
-    # use the DOI prefix since we creating DOIs with datacite
-    return doi_from_id(draft_id)
+    return _doi_or_none(response)
 
 
 def create_doi(
     rsession: requests.session, json_data: str, username: str, password: str
-) -> bool:
+) -> typing.Optional[str]:
     response = _post_to_datacite(rsession, json_data, username, password)
-    return _validate_response(response)
+    return _doi_or_none(response)
 
 
 def doi_from_id(raw_id: str) -> str:

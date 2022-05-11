@@ -1,3 +1,4 @@
+import datetime
 from io import BufferedReader
 from typing import Dict
 
@@ -9,7 +10,8 @@ import isb_lib.datacite as datacite
 import requests
 import logging
 
-from isb_web.sqlmodel_database import SQLModelDAO, save_draft_thing_with_id
+from isb_lib.models.thing import Thing
+from isb_web.sqlmodel_database import SQLModelDAO, save_draft_thing_with_id, save_thing
 
 
 @click.group()
@@ -73,9 +75,20 @@ def create_draft_identifiers(
 @click.pass_context
 def create_doi(ctx: Dict, file: BufferedReader, username: str, password: str):
     session = SQLModelDAO(ctx.obj["db_url"]).get_session()
-    result = datacite.create_doi(requests.session(), file.read(), username, password)
-    if result:
-        logging.info("Successfully saved DOI to DataCite")
+    file_contents = file.read()
+    result = datacite.create_doi(requests.session(), file_contents, username, password)
+    logging.info("Successfully saved DOI to DataCite %s", result)
+    if result is not None:
+        new_thing = Thing()
+        new_thing.id = result
+        new_thing.resolved_status = 200
+        # TODO: pipe in authority -- from where?
+        new_thing.authority_id = "AUTHORITY"
+        new_thing.resolved_url = datacite.dois_url()
+        new_thing.resolved_content = file_contents
+        new_thing.tcreated = datetime.datetime.now()
+        save_thing(session, new_thing)
+        logging.info("Sucessfully saved thing with id %s", result)
     else:
         logging.error(
             "Unable to save DOI to DataCite.  See console log for additional information."
