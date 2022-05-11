@@ -1,3 +1,6 @@
+from io import BufferedReader
+from typing import Dict
+
 import click
 import click_config_file
 
@@ -32,12 +35,7 @@ def main(ctx, db_url):
     default=None,
     help="The datacite prefix to use when creating identifiers.",
 )
-@click.option(
-    "--doi",
-    type=str,
-    default=None,
-    help="The full DOI to register"
-)
+@click.option("--doi", type=str, default=None, help="The full DOI to register")
 @click.option(
     "--username",
     type=str,
@@ -46,7 +44,9 @@ def main(ctx, db_url):
 )
 @click.password_option(hide_input=True)
 @click.pass_context
-def create_draft_identifiers(ctx, num_identifiers, prefix, doi, username, password):
+def create_draft_identifiers(
+    ctx: Dict, num_identifiers: int, prefix: str, doi: str, username: str, password: str
+):
     # If the doi is specified, then num_identifiers can be only 1
     if doi is not None:
         num_identifiers = 1
@@ -59,6 +59,27 @@ def create_draft_identifiers(ctx, num_identifiers, prefix, doi, username, passwo
             logging.info("Successfully created draft DOI %s", draft_id)
             draft_thing = save_draft_thing_with_id(session, draft_id)
             logging.info("Successfully saved draft thing with id %s", draft_thing.id)
+
+
+@main.command("create_doi")
+@click.option("--file", type=click.File("r"))
+@click.option(
+    "--username",
+    type=str,
+    default=None,
+    help="The datacite username to use when creating identifiers.",
+)
+@click.password_option(hide_input=True)
+@click.pass_context
+def create_doi(ctx: Dict, file: BufferedReader, username: str, password: str):
+    session = SQLModelDAO(ctx.obj["db_url"]).get_session()
+    result = datacite.create_doi(requests.session(), file.read(), username, password)
+    if result:
+        logging.info("Successfully saved DOI to DataCite")
+    else:
+        logging.error(
+            "Unable to save DOI to DataCite.  See console log for additional information."
+        )
 
 
 if __name__ == "__main__":
