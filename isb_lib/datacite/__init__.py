@@ -1,3 +1,4 @@
+import datetime
 import json
 import typing
 import logging
@@ -5,13 +6,10 @@ import requests
 from requests import Response
 from requests.auth import HTTPBasicAuth
 
+from isb_lib.core import parsed_date
+
 CONTENT_TYPE = "application/vnd.api+json"
 DATACITE_URL = "https://api.test.datacite.org"
-
-
-def dois_url():
-    dois_url = f"{DATACITE_URL}/dois"
-    return dois_url
 
 
 def _dois_headers():
@@ -56,6 +54,46 @@ def _doi_or_none(response: Response) -> typing.Optional[str]:
     return doi_from_id(draft_id)
 
 
+# See datacite docs here: https://support.datacite.org/docs/api-create-dois
+def datacite_metadata_from_core_record(
+    prefix: str, doi: str, authority: str, core_record: dict
+) -> dict:
+    # Datacite requires the following fields:
+    # DOI or prefix -- handled via params
+    attribute_dict = attribute_dict_with_doi_or_prefix(doi, prefix)
+    attribute_dict["types"] = {"resourceTypeGeneral": "PhysicalObject"}
+    registrant = core_record.get("registrant")
+    if registrant is None:
+        raise ValueError("Registrant is a required field in order to register a DOI")
+    # creators -- mapped from registrant?
+    attribute_dict["creators"] = [{"name": registrant}]
+    # title -- mapped from label?
+    label = core_record.get("label")
+    if label is None:
+        raise ValueError("Label is a required field in order to register a DOI")
+    attribute_dict["titles"] = [{"title": label}]
+    # publisher -- mapped from authority -- where does the authority come from?
+    #           -- alternatively we could read this somewhere out of the data
+    attribute_dict["publisher"] = authority
+    # publicationYear -- mapped from producedBy_resultTime, if not present defaults to current year
+    produced_by = core_record.get("producedBy")
+    publication_year = datetime.datetime.now().year
+    if produced_by is not None:
+        raw_result_time = produced_by.get("resultTime")
+        if raw_result_time is not None:
+            parsed_result_time = parsed_date(raw_result_time)
+            if parsed_result_time is not None:
+                publication_year = parsed_result_time.year
+    attribute_dict["publicationYear"] = publication_year
+    datacite_metadata = {"data": {"type": "dois", "attributes": attribute_dict}}
+    return datacite_metadata
+
+
+def dois_url():
+    url = f"{DATACITE_URL}/dois"
+    return url
+
+
 def create_draft_doi(
     rsession: requests.session,
     prefix: str,
@@ -63,16 +101,21 @@ def create_draft_doi(
     username: str,
     password: str,
 ) -> typing.Optional[str]:
-    attribute_dict = {}
-    if doi is not None:
-        attribute_dict["doi"] = doi
-    else:
-        attribute_dict["prefix"] = prefix
+    attribute_dict = attribute_dict_with_doi_or_prefix(doi, prefix)
     data_dict = {"type": "dois", "attributes": attribute_dict}
     request_data = {"data": data_dict}
     post_data_str = json.dumps(request_data).encode("utf-8")
     response = _post_to_datacite(rsession, post_data_str, username, password)
     return _doi_or_none(response)
+
+
+def attribute_dict_with_doi_or_prefix(doi, prefix):
+    attribute_dict = {}
+    if doi is not None:
+        attribute_dict["doi"] = doi
+    else:
+        attribute_dict["prefix"] = prefix
+    return attribute_dict
 
 
 def create_doi(

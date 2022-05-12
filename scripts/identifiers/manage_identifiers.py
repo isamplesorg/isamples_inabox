@@ -9,6 +9,7 @@ import isb_lib.core
 import isb_lib.datacite as datacite
 import requests
 import logging
+import json
 
 from isb_lib.models.thing import Thing
 from isb_web.sqlmodel_database import SQLModelDAO, save_draft_thing_with_id, save_thing
@@ -66,6 +67,13 @@ def create_draft_identifiers(
 @main.command("create_doi")
 @click.option("--file", type=click.File("r"))
 @click.option(
+    "--prefix",
+    type=str,
+    default=None,
+    help="The datacite prefix to use when creating identifiers.",
+)
+@click.option("--doi", type=str, default=None, help="The full DOI to register")
+@click.option(
     "--username",
     type=str,
     default=None,
@@ -73,10 +81,20 @@ def create_draft_identifiers(
 )
 @click.password_option(hide_input=True)
 @click.pass_context
-def create_doi(ctx: Dict, file: BufferedReader, username: str, password: str):
+def create_doi(ctx: Dict, file: BufferedReader, prefix: str, doi: str, username: str, password: str):
     session = SQLModelDAO(ctx.obj["db_url"]).get_session()
     file_contents = file.read()
-    result = datacite.create_doi(requests.session(), file_contents, username, password)
+    file_contents_dict = json.loads(file_contents)
+    datacite_metadata_dict = datacite.datacite_metadata_from_core_record(
+        prefix, doi, "AUTHORITY", file_contents_dict
+    )
+    # TODO WE HAVE THE SAME ENCODING ELSEWHERE IN DATACITE CODE SHOULD STANDARDIZE
+    result = datacite.create_doi(
+        requests.session(),
+        json.dumps(datacite_metadata_dict).encode("utf-8"),
+        username,
+        password,
+    )
     logging.info("Successfully saved DOI to DataCite %s", result)
     if result is not None:
         new_thing = Thing()
