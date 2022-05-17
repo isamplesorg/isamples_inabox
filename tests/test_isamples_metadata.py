@@ -124,13 +124,13 @@ def test_geome_child_dicts_equal(
         transformed_to_isamples_record = child_transformer.transform()
         _assert_transformed_dictionary(isamples_path, transformed_to_isamples_record)
         assert last_mod_str == child_transformer.last_updated_time()
-        source_record = json.load(source_file)
 
 
 # test the special logic in GEOME to grab the proper transformer
 def test_geome_transformer_for_identifier():
     test_file_path = "./test_data/GEOME/raw/ark-21547-Car2PIRE_0334.json"
     with open(test_file_path) as source_file:
+        source_record = json.load(source_file)
         transformer = (
             isamples_metadata.GEOMETransformer.geome_transformer_for_identifier(
                 "ark:/21547/Car2PIRE_0334", source_record
