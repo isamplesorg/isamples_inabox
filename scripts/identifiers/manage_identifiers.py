@@ -6,7 +6,7 @@ import click
 import click_config_file
 
 import isb_lib.core
-import isb_lib.datacite as datacite
+import isb_lib.identifiers.datacite as datacite
 import requests
 import logging
 import json

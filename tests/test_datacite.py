@@ -1,7 +1,7 @@
 import json
 import pytest
 
-import isb_lib.datacite as datacite
+import isb_lib.identifiers.datacite as datacite
 
 
 def test_datacite_metadata():
