@@ -17,6 +17,9 @@ def test_datacite_metadata():
         attributes = data_dict.get("attributes")
         assert prefix == attributes.get("prefix")
         assert authority == attributes.get("publisher")
+        assert 2006 == attributes.get("publicationYear")
+        assert "Curator Integrated Ocean Drilling Program (TAMU)" == attributes.get("creators")[0]
+        assert "Sample 178-1098B-1H-1 (143-144 cm.)" == attributes.get("titles")[0]["title"]
 
 
 def test_datacite_metadata_missing_label():

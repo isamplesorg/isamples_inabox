@@ -25,12 +25,12 @@ def main(ctx, db_url):
     isb_lib.core.things_main(ctx, db_url, None)
 
 
-@main.command("create_draft")
+@main.command("create_draft_doi")
 @click.option(
-    "--num_identifiers",
+    "--num_dois",
     type=int,
     default=1,
-    help="Number of draft identifiers to create.",
+    help="Number of draft dois to create.",
 )
 @click.option(
     "--prefix",
@@ -47,14 +47,14 @@ def main(ctx, db_url):
 )
 @click.password_option(hide_input=True)
 @click.pass_context
-def create_draft_identifiers(
-    ctx: Dict, num_identifiers: int, prefix: str, doi: str, username: str, password: str
+def create_draft_dois(
+    ctx: Dict, num_dois: int, prefix: str, doi: str, username: str, password: str
 ):
     # If the doi is specified, then num_identifiers can be only 1
     if doi is not None:
         num_identifiers = 1
     session = SQLModelDAO(ctx.obj["db_url"]).get_session()
-    for i in range(num_identifiers):
+    for i in range(num_dois):
         draft_id = datacite.create_draft_doi(
             requests.session(), prefix, doi, username, password
         )
