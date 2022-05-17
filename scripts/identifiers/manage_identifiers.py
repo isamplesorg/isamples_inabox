@@ -39,6 +39,7 @@ def main(ctx, db_url):
     help="The datacite prefix to use when creating identifiers.",
 )
 @click.option("--doi", type=str, default=None, help="The full DOI to register")
+@click.option("--igsn", is_flag=True)
 @click.option(
     "--username",
     type=str,
@@ -48,7 +49,7 @@ def main(ctx, db_url):
 @click.password_option(hide_input=True)
 @click.pass_context
 def create_draft_dois(
-    ctx: Dict, num_dois: int, prefix: str, doi: str, username: str, password: str
+    ctx: Dict, num_dois: int, prefix: str, doi: str, igsn: bool, username: str, password: str
 ):
     # If the doi is specified, then num_identifiers can be only 1
     if doi is not None:
@@ -56,7 +57,7 @@ def create_draft_dois(
     session = SQLModelDAO(ctx.obj["db_url"]).get_session()
     for i in range(num_dois):
         draft_id = datacite.create_draft_doi(
-            requests.session(), prefix, doi, username, password
+            requests.session(), prefix, doi, igsn, username, password
         )
         if draft_id is not None:
             logging.info("Successfully created draft DOI %s", draft_id)
@@ -73,6 +74,7 @@ def create_draft_dois(
     help="The datacite prefix to use when creating identifiers.",
 )
 @click.option("--doi", type=str, default=None, help="The full DOI to register")
+@click.option("--igsn", is_flag=True)
 @click.option(
     "--username",
     type=str,
@@ -81,12 +83,12 @@ def create_draft_dois(
 )
 @click.password_option(hide_input=True)
 @click.pass_context
-def create_doi(ctx: Dict, file: BufferedReader, prefix: str, doi: str, username: str, password: str):
+def create_doi(ctx: Dict, file: BufferedReader, prefix: str, doi: str, igsn: bool, username: str, password: str):
     session = SQLModelDAO(ctx.obj["db_url"]).get_session()
     file_contents = file.read()
     file_contents_dict = json.loads(file_contents)
     datacite_metadata_dict = datacite.datacite_metadata_from_core_record(
-        prefix, doi, "AUTHORITY", file_contents_dict
+        prefix, doi, igsn, "AUTHORITY", file_contents_dict
     )
     # TODO WE HAVE THE SAME ENCODING ELSEWHERE IN DATACITE CODE SHOULD STANDARDIZE
     result = datacite.create_doi(

@@ -7,7 +7,7 @@ from requests import Response
 from requests.auth import HTTPBasicAuth
 
 from isb_lib.core import parsed_date
-from isb_lib.identifiers.identifier import DataciteIdentifier
+from isb_lib.identifiers.identifier import DataciteIdentifier, IGSNIdentifier
 
 CONTENT_TYPE = "application/vnd.api+json"
 DATACITE_URL = "https://api.test.datacite.org"
@@ -57,7 +57,7 @@ def _doi_or_none(response: Response) -> typing.Optional[str]:
 
 # See datacite docs here: https://support.datacite.org/docs/api-create-dois
 def datacite_metadata_from_core_record(
-    prefix: typing.Optional[str], doi: typing.Optional[str], authority: str, core_record: dict
+    prefix: typing.Optional[str], doi: typing.Optional[str], igsn: bool, authority: str, core_record: dict
 ) -> dict:
     # Datacite requires the following fields:
     # DOI or prefix -- handled via params
@@ -80,7 +80,10 @@ def datacite_metadata_from_core_record(
             parsed_result_time = parsed_date(raw_result_time)
             if parsed_result_time is not None:
                 publication_year = parsed_result_time.year
-    identifier = DataciteIdentifier(doi, prefix, [registrant], [label], authority, publication_year)
+    if igsn:
+        identifier = DataciteIdentifier(doi, prefix, [registrant], [label], authority, publication_year)
+    else:
+        identifier = IGSNIdentifier(doi, prefix, [registrant], [label], authority, publication_year)
     datacite_metadata = {"data": {"type": "dois", "attributes": identifier.metadata_dict()}}
     return datacite_metadata
 
@@ -94,6 +97,7 @@ def create_draft_doi(
     rsession: requests.session,
     prefix: str,
     doi: str,
+    igsn: bool,
     username: str,
     password: str,
 ) -> typing.Optional[str]:
