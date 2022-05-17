@@ -52,7 +52,7 @@ def create_draft_dois(
 ):
     # If the doi is specified, then num_identifiers can be only 1
     if doi is not None:
-        num_identifiers = 1
+        num_dois = 1
     session = SQLModelDAO(ctx.obj["db_url"]).get_session()
     for i in range(num_dois):
         draft_id = datacite.create_draft_doi(
