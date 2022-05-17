@@ -26,5 +26,5 @@ def test_datacite_metadata_missing_label():
     test_file_path = "./test_data/DOIS/missing_label.json"
     with open(test_file_path) as source_file:
         source_record = json.load(source_file)
-        with pytest.raises(ValueError) as e:
+        with pytest.raises(ValueError):
             datacite.datacite_metadata_from_core_record("prefix", None, "authority", source_record)
