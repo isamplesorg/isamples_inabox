@@ -1,8 +1,9 @@
 import datetime
+from abc import ABC, abstractmethod
 from typing import Optional
 
 
-class Identifier:
+class Identifier(ABC):
     def __init__(
         self,
         identifier: str,
@@ -19,11 +20,17 @@ class Identifier:
         self._publication_year = publication_year
         self._resource_type = resource_type
 
+    @abstractmethod
     def metadata_dict(self) -> dict:
+        pass
+
+    @abstractmethod
+    def __str__(self) -> str:
         pass
 
 
 class DataciteIdentifier(Identifier):
+
     def __init__(
         self,
         doi: Optional[str],
@@ -64,6 +71,16 @@ class DataciteIdentifier(Identifier):
         metadata_dict["publicationYear"] = self._publication_year
         return metadata_dict
 
+    def __str__(self) -> str:
+        if self._is_doi:
+            return f"doi:{self._identifier}"
+        else:
+            return f"uassigned doi with prefix:{self._identifier}"
+
 
 class IGSNIdentifier(DataciteIdentifier):
-    pass
+    def __str__(self) -> str:
+        if self._is_doi:
+            return f"igsn:{self._identifier}"
+        else:
+            return f"uassigned igsn with prefix:{self._identifier}"
