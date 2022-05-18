@@ -55,5 +55,4 @@
        run: |
          source ./.venv/bin/activate       
          pip install mypy
-         mypy --namespace-packages --install-types
-         mypy --namespace-packages
+         mypy --install-types --non-interactive --namespace-packages
