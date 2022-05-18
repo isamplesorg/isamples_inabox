@@ -1,9 +1,9 @@
+from __future__ import annotations
 import re
 import urllib.parse
 from abc import ABC
 import datetime
 from typing import Iterator, Optional
-from __future__ import annotations
 
 import lxml.etree
 import requests
