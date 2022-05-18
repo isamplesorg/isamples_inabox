@@ -1,13 +1,13 @@
 import datetime
-from typing import Any, Optional
+from typing import Optional
 
 
 class Identifier:
     def __init__(
         self,
         identifier: str,
-        creators: [str],
-        titles: [str],
+        creators: list[str],
+        titles: list[str],
         publisher: str,
         publication_year: int = datetime.datetime.now().year,
         resource_type: str = "PhysicalObject",
@@ -19,7 +19,7 @@ class Identifier:
         self._publication_year = publication_year
         self._resource_type = resource_type
 
-    def metadata_dict(self) -> dict[str: Any]:
+    def metadata_dict(self) -> dict:
         pass
 
 
@@ -28,9 +28,10 @@ class DataciteIdentifier(Identifier):
         self,
         doi: Optional[str],
         prefix: Optional[str],
-        creators: [str],
-        titles: [str],
+        creators: list[str],
+        titles: list[str],
         publisher: str,
+        publication_year: int,
         resource_type: str = "PhysicalObject",
     ):
         if doi is None and prefix is None:
@@ -41,13 +42,13 @@ class DataciteIdentifier(Identifier):
             raise ValueError("One or more titles must be specified.")
 
         if doi is not None:
-            super().__init__(doi, creators, titles, publisher, resource_type)
+            super().__init__(doi, creators, titles, publisher, publication_year, resource_type)
             self._is_doi = True
-        else:
-            super().__init__(prefix, creators, titles, publisher, resource_type)
+        elif prefix is not None:
+            super().__init__(prefix, creators, titles, publisher, publication_year, resource_type)
             self._is_doi = False
 
-    def metadata_dict(self) -> dict[str: Any]:
+    def metadata_dict(self) -> dict:
         metadata_dict = {}
         if self._is_doi:
             metadata_dict["doi"] = self._identifier

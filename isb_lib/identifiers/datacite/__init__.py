@@ -35,7 +35,7 @@ def _validate_response(response) -> bool:
 
 
 def _post_to_datacite(
-    rsession: requests.session, post_data_str: str, username: str, password: str
+    rsession: requests.session, post_data_str: typing.AnyStr, username: str, password: str
 ) -> Response:
     response = rsession.post(
         dois_url(),
@@ -119,7 +119,7 @@ def _attribute_dict_with_doi_or_prefix(doi, prefix):
 
 
 def create_doi(
-    rsession: requests.session, json_data: str, username: str, password: str
+    rsession: requests.session, json_data: typing.AnyStr, username: str, password: str
 ) -> typing.Optional[str]:
     response = _post_to_datacite(rsession, json_data, username, password)
     return _doi_or_none(response)
