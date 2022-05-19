@@ -56,7 +56,7 @@ class SmithsonianTransformer(Transformer):
     RESPONSIBILITIES_SPLIT_RE = re.compile(r",|&")
 
     def _source_id(self) -> str:
-        return self.source_record.get("id",  "")
+        return self.source_record.get("id", "")
 
     def id_string(self) -> str:
         source_id = self._source_id()

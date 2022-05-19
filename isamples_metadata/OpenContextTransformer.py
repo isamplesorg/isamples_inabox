@@ -218,10 +218,10 @@ class OpenContextTransformer(Transformer):
     def sampling_site_elevation(self) -> str:
         return Transformer.NOT_PROVIDED
 
-    def sampling_site_latitude(self) -> typing.Optional[typing.SupportsFloat]:
+    def sampling_site_latitude(self) -> Optional[typing.SupportsFloat]:
         return _content_latitude(self.source_record)
 
-    def sampling_site_longitude(self) -> typing.Optional[typing.SupportsFloat]:
+    def sampling_site_longitude(self) -> Optional[typing.SupportsFloat]:
         return _content_longitude(self.source_record)
 
     def sampling_site_place_names(self) -> typing.List:
@@ -233,17 +233,17 @@ class OpenContextTransformer(Transformer):
             classifications.append(consists_of_dict.get("label"))
         return classifications
 
-    def last_updated_time(self) -> typing.Optional[str]:
+    def last_updated_time(self) -> Optional[str]:
         return self.source_record.get("updated", None)
 
 
-def _content_latitude(content: typing.Dict) -> typing.Optional[float]:
+def _content_latitude(content: typing.Dict) -> Optional[float]:
     return content.get("latitude", None)
 
 
-def _content_longitude(content: typing.Dict) -> typing.Optional[float]:
+def _content_longitude(content: typing.Dict) -> Optional[float]:
     return content.get("longitude", None)
 
 
-def geo_to_h3(content: typing.Dict) -> typing.Optional[str]:
+def geo_to_h3(content: typing.Dict) -> Optional[str]:
     return isamples_metadata.Transformer.geo_to_h3(_content_latitude(content), _content_longitude(content))
