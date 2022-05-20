@@ -9,7 +9,7 @@ import isb_lib.core
 url = "http://localhost:8983/solr/isb_core_records/"
 
 
-def _fixed_sesar_id(id: typing.AnyStr) -> typing.AnyStr:
+def _fixed_sesar_id(id: str) -> str:
     fixed_id = id.replace("igsn", "IGSN")
     return fixed_id
 

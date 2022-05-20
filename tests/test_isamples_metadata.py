@@ -35,7 +35,7 @@ def _run_transformer(
 
 
 def _assert_transformed_dictionary(
-    isamples_path: typing.AnyStr, transformed_to_isamples_record: typing.Dict
+    isamples_path: str, transformed_to_isamples_record: typing.Dict
 ):
     with open(isamples_path) as isamples_file:
         assert transformed_to_isamples_record.get("@id") is not None
@@ -173,7 +173,7 @@ def test_open_context_dicts_equal(open_context_source_path, isamples_path, times
     )
 
 
-def _get_record_with_id(record_id: typing.AnyStr) -> typing.Dict:
+def _get_record_with_id(record_id: str) -> typing.Dict:
     raw_csv = "./test_data/Smithsonian/DwC raw/DwC_occurrence_10.csv"
     with open(raw_csv, newline="") as csv_file:
         csv_reader = csv.reader(csv_file, delimiter="\t")

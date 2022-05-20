@@ -155,7 +155,7 @@ def construct_thing_futures(
     thing_futures: list,
     sitemap_file_iterator: Iterator,
     sitemap_file_url: str,
-    rsession: requests.sessions,
+    rsession: requests.Session,
     thing_executor: ThreadPoolExecutor,
     batch_size: int,
 ) -> bool:

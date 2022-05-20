@@ -9,7 +9,7 @@ import isb_lib.core
 url = "http://localhost:8984/solr/isb_core_records/"
 
 
-def _fixed_opencontext_id(id: typing.AnyStr) -> typing.AnyStr:
+def _fixed_opencontext_id(id: str) -> str:
     return isb_lib.normalized_id(id)
 
 

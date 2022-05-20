@@ -50,7 +50,7 @@ class SmithsonianItem(object):
 
 
 def load_thing(
-    thing_dict: typing.Dict, t_resolved: datetime.datetime, file_path: typing.AnyStr
+    thing_dict: typing.Dict, t_resolved: datetime.datetime, file_path: str
 ) -> Thing:
     """
     Load a thing from its source.

@@ -80,10 +80,10 @@ def get_solr_url(path_component: str):
 
 
 def _get_heatmap(
-    q: typing.AnyStr,
+    q: str,
     bb: typing.Dict,
     dist_err_pct: float,
-    fq: typing.AnyStr = "",
+    fq: str = "",
     grid_level=None,
 ) -> typing.Dict:
     # TODO: dealing with the antimeridian ("dateline") in the Solr request.

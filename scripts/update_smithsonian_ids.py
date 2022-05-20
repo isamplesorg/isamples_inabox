@@ -11,7 +11,7 @@ import igsn_lib.models.thing
 from isb_web.sqlmodel_database import SQLModelDAO
 
 
-def _fixed_smithsonian_id(id: typing.AnyStr) -> typing.AnyStr:
+def _fixed_smithsonian_id(id: str) -> str:
     id_no_n2t = id.removeprefix("http://n2t.net/")
     return id_no_n2t
 

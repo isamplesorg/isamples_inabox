@@ -158,18 +158,18 @@ class OpenContextRecordIterator(isb_lib.core.IdentifierIterator):
             return
         self._page_offset = 0
 
-    def last_url_str(self) -> typing.AnyStr:
+    def last_url_str(self) -> str:
         return self.url
 
 
-def _validate_resolved_content(thing: isb_lib.models.thing.Thing):
-    isb_lib.core.validate_resolved_content(OpenContextItem.AUTHORITY_ID, thing)
+def _validate_resolved_content(thing: isb_lib.models.thing.Thing) -> dict:
+    return isb_lib.core.validate_resolved_content(OpenContextItem.AUTHORITY_ID, thing)
 
 
 def reparse_as_core_record(thing: isb_lib.models.thing.Thing) -> typing.List[typing.Dict]:
-    _validate_resolved_content(thing)
+    resolved_content = _validate_resolved_content(thing)
     try:
-        transformer = OpenContextTransformer.OpenContextTransformer(thing.resolved_content)
+        transformer = OpenContextTransformer.OpenContextTransformer(resolved_content)
         return [isb_lib.core.coreRecordAsSolrDoc(transformer)]
     except Exception as e:
         get_logger().error("Failed trying to run transformer on %s, exception: %s", thing.resolved_content, e)
@@ -189,7 +189,7 @@ def identifier_from_thing_dict(thing_dict: typing.Dict) -> str:
 
 
 def load_thing(
-    thing_dict: typing.Dict, t_resolved: datetime.datetime, url: typing.AnyStr
+    thing_dict: typing.Dict, t_resolved: datetime.datetime, url: str
 ) -> isb_lib.models.thing.Thing:
     """
     Load a thing from its source.
@@ -205,7 +205,9 @@ def load_thing(
     """
     L = get_logger()
     id = identifier_from_thing_dict(thing_dict)
-    t_created = dateparser.parse(thing_dict.get("updated"))
+    updated_time = thing_dict.get("updated")
+    if updated_time is not None:
+        t_created = dateparser.parse(updated_time)
     L.info("loadThing: %s", id)
     item = OpenContextItem(id, thing_dict)
     # TODO, unlike the other collections, we are fetching these via a pre-paginated API, so we can't put anything in the
@@ -215,7 +217,7 @@ def load_thing(
     return thing
 
 
-def update_thing(thing: isb_lib.models.thing.Thing, updated_record: typing.Dict, t_resolved: datetime.datetime, url: typing.AnyStr):
+def update_thing(thing: isb_lib.models.thing.Thing, updated_record: typing.Dict, t_resolved: datetime.datetime, url: str):
     """
     Updates an existing Thing row in the database
 
