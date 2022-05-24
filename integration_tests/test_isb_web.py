@@ -42,7 +42,7 @@ def _get_things_with_authority(
     limit: int,
 ) -> typing.List:
     url = f"{hostname}thing/"
-    params = {
+    params: dict = {
         "limit": limit,
         "authority": authority_id,
         "status": 200,

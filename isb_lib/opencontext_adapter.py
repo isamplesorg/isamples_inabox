@@ -1,4 +1,5 @@
 import datetime
+from typing import Optional
 
 import isb_lib.core
 import logging
@@ -26,11 +27,11 @@ class OpenContextItem(object):
 
     def as_thing(
         self,
-        t_created: datetime.datetime,
+        t_created: Optional[datetime.datetime],
         status: int,
         resolved_url: str,
         t_resolved: datetime.datetime,
-        resolve_elapsed: float,
+        resolve_elapsed: Optional[float],
         media_type: str = None,
     ) -> isb_lib.models.thing.Thing:
         L = get_logger()
@@ -228,5 +229,7 @@ def update_thing(thing: isb_lib.models.thing.Thing, updated_record: typing.Dict,
     """
     thing.resolved_content = updated_record
     thing.tresolved = t_resolved
-    thing.tcreated = dateparser.parse(updated_record.get("updated"))
+    updated_str = updated_record.get("updated")
+    if updated_str is not None:
+        thing.tcreated = dateparser.parse(updated_str)
     thing.resolved_url = url

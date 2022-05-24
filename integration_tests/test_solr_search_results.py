@@ -35,7 +35,7 @@ authority_ids = [
 def _send_solr_query(
     rsession: requests.Session, solr_url: str, query: str
 ) -> typing.List[typing.Dict]:
-    params = {
+    params: dict = {
         "start": 0,
         "limit": 10,
         "fl": "*",
