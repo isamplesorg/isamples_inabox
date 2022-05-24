@@ -1,6 +1,8 @@
 import datetime
 import json
 import csv
+from typing import Optional
+
 import pytest
 import typing
 import re
@@ -183,14 +185,14 @@ def _get_record_with_id(record_id: str) -> typing.Dict:
                 column_headers = current_values
                 continue
             # Otherwise iterate over the keys and make source JSON
-            current_record = {}
+            current_record: Optional[dict] = {}
             for index, key in enumerate(column_headers):
                 if key == "id":
                     if record_id not in current_values[index]:
                         current_record = None
                         break
                 if len(key) > 0:
-                    current_record[key] = current_values[index]
+                    current_record[key] = current_values[index]  # type: ignore
             if current_record is not None:
                 return current_record
         print("Error, didn't find record with id: %s", record_id)

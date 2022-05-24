@@ -1,5 +1,4 @@
 import logging
-import typing
 import click
 import click_config_file
 import isb_lib.core
