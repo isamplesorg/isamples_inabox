@@ -23,11 +23,13 @@ def test_integration():
 
 
 def test_url():
-    auth_url = orcid._orcid_auth_url(orcid_id)
-    assert orcid_id in auth_url
+    test_orcid_id = "test_orcid_id"
+    auth_url = orcid._orcid_auth_url(test_orcid_id)
+    assert test_orcid_id in auth_url
 
 
 def test_headers():
-    headers = orcid._orcid_auth_headers(token)
-    assert token in headers.get("Authorization")
+    test_token = "test_token"
+    headers = orcid._orcid_auth_headers(test_token)
+    assert test_token in headers.get("Authorization")
     assert headers.get("Content-Type") is not None
