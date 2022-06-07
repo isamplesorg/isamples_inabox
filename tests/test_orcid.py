@@ -3,8 +3,11 @@ import os
 import pytest
 from isb_lib.authorization import orcid
 
-orcid_id = "000-0003-2109-7692"
-token = "b035c8e7-60ee-4400-a6d3-9b02ff9ff1b0"
+
+# If manually testing, you can put these in to environment environment variables:
+# https://stackoverflow.com/questions/42708389/how-to-set-environment-variables-in-pycharm
+orcid_id = os.environ.get("TEST_ORCID_ID")
+token = os.environ.get("TEST_ORCID_TOKEN")
 
 
 @pytest.mark.skipif(
