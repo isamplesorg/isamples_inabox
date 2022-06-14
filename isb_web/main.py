@@ -254,8 +254,9 @@ def mint_identifier(request: fastapi.Request, params: MintIdentifierParams):
     authorized = orcid.authorize_token_for_orcid_id(params.token, params.orcid_id)
     if not authorized:
         raise HTTPException(status_code=401, detail="Invalid orcid id or token")
-    bytes = json.dumps(params.datacite_metadata).encode("utf-8")
-    result = datacite.create_doi(requests.session(), bytes, "ZAHB.OPENCONTEXT", "juxdom-Jabrop-7majxi")
+    post_data = json.dumps(params.datacite_metadata).encode("utf-8")
+    result = datacite.create_doi(requests.session(), post_data, config.Settings().datacite_username,
+                                 config.Settings().datacite_password)
     if result is not None:
         return result
     else:
