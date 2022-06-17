@@ -127,12 +127,12 @@ def create_draft_doi(
     username: str,
     password: str,
 ) -> typing.Optional[str]:
-    post_data_str = _datacite_post_str(doi, prefix)
+    post_data_str = _datacite_post_bytes(doi, prefix)
     response = _post_to_datacite(rsession, post_data_str, username, password)
     return _doi_or_none(response)
 
 
-def _datacite_post_str(doi: str, prefix: str):
+def _datacite_post_bytes(doi: str, prefix: str) -> bytes:
     attribute_dict = _attribute_dict_with_doi_or_prefix(doi, prefix)
     data_dict = {"type": "dois", "attributes": attribute_dict}
     request_data = {"data": data_dict}
@@ -142,13 +142,13 @@ def _datacite_post_str(doi: str, prefix: str):
 
 async def async_post_to_datacite(
     session: aiohttp.ClientSession,
-    post_data_str: str,
+    post_data_bytes: bytes,
     username: str,
     password: str
 ) -> typing.Optional[str]:
     auth = aiohttp.BasicAuth(login=username, password=password)
     logging.debug("issuing post to datacite")
-    resp = await session.request('POST', url=dois_url(), headers=_dois_headers(), data=post_data_str, auth=auth)
+    resp = await session.request('POST', url=dois_url(), headers=_dois_headers(), data=post_data_bytes, auth=auth)
     # Note that this may raise an exception for non-2xx responses
     # You can either handle that here, or pass the exception through
     logging.debug(f"Received response from datacite")
@@ -157,17 +157,20 @@ async def async_post_to_datacite(
 
 async def async_create_draft_dois(
     num_drafts: int,
-    prefix: str,
-    doi: str,
+    prefix: typing.Optional[str],
+    doi: typing.Optional[str],
+    post_data: typing.Optional[bytes],
     igsn: bool,
     username: str,
     password: str,
 ):
-    post_str = _datacite_post_str(doi, prefix)
+    if post_data is None:
+        post_data = _datacite_post_bytes(doi, prefix)
+
     async with aiohttp.ClientSession() as session:
         tasks = []
         for i in range(num_drafts):
-            tasks.append(async_post_to_datacite(session, post_str, username, password))
+            tasks.append(async_post_to_datacite(session, post_data, username, password))
         doi_responses = await asyncio.gather(*tasks, return_exceptions=True)
     return doi_responses
 
