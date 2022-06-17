@@ -5,7 +5,6 @@ import datetime
 import json
 import typing
 import logging
-from typing import Iterator
 
 import requests
 from aiohttp import ClientResponse
@@ -132,7 +131,7 @@ def create_draft_doi(
     return _doi_or_none(response)
 
 
-def _datacite_post_bytes(doi: str, prefix: str) -> bytes:
+def _datacite_post_bytes(doi: typing.Optional[str], prefix: typing.Optional[str]) -> bytes:
     attribute_dict = _attribute_dict_with_doi_or_prefix(doi, prefix)
     data_dict = {"type": "dois", "attributes": attribute_dict}
     request_data = {"data": data_dict}
@@ -151,7 +150,7 @@ async def async_post_to_datacite(
     resp = await session.request('POST', url=dois_url(), headers=_dois_headers(), data=post_data_bytes, auth=auth)
     # Note that this may raise an exception for non-2xx responses
     # You can either handle that here, or pass the exception through
-    logging.debug(f"Received response from datacite")
+    logging.debug("Received response from datacite")
     return await _doi_or_none_client_response(resp)
 
 
@@ -175,11 +174,11 @@ async def async_create_draft_dois(
     return doi_responses
 
 
-def _attribute_dict_with_doi_or_prefix(doi, prefix):
+def _attribute_dict_with_doi_or_prefix(doi: typing.Optional[str], prefix: typing.Optional[str]) -> dict:
     attribute_dict = {}
     if doi is not None:
         attribute_dict["doi"] = doi
-    else:
+    elif prefix is not None:
         attribute_dict["prefix"] = prefix
     return attribute_dict
 
