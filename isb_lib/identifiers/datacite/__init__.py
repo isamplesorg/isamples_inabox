@@ -8,6 +8,7 @@ import logging
 from typing import Iterator
 
 import requests
+from aiohttp import ClientResponse
 from requests import Response
 from requests.auth import HTTPBasicAuth
 
@@ -55,6 +56,26 @@ def _doi_or_none(response: Response) -> typing.Optional[str]:
     if not _validate_response(response):
         return None
     json_response = response.json()
+    draft_id = json_response["data"]["id"]
+    # use the DOI prefix since we creating DOIs with datacite
+    return doi_from_id(draft_id)
+
+
+def _validate_client_response(response: ClientResponse) -> bool:
+    if response.status < 200 or response.status >= 300:
+
+        logging.error(
+            "Error requesting new DOI, status code: %s",
+            response.status,
+        )
+        return False
+    return True
+
+
+async def _doi_or_none_client_response(response: ClientResponse) -> typing.Optional[str]:
+    if not _validate_client_response(response):
+        return None
+    json_response = await response.json()
     draft_id = json_response["data"]["id"]
     # use the DOI prefix since we creating DOIs with datacite
     return doi_from_id(draft_id)
@@ -124,15 +145,14 @@ async def async_post_to_datacite(
     post_data_str: str,
     username: str,
     password: str
-) -> dict:
+) -> typing.Optional[str]:
     auth = aiohttp.BasicAuth(login=username, password=password)
-    print("issuing post to datacite")
+    logging.debug("issuing post to datacite")
     resp = await session.request('POST', url=dois_url(), headers=_dois_headers(), data=post_data_str, auth=auth)
     # Note that this may raise an exception for non-2xx responses
     # You can either handle that here, or pass the exception through
-    data = await resp.json()
-    print(f"Received response from datacite")
-    return data
+    logging.debug(f"Received response from datacite")
+    return await _doi_or_none_client_response(resp)
 
 
 async def async_create_draft_dois(
