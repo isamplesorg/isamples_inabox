@@ -1,7 +1,12 @@
+import asyncio
+import aiohttp
+
 import datetime
 import json
 import typing
 import logging
+from typing import Iterator
+
 import requests
 from requests import Response
 from requests.auth import HTTPBasicAuth
@@ -13,12 +18,12 @@ CONTENT_TYPE = "application/vnd.api+json"
 DATACITE_URL = "https://api.test.datacite.org"
 
 
-def _dois_headers():
+def _dois_headers() -> dict:
     headers = {"content-type": CONTENT_TYPE}
     return headers
 
 
-def _dois_auth(password, username):
+def _dois_auth(password, username) -> HTTPBasicAuth:
     auth = HTTPBasicAuth(username, password)
     return auth
 
@@ -101,12 +106,50 @@ def create_draft_doi(
     username: str,
     password: str,
 ) -> typing.Optional[str]:
+    post_data_str = _datacite_post_str(doi, prefix)
+    response = _post_to_datacite(rsession, post_data_str, username, password)
+    return _doi_or_none(response)
+
+
+def _datacite_post_str(doi: str, prefix: str):
     attribute_dict = _attribute_dict_with_doi_or_prefix(doi, prefix)
     data_dict = {"type": "dois", "attributes": attribute_dict}
     request_data = {"data": data_dict}
     post_data_str = json.dumps(request_data).encode("utf-8")
-    response = _post_to_datacite(rsession, post_data_str, username, password)
-    return _doi_or_none(response)
+    return post_data_str
+
+
+async def async_post_to_datacite(
+    session: aiohttp.ClientSession,
+    post_data_str: str,
+    username: str,
+    password: str
+) -> dict:
+    auth = aiohttp.BasicAuth(login=username, password=password)
+    print("issuing post to datacite")
+    resp = await session.request('POST', url=dois_url(), headers=_dois_headers(), data=post_data_str, auth=auth)
+    # Note that this may raise an exception for non-2xx responses
+    # You can either handle that here, or pass the exception through
+    data = await resp.json()
+    print(f"Received response from datacite")
+    return data
+
+
+async def async_create_draft_dois(
+    num_drafts: int,
+    prefix: str,
+    doi: str,
+    igsn: bool,
+    username: str,
+    password: str,
+):
+    post_str = _datacite_post_str(doi, prefix)
+    async with aiohttp.ClientSession() as session:
+        tasks = []
+        for i in range(num_drafts):
+            tasks.append(async_post_to_datacite(session, post_str, username, password))
+        doi_responses = await asyncio.gather(*tasks, return_exceptions=True)
+    return doi_responses
 
 
 def _attribute_dict_with_doi_or_prefix(doi, prefix):
