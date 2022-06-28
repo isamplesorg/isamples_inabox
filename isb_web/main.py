@@ -135,7 +135,7 @@ app.mount(
     ),
     name="ui",
 )
-app.mount("/manage", manage_app)
+app.mount(manage.MANAGE_PREFIX, manage_app)
 
 
 def isAllowedReferer(referer):

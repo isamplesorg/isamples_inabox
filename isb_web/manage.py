@@ -19,6 +19,8 @@ from isb_web import config
 
 manage_api = FastAPI()
 
+MANAGE_PREFIX = "/manage"
+
 logging.basicConfig(level=logging.DEBUG)
 _L = logging.getLogger("manage")
 
@@ -97,7 +99,7 @@ manage_api.add_middleware(
             "audience": config.Settings().orcid_client_id,
         }
     },
-    public_paths={"/", "/login", "/auth"},
+    public_paths={MANAGE_PREFIX, MANAGE_PREFIX + "/login", MANAGE_PREFIX + "/auth"},
 )
 
 manage_api.add_middleware(
