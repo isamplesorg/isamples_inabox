@@ -23,7 +23,7 @@ from isb_lib.core import MEDIA_GEO_JSON, MEDIA_JSON, MEDIA_NQUADS
 from isb_lib.identifiers import datacite
 from isb_lib.models.thing import Thing
 from isb_lib.authorization import orcid
-from isb_web import sqlmodel_database, analytics
+from isb_web import sqlmodel_database, analytics, manage
 from isb_web.analytics import AnalyticsEvent
 from isb_web import schemas
 from isb_web import crud
@@ -102,6 +102,7 @@ STAC_ITEM_URL_PATH = config.Settings().stac_item_url_path
 STAC_COLLECTION_URL_PATH = config.Settings().stac_collection_url_path
 
 app = fastapi.FastAPI(openapi_tags=tags_metadata)
+manage_app = manage.manage_api
 dao = SQLModelDAO(None)
 
 app.add_middleware(
@@ -134,6 +135,7 @@ app.mount(
     ),
     name="ui",
 )
+app.mount("/manage", manage_app)
 
 
 def isAllowedReferer(referer):

@@ -79,6 +79,10 @@ class Settings(BaseSettings):
     # This must not ever be checked in.  Set it by doing export ORCID_CLIENT_SECRET=foobar
     orcid_client_secret: str = ""
 
+    orcid_issuer: str = "https://sandbox.orcid.org"
+
+    secret_key: str = "123456"
+
     class Config:
         env_file = "isb_web_config.env"
         case_sensitive = False
