@@ -13,6 +13,8 @@ import starlette.types
 import starlette.datastructures
 import starlette_oauth2_api
 import authlib.integrations.starlette_client
+from urllib import parse
+from urllib.parse import urljoin
 
 # The FastAPI app that mounts as a sub-app to the main FastAPI app
 from isb_web import config
@@ -104,7 +106,7 @@ manage_api.add_middleware(
 
 manage_api.add_middleware(
     starlette.middleware.sessions.SessionMiddleware,
-    secret_key=config.Settings().secret_key,
+    secret_key=config.Settings().session_middleware_key,
 )
 
 # https://www.starlette.io/middleware/#corsmiddleware
@@ -196,7 +198,15 @@ async def auth(request: starlette.requests.Request):
     """
     token = await oauth.orcid.authorize_access_token(request)
     request.session["user"] = dict(token)
-    return starlette.responses.RedirectResponse(url="/")
+    # TODO: work this out dynamically -- need to test it out on mars to see what it looks like
+    # probably need to manipulate the paths a bit more, too
+    print(f"request url is {request.url}")
+    url = parse.urlparse(str(request.url))
+    print(f"url path is {url.path}")
+    base = url.scheme + "://" + url.netloc
+    joined = urljoin(base, '/isamples_central/ui/orcid_token')
+    print(f"joined url is {joined}")
+    return starlette.responses.RedirectResponse(url=joined)
 
 
 @manage_api.get("/logout")

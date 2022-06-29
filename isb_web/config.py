@@ -51,7 +51,7 @@ class Settings(BaseSettings):
 
     orcid_issuer: str = "https://sandbox.orcid.org"
 
-    secret_key: str = "123456"
+    session_middleware_key: str = "81987812-0cf8-459e-b27b-40dabcded856"
 
     class Config:
         env_file = "isb_web_config.env"
