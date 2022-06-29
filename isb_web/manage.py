@@ -99,7 +99,7 @@ manage_api.add_middleware(
             "audience": config.Settings().orcid_client_id,
         }
     },
-    public_paths={MANAGE_PREFIX, MANAGE_PREFIX + "/login", MANAGE_PREFIX + "/auth"},
+    public_paths={MANAGE_PREFIX, MANAGE_PREFIX + "/login", MANAGE_PREFIX + "/auth", MANAGE_PREFIX + "/logout"},
 )
 
 manage_api.add_middleware(
@@ -121,8 +121,9 @@ manage_api.add_middleware(
 # server_metadata_url
 oauth.register(
     name="orcid",
-    server_metadata_url=config.Settings().orcid_issuer
-    + "/.well-known/openid-configuration",
+    client_id=config.Settings().orcid_client_id,
+    client_secret=config.Settings().orcid_client_secret,
+    server_metadata_url=config.Settings().orcid_issuer + "/.well-known/openid-configuration",
     client_kwargs={"scope": "openid"},
     api_base_url=config.Settings().orcid_issuer,
     # request_token_url='https://orcid.org/oauth/request_token',

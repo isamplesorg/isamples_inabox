@@ -54,42 +54,6 @@ except KeyError:
     pass
 L = logging.getLogger("ISB")
 
-# Cookie chaff
-COOKIE_SECRET = config.Settings().cookie_secret
-
-# OAuth2 application client id
-CLIENT_ID = config.Settings().client_id
-
-# OAuth2 application client secret
-CLIENT_SECRET = config.Settings().client_secret
-
-# OAuth2 endpoint for client authorization
-AUTHORIZE_ENDPOINT = config.Settings().authorize_endpoint
-
-# OAuth2 endpoint for retrieving a token after successful auth
-ACCESS_TOKEN_ENDPOINT = config.Settings().access_token_endpoint
-
-# OAuth redirect URL. This is set manually because of a
-# disparity between nginx protocol and the gunicorn protocol
-# advertised to fastAPI resulting in http instead of https
-OAUTH_REDIRECT_URL = config.Settings().oauth_redirect_url
-
-# An OAuth instance for generating the requests
-oauth_client = authlib.integrations.starlette_client.OAuth()
-
-# Register the GITHUB OAuth2 urls
-oauth_client.register(
-    name="github",
-    client_id=CLIENT_ID,
-    client_secret=CLIENT_SECRET,
-    access_token_url=ACCESS_TOKEN_ENDPOINT,
-    access_token_params=None,
-    authorize_url=AUTHORIZE_ENDPOINT,
-    authorize_params=None,
-    api_base_url="https://api.github.com/",
-    client_kwargs={"scope": "public_repo, user:email"},
-)
-
 tags_metadata = [
     {
         "name": "heatmaps",
@@ -104,14 +68,6 @@ STAC_COLLECTION_URL_PATH = config.Settings().stac_collection_url_path
 app = fastapi.FastAPI(openapi_tags=tags_metadata)
 manage_app = manage.manage_api
 dao = SQLModelDAO(None)
-
-app.add_middleware(
-    fastapi.middleware.cors.CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-app.add_middleware(SessionMiddleware, secret_key=COOKIE_SECRET)
 
 app.mount(
     "/static",
