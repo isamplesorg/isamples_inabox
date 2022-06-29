@@ -126,12 +126,6 @@ oauth.register(
     server_metadata_url=config.Settings().orcid_issuer + "/.well-known/openid-configuration",
     client_kwargs={"scope": "openid"},
     api_base_url=config.Settings().orcid_issuer,
-    # request_token_url='https://orcid.org/oauth/request_token',
-    # access_token_url='https://orcid.org/oauth/token',
-    # scope='/authenticate',
-    # access_token_params={'grant_type':'authorization_code'},
-    # authorize_url='https://orcid.org/oauth/authorize',
-    # authorize_params=None,
 )
 
 
