@@ -53,7 +53,7 @@ class AuthenticateMiddleware(starlette_oauth2_api.AuthenticateMiddleware):
         elif "authorization" in request.headers and request.headers[
             "authorization"
         ].startswith("Bearer "):
-            token = request.headers["authorization"][len("Bearer ") :]
+            token = request.headers["authorization"][len("Bearer "):]
 
         elif "authorization" in request.headers:
             _L.debug('No "Bearer" in authorization header')
