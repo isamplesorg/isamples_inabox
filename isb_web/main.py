@@ -63,10 +63,10 @@ manage_app = manage.manage_api
 dao = SQLModelDAO(None)
 
 app.add_middleware(
-     fastapi.middleware.cors.CORSMiddleware,
-     allow_origins=["*"],
-     allow_methods=["*"],
-     allow_headers=["*"],
+    fastapi.middleware.cors.CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 app.mount(
     "/static",
