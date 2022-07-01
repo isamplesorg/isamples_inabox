@@ -219,3 +219,16 @@ async def logout(request: starlette.requests.Request):
     """
     request.session.pop("user", None)
     return starlette.responses.RedirectResponse(url="/")
+
+
+@manage_api.get("/userinfo")
+def userinfo(request: starlette.requests.Request):
+    user = request.session.get("user")
+    response_dict = {
+        "name": user.get("name"),
+        "orcid": user.get("orcid"),
+        "id_token": user.get("id_token"),
+        "expires_at": user.get("expires_at"),
+        "auth_time": user.get("userinfo").get("auth_time")
+    }
+    return response_dict
