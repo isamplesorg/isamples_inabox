@@ -59,8 +59,10 @@ STAC_ITEM_URL_PATH = config.Settings().stac_item_url_path
 STAC_COLLECTION_URL_PATH = config.Settings().stac_collection_url_path
 
 app = fastapi.FastAPI(openapi_tags=tags_metadata)
-manage_app = manage.manage_api
 dao = SQLModelDAO(None)
+manage_app = manage.manage_api
+# Avoid a circular dependency but share the db connection by pushing into the manage handler
+manage.dao = dao
 
 app.add_middleware(
     fastapi.middleware.cors.CORSMiddleware,

@@ -22,7 +22,7 @@ DRAFT_RESOLVED_STATUS = -1
 
 
 class SQLModelDAO:
-    def __init__(self, db_url: str, echo: bool = False):
+    def __init__(self, db_url: Optional[str], echo: bool = False):
         # This is a strange initializer, but FastAPI wants us to construct the object before we know we
         # want to use it.  So, separate out the object construction from the database connection.
         # In unit tests, this ends up getting swapped out and unused, which is the source of the confusion.
