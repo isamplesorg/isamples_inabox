@@ -15,13 +15,11 @@ import starlette.types
 import starlette.datastructures
 import starlette_oauth2_api
 import authlib.integrations.starlette_client
-from urllib import parse
-from urllib.parse import urljoin
 
-# The FastAPI app that mounts as a sub-app to the main FastAPI app
 from isb_lib.utilities import url_utilities
 from isb_web import config
 
+# The FastAPI app that mounts as a sub-app to the main FastAPI app
 manage_api = FastAPI()
 
 MANAGE_PREFIX = "/manage"
