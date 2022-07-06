@@ -57,6 +57,8 @@ class Settings(BaseSettings):
 
     logout_redirect_fragment: str = "/isamples_central/ui"
 
+    orcid_superusers: list[str] = ["0000-0003-2109-7692"]
+
     class Config:
         env_file = "isb_web_config.env"
         case_sensitive = False

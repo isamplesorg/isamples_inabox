@@ -37,6 +37,9 @@ def get_session():
         yield session
 
 
+allowed_orcid_ids: list = []
+
+
 class AuthenticateMiddleware(starlette_oauth2_api.AuthenticateMiddleware):
     """
     Override the __call__ method of the AuthenticateMiddleware to also check
@@ -61,6 +64,15 @@ class AuthenticateMiddleware(starlette_oauth2_api.AuthenticateMiddleware):
         # Cookie set with auth info
         if user is not None:
             token = user.get("id_token", None)
+            orcid_id = user.get("orcid", None)
+            if orcid_id not in allowed_orcid_ids:
+                return await self._prepare_error_response(
+                    "orcid id is not authorized to manage identifiers",
+                    401,
+                    scope,
+                    receive,
+                    send,
+                )
 
         # check for authorization header and token on it.
         elif "authorization" in request.headers and request.headers[
@@ -253,6 +265,7 @@ def add_orcid_id(request: starlette.requests.Request, session: Session = Depends
         # TODO: add additional check to see if it's allowed to create
         orcid_id = request.query_params.get("orcid_id")
         person = sqlmodel_database.save_person_with_orcid_id(session, orcid_id)
+        allowed_orcid_ids.append(orcid_id)
         return person.primary_key
     else:
         # I think the middleware should prevent this, but just in case…

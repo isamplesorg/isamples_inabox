@@ -98,7 +98,7 @@ app.mount(manage.MANAGE_PREFIX, manage_app)
 @app.on_event("startup")
 def on_startup():
     dao.connect_sqlmodel(isb_web.config.Settings().database_url)
-
+    manage.allowed_orcid_ids = sqlmodel_database.all_orcid_ids(dao.get_session()).extend(isb_web.config.Settings().orcid_superusers)
 
 def get_session():
     with dao.get_session() as session:
