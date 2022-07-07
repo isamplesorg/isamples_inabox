@@ -102,6 +102,7 @@ def on_startup():
     orcid_ids.extend(isb_web.config.Settings().orcid_superusers)
     manage.allowed_orcid_ids = orcid_ids
 
+
 def get_session():
     with dao.get_session() as session:
         yield session
