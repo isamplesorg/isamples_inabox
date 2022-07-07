@@ -99,7 +99,10 @@ app.mount(manage.MANAGE_PREFIX, manage_app)
 def on_startup():
     dao.connect_sqlmodel(isb_web.config.Settings().database_url)
     orcid_ids = sqlmodel_database.all_orcid_ids(dao.get_session())
+    # Superusers are allowed to mint identifiers as well, so make sure they're in the list.
     orcid_ids.extend(isb_web.config.Settings().orcid_superusers)
+    # The main handler's startup is the guaranteed spot where we know we have a db connection.
+    # User the connected db session to push in to the manage handler's orcid_ids state.
     manage.allowed_orcid_ids = orcid_ids
 
 
