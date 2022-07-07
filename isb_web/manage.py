@@ -24,7 +24,7 @@ from isb_web.sqlmodel_database import SQLModelDAO
 
 # The FastAPI app that mounts as a sub-app to the main FastAPI app
 manage_api = FastAPI()
-dao = Optional[SQLModelDAO]
+dao: Optional[SQLModelDAO] = None
 MANAGE_PREFIX = "/manage"
 
 logging.basicConfig(level=logging.DEBUG)
