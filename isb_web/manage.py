@@ -262,11 +262,12 @@ def userinfo(request: starlette.requests.Request):
 def add_orcid_id(request: starlette.requests.Request, session: Session = Depends(get_session)):
     user: Optional[dict] = request.session.get("user")
     if user is not None:
-        # TODO: add additional check to see if it's allowed to create
         orcid_id = request.query_params.get("orcid_id")
+        if user.get("orcid") not in config.Settings().orcid_superusers:
+            raise HTTPException(401, "orcid id not authorized to add users")
         person = sqlmodel_database.save_person_with_orcid_id(session, orcid_id)
         allowed_orcid_ids.append(orcid_id)
         return person.primary_key
     else:
         # I think the middleware should prevent this, but just in case…
-        raise HTTPException(401)
+        raise HTTPException(401, "no session")
