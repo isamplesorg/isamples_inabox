@@ -4,13 +4,13 @@ iSamples identifier minting is provided using [DataCite DOIs](https://datacite.o
 
 ## Authentication using orcid
 
-The first step in minting an identifier is authenticating using orcid.  Users will first need to register for an orcid id at https://orcid.org.  Once users have created their identifier, the login process is initiating by hitting the login URL at the hosted iSamples in a Box instance, e.g. on [Mars](https://mars.cyverse.org/isamples_central/manage/login).
+The first step in minting an identifier is authenticating using orcid.  Users will first need to register for an orcid id at https://orcid.org.  Once users have created their identifier, the login process is initiated by hitting the login URL at the hosted iSamples in a Box instance, e.g. on [Mars](https://mars.cyverse.org/isamples_central/manage/login).
 
 ### Python oauth implementation using authlib
 
 Under the covers, orcid is using [openid](https://info.orcid.org/documentation/api-tutorials/api-tutorial-get-and-authenticated-orcid-id/#easy-faq-2731), which is really just an enhancement of the standard [3-legged oauth](https://info.orcid.org/documentation/api-tutorials/api-tutorial-get-and-authenticated-orcid-id/#easy-faq-2537) pattern.
 
-The iSamples implementation of these pieces are located in `manage.py`, which contains all the necessary logic for dealing with managing identifiers.
+The iSamples implementation of these pieces are located in [manage.py](https://github.com/isamplesorg/isamples_inabox/blob/develop/isb_web/manage.py), which contains all the necessary logic for dealing with managing identifiers.
 
 Most of the functionality is abstracted away in the `authlib` integration, and iSamples just constructs that library and specifies the necessary parameters:
 
@@ -46,11 +46,11 @@ async def auth(request: starlette.requests.Request):
     return starlette.responses.RedirectResponse(url=redirect_url)    
 ```
 
-The only additional step required is to sure that the `/auth` handler URL is registered as a valid redirect URL in the orchid management console.
+The only additional step required is to sure that the `/auth` handler URL is registered as a valid redirect URL in the orcid management console.
 
 ### Python middleware using starlette_oauth2_api
 
-The `starlette_oauth2_api.AuthenticateMiddleware` ensures that users are authenticated when they attempt to access any of the FastAPI manage handlers.  The middleware effectively intercepts all manage API requests and redirects them if there isn't a validated session.  The implementation is relatively straightforward, just adding the middleware to the FastAPI manage handler:
+The `starlette_oauth2_api.AuthenticateMiddleware` ensures that users are authenticated when they attempt to access any of the FastAPI manage handlers.  The middleware effectively intercepts all manage API requests and redirects them if there isn't a validated session, or the orcid id associated with the session isn't allowed to access the site.  The implementation is relatively straightforward, just adding the middleware to the FastAPI manage handler:
 
 ```
 manage_api.add_middleware(
@@ -81,4 +81,4 @@ Once all of the above has been completed, you're ready to mint new DOIs with dat
 
 (1) Using the management UI, hit the `/dois` URL in the ISB instance e.g. on [Mars](https://mars.cyverse.org/isamples_central/ui/#/dois) and enter the required fields.  You can see the generated JSON in the right-side panel, and that generated JSON is sent to datacite.  Once the datacite response comes back, you'll be able to see the newly minted DOI.
 
-(2) Similarly, you can also use a CLI to directly hit the iSB `/manage/mint_draft_identifiers` endpoint and mint identifiers using your scripting language of choice.  The only prerequisite here is to make sure you've obtained a valid JWT from orcid before calling the endpoint.  You'll need to include the JWT as an `authorization` header when you call the endpoint.  A working example of a CLI is available on the [iSamples GitHub](https://github.com/isamplesorg/isamples_inabox/blob/develop/scripts/examples/mint_identifiers_cli.py)
+(2) Similarly, you can also use a CLI to directly hit the iSB `/manage/mint_draft_identifiers` endpoint and mint identifiers using your scripting language of choice.  The only prerequisite here is to make sure you've obtained a valid JWT from orcid before calling the endpoint.  You'll need to include the JWT in an `authorization: Bearer` header when you call the endpoint.  A working example of a CLI is available on the [iSamples GitHub](https://github.com/isamplesorg/isamples_inabox/blob/develop/scripts/examples/mint_identifiers_cli.py)

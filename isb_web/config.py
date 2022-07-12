@@ -44,9 +44,11 @@ class Settings(BaseSettings):
     orcid_token_redirect_uri: str = "http://localhost:8000/orcid_token"
 
     # This shouldn't be checked in.  Set it by doing export ORCID_CLIENT_ID=foobar
+    # This value should be obtained from the orcid API management console.
     orcid_client_id: str = ""
 
     # This must not ever be checked in.  Set it by doing export ORCID_CLIENT_SECRET=foobar
+    # This value should be obtained from the orcid API management console.
     orcid_client_secret: str = ""
 
     # The base URL for the orcid issuing authority.  Makes it easy to change between sandbox and production orcid.
