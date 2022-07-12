@@ -49,14 +49,19 @@ class Settings(BaseSettings):
     # This must not ever be checked in.  Set it by doing export ORCID_CLIENT_SECRET=foobar
     orcid_client_secret: str = ""
 
+    # The base URL for the orcid issuing authority.  Makes it easy to change between sandbox and production orcid.
     orcid_issuer: str = "https://sandbox.orcid.org"
 
+    # This is a random UUID for encoding the session details in the Session cookie.
     session_middleware_key: str = "81987812-0cf8-459e-b27b-40dabcded856"
 
+    # The destination URL fragment where to drop users after they successfully authenticate in the orcid flow.
     auth_response_redirect_fragment: str = "/isamples_central/ui/#/dois"
 
+    # The destination URL fragment where to drop users after they logout of the management application.
     logout_redirect_fragment: str = "/isamples_central/ui"
 
+    # The list of orcid ids that are allowed to add other orcid ids to the iSB instance.
     orcid_superusers: list[str] = []
 
     class Config:
