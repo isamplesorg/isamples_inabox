@@ -77,8 +77,8 @@ Once users have their orcid ids established and the auth URLs are registered usi
 
 ## Minting identifiers using datacite
 
-Once all of the above has been completed, you're ready to mint new DOIs with datacite.  There are two ways to do so: by using the management UI or by using a CLI that directly hits the identifier minting endpoint.
+Once all of the above has been completed, you're ready to mint new identifiers with datacite.  There are two ways to do so: by using the management UI or by using a CLI that directly hits the identifier minting endpoint.
 
-(1) Using the management UI, hit the `/dois` URL in the ISB instance e.g. on [Mars](https://mars.cyverse.org/isamples_central/ui/#/dois) and enter the required fields.  You can see the generated JSON in the right-side panel, and that generated JSON is sent to datacite.  Once the datacite response comes back, you'll be able to see the newly minted DOI.
+(1) Using the management UI, hit the `/dois` URL in the ISB instance e.g. on [Mars](https://mars.cyverse.org/isamples_central/ui/#/dois) and enter the required fields.  You can see the generated JSON in the right-side panel, and that generated JSON is sent to datacite.  Once the datacite response comes back, you'll be able to see the newly minted identifier.
 
 (2) Similarly, you can also use a CLI to directly hit the iSB `/manage/mint_draft_identifiers` endpoint and mint identifiers using your scripting language of choice.  The only prerequisite here is to make sure you've obtained a valid JWT from orcid before calling the endpoint.  You'll need to include the JWT in an `authorization: Bearer` header when you call the endpoint.  A working example of a CLI is available on the [iSamples GitHub](https://github.com/isamplesorg/isamples_inabox/blob/develop/scripts/examples/mint_identifiers_cli.py)
