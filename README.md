@@ -10,6 +10,30 @@ and a simple UI for viewing.
 
 ## Installation
 
+### Python environment
+Follow the instructions in [python_setup.md.html](docs/python_setup.md.html)
+
+### Tunneling postgres and solr configuration
+If you don't want to worry about running everything locally, you can tunnel remote services with ssh.
+For example, with these two ssh tunnels:
+#### solr
+```
+ssh <username>@mars.cyverse.org -p 1657 -L8984:localhost:9983
+```
+#### postgres
+```
+ssh <username>@mars.cyverse.org -p 1657 -L6432:localhost:5432
+```
+we would end up with iSB config that looks like
+```
+DATABASE_URL = "postgresql+psycopg2://isb_writer:<pw>@localhost:6432/isb_1"
+SOLR_URL = "http://localhost:8984/solr/isb_core_records/"
+```
+Note that you'll want that config file to be named `isb_web_config.env` and located in the working directory of where 
+you run whatever script you're working on. 
+### Local postgres and solr configuration
+If you'd prefer to run everything locally, follow this.
+
 Install Postgres and Solr, e.g.:
 ```
 brew install postgres
