@@ -13,6 +13,11 @@ and a simple UI for viewing.
 ### Python environment
 Follow the instructions in [python_setup.md.html](docs/python_setup.md.html)
 
+#### Python tooling
+Before code is allowed to merge, it needs to pass flake8 and mypy checks.  You may follow the instructions on how to 
+install and run these locally.  Additionally, you may run the black python formatter on new code to ensure the 
+formatting matches the rest of the project.
+
 ### Tunneling postgres and solr configuration
 If you don't want to worry about running everything locally, you can tunnel remote services with ssh.
 For example, with these two ssh tunnels:

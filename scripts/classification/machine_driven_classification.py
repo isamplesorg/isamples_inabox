@@ -36,15 +36,17 @@ def main(ctx, db_url: str, solr_url: str, max_records: int, verbosity: str):
     isb_lib.core.things_main(ctx, db_url, solr_url, verbosity)
     db_session = SQLModelDAO(db_url).get_session()
     thing_iterator = ThingRecordIterator(
-        db_session,
-        authority_id="SESAR",
-        page_size=max_records
+        db_session, authority_id="SESAR", page_size=max_records
     )
     for thing in thing_iterator.yieldRecordsByPage():
         print(f"thing is {thing.id}")
-        transformed = SESARTransformer.SESARTransformer(thing.resolved_content).transform()
-        print(f"context: {transformed['hasContextCategory']} material: {transformed['hasMaterialCategory']} "
-              f"specimen: {transformed['hasSpecimenCategory']}")
+        transformed = SESARTransformer.SESARTransformer(
+            thing.resolved_content
+        ).transform()
+        print(
+            f"context: {transformed['hasContextCategory']} material: {transformed['hasMaterialCategory']} "
+            f"specimen: {transformed['hasSpecimenCategory']}"
+        )
 
 
 """
