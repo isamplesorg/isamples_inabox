@@ -59,6 +59,8 @@ brew services start postgres
 brew services start solr
 ```
 
+### Python virtual environment creation
+
 Create a python virtual environment, checkout the source, and run poetry install.
 
 e.g.:
@@ -70,7 +72,7 @@ git checkout -b origin/develop
 poetry install
 ```
 
-Create a database, e.g:
+If running locally, create a database, e.g:
 ```
 psql postgres
 CREATE DATABASE isb_1;
@@ -86,13 +88,16 @@ max_records = 1000
 verbosity="INFO"
 ```
 
-Create a solr collection `isb_rel`:
+If running locally, create a solr collection `isb_core_records`:
 ```
-solr create -c isb_rel
+solr create -c isb_core_records
 ```
 
-Adjust the solr schema. This bit is hacky - open `notes/solr_manage.ipynb` 
-and run the blocks down to the one with the `createField` calls. 
+Then run the schema creation script against your local solr instance:
+
+```
+python scripts/solr_schema_init/create_isb_core_schema.py
+```
 
 ## Operation
 
