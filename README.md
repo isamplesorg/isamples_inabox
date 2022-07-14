@@ -35,7 +35,12 @@ db_url = "postgresql+psycopg2://isb_writer:<password>@localhost:6432/isb_1"
 solr_url = "http://localhost:8984/solr/isb_core_records/"
 ```
 Note that you'll want that config file to be named `isb_web_config.env` and located in the working directory of where 
-you run whatever script you're working on. 
+you run whatever script you're working on. After that, run the script with 
+
+```
+poetry run python example_script.py --config isb_web_config.env
+```
+
 ### Local postgres and solr configuration
 If you'd prefer to run everything locally, follow this.
 
