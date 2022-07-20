@@ -361,6 +361,16 @@ async def get_things_for_sitemap(
     return content
 
 
+def all_profiles_json_response(request_url: str):
+    query_string_index = request_url.find("?")
+    if query_string_index != -1:
+        request_url = request_url[0:query_string_index]
+    headers = profiles.get_all_profiles_response_headers(request_url)
+    return fastapi.responses.JSONResponse(
+        content={}, media_type=MEDIA_JSON, headers=headers
+    )
+
+
 @app.get(f"/{THING_URL_PATH}/{{identifier:path}}", response_model=typing.Any)
 async def get_thing(
     request: fastapi.Request,
@@ -388,6 +398,8 @@ async def get_thing(
             status_code=status,
             detail=f"Unable to retrieve solr record for identifier: {identifier}"
         )
+    if _profile == profiles.ALL_PROFILES_QSA_VALUE:
+        return all_profiles_json_response(str(request.url))
     request_profile = profiles.get_profile_from_qsa(_profile)
     if request_profile is None:
         # didn't find in qsa, check headers

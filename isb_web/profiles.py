@@ -5,6 +5,9 @@ import fastapi
 
 
 # taken and adapted from https://github.com/RDFLib/pyLDAPI
+from isb_lib.core import MEDIA_JSON
+
+
 class ProfilesMediatypesException(ValueError):
     pass
 
@@ -22,7 +25,8 @@ ISAMPLES_PROFILE = Profile("https://w3id.org/isample/schema", "isamples")
 SOURCE_PROFILE = Profile("https://w3id.org/isample/source_record", "source")
 ALL_SUPPORTED_PROFILES = [ISAMPLES_PROFILE, SOURCE_PROFILE]
 DEFAULT_PROFILE = ISAMPLES_PROFILE
-
+# If the _profile query string argument is this value, treat the request as a list profiles request
+ALL_PROFILES_QSA_VALUE = "all"
 
 def content_profile_headers(profile: Profile) -> dict:
     return {
@@ -79,3 +83,21 @@ def get_profile_from_http(request: fastapi.Request) -> Optional[Profile]:
             msg = "You have requested a profile using an Accept-Profile header that is incorrectly formatted."
             raise ProfilesMediatypesException(msg)
     return None
+
+
+def get_all_profiles_response_headers(base_url_str: str) -> dict:
+    individual_links: list[str] = []
+    for profile in ALL_SUPPORTED_PROFILES:
+        if profile == DEFAULT_PROFILE:
+            rel = "canonical"
+        else:
+            rel = "alternate"
+        individual_links.append(f"<{base_url_str}?_profile={profile.token}>; "
+                                f"rel=\"{rel}\"; type=\"{MEDIA_JSON}\"; "
+                                f"profile=\"{profile.uri}\", ")
+    link_header_value = "".join(individual_links).rstrip(", ")
+    return {
+        "Content-Profile": "<http://www.w3.org/ns/dx/conneg/profile/qsa>",
+        "Link": link_header_value
+    }
+
