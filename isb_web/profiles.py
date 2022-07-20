@@ -4,6 +4,11 @@ import connegp
 import fastapi
 
 
+# taken and adapted from https://github.com/RDFLib/pyLDAPI
+class ProfilesMediatypesException(ValueError):
+    pass
+
+
 class Profile:
     uri: str
     token: str
@@ -16,12 +21,14 @@ class Profile:
 ISAMPLES_PROFILE = Profile("https://w3id.org/isample/schema", "isamples")
 SOURCE_PROFILE = Profile("https://w3id.org/isample/source_record", "source")
 ALL_SUPPORTED_PROFILES = [ISAMPLES_PROFILE, SOURCE_PROFILE]
+DEFAULT_PROFILE = ISAMPLES_PROFILE
 
 
 def content_profile_headers(profile: Profile) -> dict:
     return {
         "Content-Profile": profile.uri
     }
+
 
 # taken and adapted from https://github.com/RDFLib/pyLDAPI
 def get_profile_from_qsa(profiles_string: str = None) -> Optional[Profile]:
@@ -46,4 +53,29 @@ def get_profile_from_qsa(profiles_string: str = None) -> Optional[Profile]:
                         if supported_profile.token == profile["profile"]:
                             return supported_profile
 
+    return None
+
+
+# taken and adapted from https://github.com/RDFLib/pyLDAPI
+def get_profile_from_http(request: fastapi.Request) -> Optional[Profile]:
+    """
+    Reads an Accept-Profile HTTP header and returns a list of Profile tokens in descending weighted order
+    Ref: https://www.w3.org/TR/dx-prof-conneg/#http-getresourcebyprofile
+    :return: The profile to use, or None if not found
+    :rtype: Profile
+    """
+    if request.headers.get("Accept-Profile") is not None:
+        try:
+            ap = connegp.AcceptProfileHeaderParser(request.headers.get("Accept-Profile"))
+            if ap.valid:
+                for p in ap.profiles:
+                    # convert this valid URI/URN to a token
+                    for supported_profile in ALL_SUPPORTED_PROFILES:
+                        if supported_profile.uri == p["profile"]:
+                            return supported_profile
+            else:
+                return None
+        except Exception:
+            msg = "You have requested a profile using an Accept-Profile header that is incorrectly formatted."
+            raise ProfilesMediatypesException(msg)
     return None

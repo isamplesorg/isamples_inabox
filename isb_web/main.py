@@ -366,7 +366,7 @@ async def get_thing(
     request: fastapi.Request,
     identifier: str,
     full: bool = False,
-    format: isb_format.ISBFormat = isb_format.ISBFormat.ORIGINAL,
+    format: typing.Optional[isb_format.ISBFormat] = None,
     _profile: str = None,
     session: Session = Depends(get_session),
 ):
@@ -389,9 +389,9 @@ async def get_thing(
             detail=f"Unable to retrieve solr record for identifier: {identifier}"
         )
     request_profile = profiles.get_profile_from_qsa(_profile)
-    headers = {}
-    if request_profile is not None:
-        headers.update(profiles.content_profile_headers(request_profile))
+    if request_profile is None:
+        # didn't find in qsa, check headers
+        request_profile = profiles.get_profile_from_http(request)
 
     # Retrieve record from the database
     item = sqlmodel_database.get_thing_with_id(session, identifier)
@@ -404,9 +404,14 @@ async def get_thing(
     if (request_profile is not None and request_profile == profiles.SOURCE_PROFILE) or \
             format == isb_format.ISBFormat.ORIGINAL:
         content = item.resolved_content
-    if (request_profile is not None and request_profile == profiles.ISAMPLES_PROFILE) or \
-            format == isb_format.ISBFormat.CORE:
+    else:
+        # If no profile explicitly requested, include the default profile here
+        if request_profile is None:
+            request_profile = profiles.DEFAULT_PROFILE
         content = await thing_resolved_content(identifier, item)
+    headers = {}
+    if request_profile is not None:
+        headers.update(profiles.content_profile_headers(request_profile))
     return fastapi.responses.JSONResponse(
         content=content, media_type=item.resolved_media_type, headers=headers
     )
