@@ -26,6 +26,7 @@ from isb_web import crud
 from isb_web import config
 from isb_web import isb_format
 from isb_web import isb_solr_query
+from isb_web import profiles
 from isamples_metadata.SESARTransformer import SESARTransformer
 from isamples_metadata.OpenContextTransformer import OpenContextTransformer
 from isamples_metadata.SmithsonianTransformer import SmithsonianTransformer
@@ -366,6 +367,7 @@ async def get_thing(
     identifier: str,
     full: bool = False,
     format: isb_format.ISBFormat = isb_format.ISBFormat.ORIGINAL,
+    _profile: str = None,
     session: Session = Depends(get_session),
 ):
     properties = {
@@ -386,6 +388,10 @@ async def get_thing(
             status_code=status,
             detail=f"Unable to retrieve solr record for identifier: {identifier}"
         )
+    request_profile = profiles.get_profile_from_qsa(_profile)
+    headers = {}
+    if request_profile is not None:
+        headers.update(profiles.content_profile_headers(request_profile))
 
     # Retrieve record from the database
     item = sqlmodel_database.get_thing_with_id(session, identifier)
@@ -395,12 +401,14 @@ async def get_thing(
         )
     if full or format == isb_format.ISBFormat.FULL:
         return item
-    if format == isb_format.ISBFormat.CORE:
-        content = await thing_resolved_content(identifier, item)
-    else:
+    if (request_profile is not None and request_profile == profiles.SOURCE_PROFILE) or \
+            format == isb_format.ISBFormat.ORIGINAL:
         content = item.resolved_content
+    if (request_profile is not None and request_profile == profiles.ISAMPLES_PROFILE) or \
+            format == isb_format.ISBFormat.CORE:
+        content = await thing_resolved_content(identifier, item)
     return fastapi.responses.JSONResponse(
-        content=content, media_type=item.resolved_media_type
+        content=content, media_type=item.resolved_media_type, headers=headers
     )
 
 
