@@ -101,4 +101,3 @@ def get_all_profiles_response_headers(base_url_str: str) -> dict:
         "Content-Profile": "<http://www.w3.org/ns/dx/conneg/profile/qsa>",
         "Link": link_header_value
     }
-

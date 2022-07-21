@@ -371,6 +371,21 @@ def all_profiles_json_response(request_url: str):
     )
 
 
+def solr_thing_response(identifier: str):
+    # Return solr representation of the record
+    # Get the solr response, and return the doc portion or
+    # and appropriate error condition
+    status, doc = isb_solr_query.solr_get_record(identifier)
+    if status == 200:
+        return fastapi.responses.JSONResponse(
+            content=doc, media_type="application/json"
+        )
+    raise fastapi.HTTPException(
+        status_code=status,
+        detail=f"Unable to retrieve solr record for identifier: {identifier}"
+    )
+
+
 @app.head(f"/{THING_URL_PATH}/{{identifier:path}}", response_model=typing.Any)
 @app.get(f"/{THING_URL_PATH}/{{identifier:path}}", response_model=typing.Any)
 async def get_thing(
@@ -387,18 +402,8 @@ async def get_thing(
     analytics.record_analytics_event(AnalyticsEvent.THING_BY_IDENTIFIER, request, properties)
     """Record for the specified identifier"""
     if format == isb_format.ISBFormat.SOLR:
-        # Return solr representation of the record
-        # Get the solr response, and return the doc portion or
-        # and appropriate error condition
-        status, doc = isb_solr_query.solr_get_record(identifier)
-        if status == 200:
-            return fastapi.responses.JSONResponse(
-                content=doc, media_type="application/json"
-            )
-        raise fastapi.HTTPException(
-            status_code=status,
-            detail=f"Unable to retrieve solr record for identifier: {identifier}"
-        )
+        return solr_thing_response(identifier)
+
     if _profile == profiles.ALL_PROFILES_QSA_VALUE or request.method == "HEAD":
         return all_profiles_json_response(str(request.url))
     request_profile = profiles.get_profile_from_qsa(_profile)
@@ -432,7 +437,7 @@ async def get_thing(
     )
 
 
-@app.get(f"/resolve/{{identifier:path}}", response_model=typing.Any)
+@app.get("/resolve/{identifier:path}", response_model=typing.Any)
 async def resolve_thing(
     request: fastapi.Request,
     identifier: str,
@@ -449,6 +454,7 @@ async def resolve_thing(
     if do_redirect_header is not None and (do_redirect_header == "0" or do_redirect_header == "false"):
         return fastapi.responses.Response(headers=headers)
     return fastapi.responses.RedirectResponse(url=url_str, status_code=302, headers=headers)
+
 
 async def thing_resolved_content(identifier: str, item: Thing) -> dict:
     authority_id = item.authority_id
