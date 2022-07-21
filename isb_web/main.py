@@ -371,6 +371,7 @@ def all_profiles_json_response(request_url: str):
     )
 
 
+@app.head(f"/{THING_URL_PATH}/{{identifier:path}}", response_model=typing.Any)
 @app.get(f"/{THING_URL_PATH}/{{identifier:path}}", response_model=typing.Any)
 async def get_thing(
     request: fastapi.Request,
@@ -398,7 +399,7 @@ async def get_thing(
             status_code=status,
             detail=f"Unable to retrieve solr record for identifier: {identifier}"
         )
-    if _profile == profiles.ALL_PROFILES_QSA_VALUE:
+    if _profile == profiles.ALL_PROFILES_QSA_VALUE or request.method == "HEAD":
         return all_profiles_json_response(str(request.url))
     request_profile = profiles.get_profile_from_qsa(_profile)
     if request_profile is None:
@@ -413,14 +414,16 @@ async def get_thing(
         )
     if full or format == isb_format.ISBFormat.FULL:
         return item
-    if (request_profile is not None and request_profile == profiles.SOURCE_PROFILE) or \
-            format == isb_format.ISBFormat.ORIGINAL:
-        content = item.resolved_content
+    if (request_profile is not None and request_profile == profiles.ISAMPLES_PROFILE) or \
+            format == isb_format.ISBFormat.CORE:
+        if request_profile is None:
+            request_profile = profiles.ISAMPLES_PROFILE
+        content = await thing_resolved_content(identifier, item)
     else:
-        # If no profile explicitly requested, include the default profile here
+        # If no profile explicitly requested, use the default profile here (currently original source)
         if request_profile is None:
             request_profile = profiles.DEFAULT_PROFILE
-        content = await thing_resolved_content(identifier, item)
+        content = item.resolved_content
     headers = {}
     if request_profile is not None:
         headers.update(profiles.content_profile_headers(request_profile))
@@ -428,6 +431,24 @@ async def get_thing(
         content=content, media_type=item.resolved_media_type, headers=headers
     )
 
+
+@app.get(f"/resolve/{{identifier:path}}", response_model=typing.Any)
+async def resolve_thing(
+    request: fastapi.Request,
+    identifier: str,
+    full: bool = False,
+    format: typing.Optional[isb_format.ISBFormat] = None,
+    _profile: str = None,
+    session: Session = Depends(get_session),
+):
+    url_str = str(request.url).replace("/resolve/", f"/{config.Settings().thing_url_path}/")
+    headers = {
+        "Location": url_str
+    }
+    do_redirect_header = request.headers.get("Do-Redirect")
+    if do_redirect_header is not None and (do_redirect_header == "0" or do_redirect_header == "false"):
+        return fastapi.responses.Response(headers=headers)
+    return fastapi.responses.RedirectResponse(url=url_str, status_code=302, headers=headers)
 
 async def thing_resolved_content(identifier: str, item: Thing) -> dict:
     authority_id = item.authority_id

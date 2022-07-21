@@ -24,9 +24,10 @@ class Profile:
 ISAMPLES_PROFILE = Profile("https://w3id.org/isample/schema", "isamples")
 SOURCE_PROFILE = Profile("https://w3id.org/isample/source_record", "source")
 ALL_SUPPORTED_PROFILES = [ISAMPLES_PROFILE, SOURCE_PROFILE]
-DEFAULT_PROFILE = ISAMPLES_PROFILE
+DEFAULT_PROFILE = SOURCE_PROFILE
 # If the _profile query string argument is this value, treat the request as a list profiles request
 ALL_PROFILES_QSA_VALUE = "all"
+
 
 def content_profile_headers(profile: Profile) -> dict:
     return {
