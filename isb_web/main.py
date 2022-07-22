@@ -404,7 +404,8 @@ async def get_thing(
     if format == isb_format.ISBFormat.SOLR:
         return solr_thing_response(identifier)
 
-    if _profile == profiles.ALL_PROFILES_QSA_VALUE or request.method == "HEAD":
+    if _profile == profiles.ALL_PROFILES_QSA_VALUE or _profile == profiles.ALT_PROFILES_QSA_VALUE \
+            or request.method == "HEAD":
         return all_profiles_json_response(str(request.url))
     request_profile = profiles.get_profile_from_qsa(_profile)
     if request_profile is None:

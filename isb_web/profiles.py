@@ -27,6 +27,7 @@ ALL_SUPPORTED_PROFILES = [ISAMPLES_PROFILE, SOURCE_PROFILE]
 DEFAULT_PROFILE = SOURCE_PROFILE
 # If the _profile query string argument is this value, treat the request as a list profiles request
 ALL_PROFILES_QSA_VALUE = "all"
+ALT_PROFILES_QSA_VALUE = "alt"
 
 
 def content_profile_headers(profile: Profile) -> dict:
@@ -98,6 +99,6 @@ def get_all_profiles_response_headers(base_url_str: str) -> dict:
                                 f"profile=\"{profile.uri}\", ")
     link_header_value = "".join(individual_links).rstrip(", ")
     return {
-        "Content-Profile": "<http://www.w3.org/ns/dx/conneg/profile/qsa>",
+        "Content-Profile": "<http://www.w3.org/ns/dx/conneg/altr>",
         "Link": link_header_value
     }
