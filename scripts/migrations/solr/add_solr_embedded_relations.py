@@ -12,15 +12,14 @@ from isb_web.isb_solr_query import ISBCoreSolrRecordIterator
 def mutate_record(record: typing.Dict) -> typing.Optional[typing.Dict]:
     # Do whatever work is required to mutate the record to update things…
     record_copy = record.copy()
-    related_resources = record_copy.pop("relatedResource_isb_core_id")
+    parent_id = record_copy.get("producedBy_isb_core_id")
     relations = []
-    for related_resource_id in related_resources:
-        relation_dict = {
-            "relation_target": related_resource_id,
-            "relation_type": "related",
-            "id": f"{record['id']}_related_{related_resource_id}"
-        }
-        relations.append(relation_dict)
+    relation_dict = {
+        "relation_target": parent_id,
+        "relation_type": "subsample",
+        "id": f"{record['id']}_subsample_{parent_id}"
+    }
+    relations.append(relation_dict)
     record_copy["relations"] = relations
     return record_copy
 
@@ -36,7 +35,7 @@ def main(ctx):
     batch_size = 1
     current_mutated_batch = []
     rsession = requests.session()
-    iterator = ISBCoreSolrRecordIterator(rsession, "relatedResource_isb_core_id:*", batch_size, 0, "id asc")
+    iterator = ISBCoreSolrRecordIterator(rsession, "producedBy_label:tissue*subsample*", batch_size, 0, "id asc")
     for record in iterator:
         mutated_record = mutate_record(record)
         if mutated_record is not None:
