@@ -1,49 +1,6 @@
 import collections
 from model import get_model
-
-# SESAR test record igsn prefix
-SESAR_test_igsn = [
-    "IEKTS",
-    "IEKCM",
-    "IEKEL",
-    "IESDE",
-    "MEG",
-    "MCT IEJKH",
-    "IESER",
-    "IELL2",
-    "IELL1",
-    "LLS",
-    "IEHS1",
-    "HSU",
-    "IECAO",
-    "IESBC"
-]
-SESAR_CV_words = {
-    'anthropogenic',
-    'biogenic',
-    'dispersed',
-    'fluid',
-    'frozen',
-    'gaseous',
-    'ice',
-    'liquid',
-    'material',
-    'media',
-    'metal',
-    'mineral',
-    'mixed',
-    'natural',
-    'non-aqueous',
-    'non-organic',
-    'organic',
-    'particulate',
-    'rock',
-    'sediment',
-    'soil',
-    'soil,',
-    'solid',
-    'water'
-}
+import SESARClassifierInput
 
 
 def checkInformative(description_map, text, collection):
@@ -54,7 +11,7 @@ def checkInformative(description_map, text, collection):
         #       && only contains sampleType
         informative = False
         if "description" not in description_map:
-            for cv in SESAR_CV_words:
+            for cv in SESARClassifierInput.SESAR_CV_words:
                 if cv in text:
                     informative = True
                     break
@@ -72,7 +29,7 @@ def checkInvalid(collection, field_to_value):
     i.e., not a sample record"""
     if collection == "SESAR":
         if field_to_value["igsnPrefix"] != "":
-            for test_igsn in SESAR_test_igsn:
+            for test_igsn in SESARClassifierInput.SESAR_test_igsn:
                 if test_igsn in field_to_value["igsnPrefix"]:
                     return True
         if field_to_value["sampleType"] == "Hole" or \
