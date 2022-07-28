@@ -67,21 +67,22 @@ def checkInformative(description_map, text, collection):
     return informative
 
 
-def checkInvalid(field_to_value):
+def checkInvalid(collection, field_to_value):
     """Checks if the record is invalid,
     i.e., not a sample record"""
-    if field_to_value["igsnPrefix"] != "":
-        for test_igsn in SESAR_test_igsn:
-            if test_igsn in field_to_value["igsnPrefix"]:
-                return True
-    if field_to_value["sampleType"] == "Hole" or \
-            field_to_value["sampleType"] == "Site":
-        return True
+    if collection == "SESAR":
+        if field_to_value["igsnPrefix"] != "":
+            for test_igsn in SESAR_test_igsn:
+                if test_igsn in field_to_value["igsnPrefix"]:
+                    return True
+        if field_to_value["sampleType"] == "Hole" or \
+                field_to_value["sampleType"] == "Site":
+            return True
     return False
 
 
-def classify_by_sampleType(field_to_value):
-    """Use the sampleType field in the record and
+def SESAR_classify_by_sampleType(field_to_value):
+    """Use the sampleType field in the SESAR record and
     check if it falls into any of the defined rules
     If it does not, return None"""
     if "IODP" in field_to_value["cruiseFieldPrgrm"] or \
@@ -140,7 +141,7 @@ def classify_by_rule(description_map, text, collection, labelType):
 
         # check if the fields fall into the rules
         # if it does not, return None
-        return classify_by_sampleType(field_to_value)
+        return SESAR_classify_by_sampleType(field_to_value)
 
 
 def classify_by_machine(text, collection, labelType):
