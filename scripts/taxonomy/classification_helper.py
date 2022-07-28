@@ -84,17 +84,18 @@ def classify_by_sampleType(field_to_value):
     """Use the sampleType field in the record and
     check if it falls into any of the defined rules
     If it does not, return None"""
-    if "IODP" in field_to_value["cruiseFieldPrgrm"]:
-        if field_to_value["sampleType"] == "Core":
+    if "IODP" in field_to_value["cruiseFieldPrgrm"] or \
+            "ODP" in field_to_value["cruiseFieldPrgrm"]:
+        if "core" in field_to_value["sampleType"].lower():
             return "Mixture of sediment and rock"
         if field_to_value["sampleType"] == "Individual Sample":
             return "Sediment or Rock"
         if "macrofossil" in field_to_value["description"].lower():
             return "Rock"
-    if field_to_value["sampleType"] == "Dredge":
+    if "dredge" in field_to_value["sampleType"].lower():
         return "Natural Solid Material"
     if field_to_value["primaryLocationType"] == "wetland" and \
-            field_to_value["sampleType"] == "Core":
+            "core" in field_to_value["sampleType"].lower():
         return "Material"
     if field_to_value["sampleType"] == "U-channel":
         return "Sediment"
