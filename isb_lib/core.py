@@ -557,6 +557,7 @@ class ThingRecordIterator:
         status: int = 200,
         page_size: int = 5000,
         offset: int = 0,
+        limit: int = -1,
         min_time_created: datetime.datetime = None,
     ):
         self._session = session
@@ -566,6 +567,8 @@ class ThingRecordIterator:
         self._offset = offset
         self._min_time_created = min_time_created
         self._id = offset
+        self._limit = limit
+        self._total_selected = 0
 
     def yieldRecordsByPage(self):
         while True:
@@ -582,6 +585,10 @@ class ThingRecordIterator:
             max_id_in_page = 0
             for rec in things:
                 n += 1
+                self._total_selected += 1
+                if self._limit > 0 and self._total_selected == self._limit:
+                    n = 0
+                    break
                 yield rec
                 max_id_in_page = rec.primary_key
             if n == 0:

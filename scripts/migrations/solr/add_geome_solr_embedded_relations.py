@@ -12,7 +12,7 @@ from isb_web.isb_solr_query import ISBCoreSolrRecordIterator
 def mutate_record(record: typing.Dict) -> typing.Optional[typing.Dict]:
     # Do whatever work is required to mutate the record to update things…
     record_copy = record.copy()
-    parent_id = record_copy.get("producedBy_isb_core_id")
+    parent_id = record_copy.get("relatedResource_isb_core_id")[0]
     relations = []
     relation_dict = {
         "relation_target": parent_id,
@@ -32,7 +32,7 @@ def main(ctx):
     solr_url = isb_web.config.Settings().solr_url
     isb_lib.core.things_main(ctx, None, solr_url, "INFO", False)
     total_records = 0
-    batch_size = 1
+    batch_size = 10000
     current_mutated_batch = []
     rsession = requests.session()
     iterator = ISBCoreSolrRecordIterator(rsession, "producedBy_label:tissue*subsample*", batch_size, 0, "id asc")
