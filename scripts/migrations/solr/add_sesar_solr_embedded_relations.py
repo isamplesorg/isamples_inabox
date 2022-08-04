@@ -60,8 +60,7 @@ def compute_sesar_parent_relations(session: Session) -> dict:
             session,
             authority_id=isb_lib.sesar_adapter.SESARItem.AUTHORITY_ID,
             page_size=batch_size,
-            offset=0,
-            limit=50000
+            offset=0
         )
         # thing = get_thing_with_id(session, "IGSN:NHB002GWT")
         for thing in thing_iterator.yieldRecordsByPage():

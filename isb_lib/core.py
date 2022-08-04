@@ -248,7 +248,15 @@ def handle_produced_by_fields(coreMetadata: typing.Dict, doc: typing.Dict):  # n
             doc["producedBy_resultTime"] = solr_date_str
             doc["producedBy_resultTimeRange"] = solr_date_str
     if _shouldAddMetadataValueToSolrDoc(producedBy, "@id"):
-        doc["producedBy_isb_core_id"] = producedBy["@id"]
+        produced_by_id = producedBy["@id"]
+        doc["producedBy_isb_core_id"] = produced_by_id
+        doc["relations"] = [
+            {
+                "relation_target": produced_by_id,
+                "relation_type": "subsample",
+                "id": f"{doc['id']}_subsample_{produced_by_id}"
+            }
+        ]
     if "samplingSite" in producedBy:
         samplingSite = producedBy["samplingSite"]
         if _shouldAddMetadataValueToSolrDoc(samplingSite, "description"):
