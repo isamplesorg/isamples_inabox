@@ -12,16 +12,20 @@ from isb_web.isb_solr_query import ISBCoreSolrRecordIterator
 def mutate_record(record: typing.Dict) -> typing.Optional[typing.Dict]:
     # Do whatever work is required to mutate the record to update things…
     record_copy = record.copy()
-    parent_id = record_copy.get("relatedResource_isb_core_id")[0]
-    relations = []
-    relation_dict = {
-        "relation_target": parent_id,
-        "relation_type": "subsample",
-        "id": f"{record['id']}_subsample_{parent_id}"
-    }
-    relations.append(relation_dict)
-    record_copy["relations"] = relations
-    return record_copy
+    related_resource_id = record_copy.get("relatedResource_isb_core_id")
+    if related_resource_id is None:
+        return None
+    else:
+        parent_id = related_resource_id[0]
+        relations = []
+        relation_dict = {
+            "relation_target": parent_id,
+            "relation_type": "subsample",
+            "id": f"{record['id']}_subsample_{parent_id}"
+        }
+        relations.append(relation_dict)
+        record_copy["relations"] = relations
+        return record_copy
 
 
 @click.command()
