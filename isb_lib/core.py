@@ -594,7 +594,7 @@ class ThingRecordIterator:
             for rec in things:
                 n += 1
                 self._total_selected += 1
-                if self._limit > 0 and self._total_selected == self._limit:
+                if self._limit is not None and self._total_selected == self._limit:
                     n = 0
                     break
                 yield rec
