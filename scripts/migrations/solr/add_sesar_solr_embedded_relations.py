@@ -7,10 +7,9 @@ from sqlmodel import Session
 
 import isb_lib.core
 import isb_web.config
-from isb_lib.models.thing import Thing
 from isb_lib.sesar_adapter import fullIgsn
 from isb_web.isb_solr_query import ISBCoreSolrRecordIterator
-from isb_web.sqlmodel_database import SQLModelDAO, all_thing_identifiers, get_thing_with_id
+from isb_web.sqlmodel_database import SQLModelDAO
 
 
 @click.command()
@@ -87,6 +86,7 @@ def mutate_record(record: dict, igsn_to_parent_igsn: dict) -> Optional[dict]:
     relations.append(relation_dict)
     record_copy["relations"] = relations
     return record_copy
+
 
 """
 Adds SESAR embedded parent relations
