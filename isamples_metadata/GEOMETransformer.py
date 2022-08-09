@@ -2,12 +2,15 @@ from __future__ import annotations
 import datetime
 import logging
 import typing
+import re
 from typing import Optional
 
 import isamples_metadata
 from isamples_metadata.Transformer import (
     Transformer,
 )
+
+PERMIT_STRINGS_TO_IGNORE = ['nan', 'na', 'no data', 'unknown', 'none_required']
 
 TISSUE_ENTITY = "Tissue"
 JSON_TIME_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
@@ -437,12 +440,64 @@ class GEOMETransformer(Transformer):
     def authorized_by(self) -> typing.List[str]:
         permit_information = self._parent_permit_information()
         if permit_information is not None:
-            return [permit_information]
+            parsed_permit_information = GEOMETransformer.parse_permit_freetext(permit_information)
+            return parsed_permit_information["authorizedBy"]
         return []
 
     def complies_with(self) -> typing.List[str]:
         # Don't have this information
         return []
+
+    @staticmethod
+    def _format_result_object(authorized_by: list[str]) -> dict[str, list[str]]:
+        return {"authorizedBy": authorized_by, "compliesWith": []}
+
+    @staticmethod
+    def parse_permit_freetext(string):
+        original_string = str(string)
+
+        # If the string is NA
+        if original_string.lower() in PERMIT_STRINGS_TO_IGNORE: return GEOMETransformer._format_result_object([])
+
+        # Remove quotes
+        original_string = re.sub(r'\"', "", original_string)
+
+        slash_n = len(re.findall(r'/', original_string))
+        comma_n = len(re.findall(r'\,', original_string))
+
+        # e.g. DAFF/DEA
+        if slash_n == 1 and original_string.replace(" ", "") == original_string:
+            return GEOMETransformer._format_result_object(original_string.split("/"))
+
+        # If there are multiple slash "/", we need to split string by " and " or ", "
+        if slash_n > 1 and not comma_n > 1:
+            # replace typo error "/ " to "/"
+            original_string = re.sub("/ ", "/", original_string)
+
+            if re.findall(' and ', original_string):
+                return GEOMETransformer._format_result_object(original_string.split(" and "))
+            else:
+                return GEOMETransformer._format_result_object(original_string.split(", "))
+
+                # If there are multiple commas, ", ", we need to split string by ", " and remove "&" or "and"
+        if comma_n > 1 and (", and " in original_string or ", & " in original_string) and not slash_n > 1:
+            # Ignore long string
+            if len(re.findall('and', original_string)) > 1:
+                return GEOMETransformer._format_result_object([original_string])
+
+            if " and " in original_string:
+                original_string = original_string.replace(" and ", ' ')
+
+            if " & " in original_string:
+                original_string = original_string.replace(" & ", ' ')
+
+            return GEOMETransformer._format_result_object(original_string.split(", "))
+
+        # Split string by semicolon, ";" but ignore long string with multiple separator
+        if re.findall("; ", original_string) and not comma_n > 1:
+            return GEOMETransformer._format_result_object(original_string.split("; "))
+
+        return GEOMETransformer._format_result_object([original_string])
 
 
 class GEOMEChildTransformer(GEOMETransformer):
