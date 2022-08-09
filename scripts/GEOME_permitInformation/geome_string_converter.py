@@ -24,7 +24,6 @@ def splitString(string):
 
     # If there are multiple slash "/", we need to split string by " and " or ", "
     if(slash_N > 1 and not comma_N > 1):
-        print(slash_N)
         # replace typo error "/ " to "/"
         originalString = re.sub("/ ", "/", originalString)
 
@@ -35,7 +34,6 @@ def splitString(string):
     
     # If there are multiple commas, ", ", we need to split string by ", " and remove "&" or "and"
     if(comma_N > 1 and (", and " in originalString or ", & " in originalString) and not slash_N > 1):
-        print(comma_N)
         # Ignore long string
         if(len(re.findall('and', originalString)) > 1):
             return formatResultObject([originalString]) 
