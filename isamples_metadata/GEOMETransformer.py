@@ -429,6 +429,21 @@ class GEOMETransformer(Transformer):
         else:
             return None
 
+    def _parent_permit_information(self) -> Optional[str]:
+        parent_record = self._source_record_parent_record()
+        if parent_record is not None:
+            return parent_record.get("permitInformation", Transformer.NOT_PROVIDED)
+
+    def authorized_by(self) -> typing.List[str]:
+        permit_information = self._parent_permit_information()
+        if permit_information is not None:
+            return [permit_information]
+        return []
+
+    def complies_with(self) -> typing.List[str]:
+        # Don't have this information
+        return []
+
 
 class GEOMEChildTransformer(GEOMETransformer):
     """GEOME child record subclass transformer -- uses some fields from the parent and some from the child"""
@@ -502,6 +517,14 @@ class GEOMEChildTransformer(GEOMETransformer):
         parent_dict["target"] = main_record.get("bcid", "")
         parent_dict["relationshipType"] = "derived_from"
         return [parent_dict]
+
+    def authorized_by(self) -> typing.List[str]:
+        # If present, this information is stored on the parent record
+        return []
+
+    def complies_with(self) -> typing.List[str]:
+        # If present, this information is stored on the parent record
+        return []
 
 
 # Function to iterate through the identifiers and instantiate the proper GEOME Transformer based on the identifier
