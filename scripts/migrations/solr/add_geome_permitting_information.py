@@ -4,6 +4,7 @@ import click
 import requests
 import logging
 
+from isamples_metadata.GEOMETransformer import GEOMETransformer
 from sqlmodel import Session
 
 import isb_lib
@@ -46,7 +47,8 @@ def mutate_record(record: typing.Dict, permitting_information: typing.Dict) -> t
     if record_permit_info is None:
         return None
     record_copy = record.copy()
-    record_copy["authorizedBy"] = record_permit_info
+    freetext = GEOMETransformer.parse_permit_freetext(record_permit_info)
+    record_copy["authorizedBy"] = freetext["authorizedBy"]
     return record_copy
 
 
