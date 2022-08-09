@@ -457,7 +457,8 @@ class GEOMETransformer(Transformer):
         original_string = str(string)
 
         # If the string is NA
-        if original_string.lower() in PERMIT_STRINGS_TO_IGNORE: return GEOMETransformer._format_result_object([])
+        if original_string.lower() in PERMIT_STRINGS_TO_IGNORE:
+            return GEOMETransformer._format_result_object([])
 
         # Remove quotes
         original_string = re.sub(r'\"', "", original_string)
