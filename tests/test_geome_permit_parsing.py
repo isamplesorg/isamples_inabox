@@ -103,6 +103,16 @@ structured_data_test_values = [
         ["foo1", "foo2"],
         ["bar1", "bar2"],
     ),
+    (
+        "complies:foo1;foo2 authorized:bar1;bar2",
+        ["foo1", "foo2"],
+        ["bar1", "bar2"],
+    ),
+    (
+        "authorized:foo complies:bar",
+        ["bar"],
+        ["foo"],
+    ),
 ]
 
 

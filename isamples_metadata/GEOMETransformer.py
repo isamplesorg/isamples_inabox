@@ -15,10 +15,10 @@ PERMIT_STRINGS_TO_IGNORE = ['nan', 'na', 'no data', 'unknown', 'none_required']
 TISSUE_ENTITY = "Tissue"
 JSON_TIME_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
 
-complies_with_str = r"complies(?:_| )?with:([^\s]+)(\s+authorized(?:_| )??by:(.*))?"
+complies_with_str = r"complies(?:_| )?(?:with)?:([^\s]+)(\s+authorized(?:_| )?(?:by)?:(.*))?"
 PERMIT_STRUCTURED_TEXT_COMPLIES_WITH_PATTERN = re.compile(complies_with_str, re.IGNORECASE)
 
-authorized_by_str = r"authorized(?:_| )?by:([^\s]+)(\s+complies(?:_| )?with:(.*))?"
+authorized_by_str = r"authorized(?:_| )?(?:by)?:([^\s]+)(\s+complies(?:_| )?(?:with)?:(.*))?"
 PERMIT_STRUCTURED_TEXT_AUTHORIZED_BY_PATTERN = re.compile(authorized_by_str, re.IGNORECASE)
 
 
