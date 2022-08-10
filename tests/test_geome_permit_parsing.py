@@ -1,5 +1,3 @@
-from typing import Optional
-
 import pytest
 from isamples_metadata.GEOMETransformer import GEOMETransformer
 
