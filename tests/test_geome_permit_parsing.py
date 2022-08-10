@@ -39,7 +39,7 @@ iterator_testcases = [
             "162/FQ006/EXP./DNQB/VII/2011)"],
             "compliesWith": []}),
     ("NMFS permits, state permits, & CITES permits",
-     {"authorizedBy": ["NMFS permits", "state permits", "CITES permits"], "compliesWith": []}),
+     {"authorizedBy": ["NMFS permits, state permits, & CITES permits"], "compliesWith": []}),
     ("MinistryofWaterandEnvironmentofYemen",
      {"authorizedBy": ["MinistryofWaterandEnvironmentofYemen"], "compliesWith": []}),
     (
@@ -49,7 +49,7 @@ iterator_testcases = [
             "compliesWith": []}),
     ("DAFF/DEA", {"authorizedBy": ["DAFF", "DEA"], "compliesWith": []}),
     ("Ministry of Environment, Natural Resources, and Transport",
-     {"authorizedBy": ["Ministry of Environment", "Natural Resources", "Transport"], "compliesWith": []}),
+     {"authorizedBy": ["Ministry of Environment, Natural Resources, and Transport"], "compliesWith": []}),
     ("G10/33597.1 & 118636; GBRMPA & QLD Fisheries",
      {"authorizedBy": ["G10/33597.1 & 118636", "GBRMPA & QLD Fisheries"], "compliesWith": []})
 ]

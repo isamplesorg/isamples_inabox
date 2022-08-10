@@ -520,20 +520,6 @@ class GEOMETransformer(Transformer):
             else:
                 return GEOMETransformer._format_result_object(original_string.split(", "))
 
-                # If there are multiple commas, ", ", we need to split string by ", " and remove "&" or "and"
-        if comma_n > 1 and (", and " in original_string or ", & " in original_string) and not slash_n > 1:
-            # Ignore long string
-            if len(re.findall('and', original_string)) > 1:
-                return GEOMETransformer._format_result_object([original_string])
-
-            if " and " in original_string:
-                original_string = original_string.replace(" and ", ' ')
-
-            if " & " in original_string:
-                original_string = original_string.replace(" & ", ' ')
-
-            return GEOMETransformer._format_result_object(original_string.split(", "))
-
         # Split string by semicolon, ";" but ignore long string with multiple separator
         if re.findall("; ", original_string) and not comma_n > 1:
             return GEOMETransformer._format_result_object(original_string.split("; "))
