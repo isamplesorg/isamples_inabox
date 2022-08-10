@@ -1,3 +1,5 @@
+from typing import Optional
+
 import pytest
 from isamples_metadata.GEOMETransformer import GEOMETransformer
 
@@ -58,3 +60,29 @@ iterator_testcases = [
 @pytest.mark.parametrize("original_entries,expected_outcome", iterator_testcases)
 def test_split_string(original_entries, expected_outcome):
     assert GEOMETransformer.parse_permit_freetext(original_entries) == expected_outcome
+
+
+structured_data_test_values = [
+    (
+        "complies_with:foo authorized_by:bar",
+        ["foo"],
+        ["bar"],
+    ),
+    (
+        "complies_with:foo",
+        ["foo"],
+        None,
+    ),
+    (
+        "authorized_by:bar",
+        None,
+        ["bar"],
+    ),
+]
+
+
+@pytest.mark.parametrize("source_text,complies_with,authorized_by", structured_data_test_values)
+def test_parse_structured_data(source_text: str, complies_with: list[str], authorized_by: list[str]):
+    parse_result = GEOMETransformer.parse_permit_structured_text(source_text)
+    assert complies_with == parse_result.get("compliesWith")
+    assert authorized_by == parse_result.get("authorizedBy")

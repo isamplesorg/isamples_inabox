@@ -14,6 +14,8 @@ PERMIT_STRINGS_TO_IGNORE = ['nan', 'na', 'no data', 'unknown', 'none_required']
 
 TISSUE_ENTITY = "Tissue"
 JSON_TIME_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
+PERMIT_STRUCTURED_TEXT_COMPLIES_WITH_PATTERN = re.compile(r"complies_with:([^\s]+)(\s+authorized_by:(.*))?")
+PERMIT_STRUCTURED_TEXT_AUTHORIZED_BY_PATTERN = re.compile(r"authorized_by:([^\s]+)(\s+complies_with:(.*))?")
 
 
 class GEOMETransformer(Transformer):
@@ -453,8 +455,42 @@ class GEOMETransformer(Transformer):
         return {"authorizedBy": authorized_by, "compliesWith": []}
 
     @staticmethod
-    def parse_permit_freetext(string):
-        original_string = str(string)
+    def parse_permit_text(text: str) -> dict[str, list[str]]:
+        structured_text = GEOMETransformer.parse_permit_structured_text(text)
+        if len(structured_text) > 0:
+            return structured_text
+        else:
+            return GEOMETransformer.parse_permit_freetext(text)
+
+    @staticmethod
+    def _parse_semicolon_joined_text(text: str) -> list[str]:
+        return text.split(";")
+
+    @staticmethod
+    def parse_permit_structured_text(text: str) -> dict[str, list[str]]:
+        match = PERMIT_STRUCTURED_TEXT_AUTHORIZED_BY_PATTERN.match(text)
+        result = {}
+        authorized_by_str = None
+        complies_with_str = None
+        if match is not None:
+            authorized_by_str = match.group(1)
+            complies_with_str = match.group(3)
+        else:
+            match = PERMIT_STRUCTURED_TEXT_COMPLIES_WITH_PATTERN.match(text)
+            if match is not None:
+                complies_with_str = match.group(1)
+                authorized_by_str = match.group(3)
+        if authorized_by_str is not None:
+            authorized_by_list = GEOMETransformer._parse_semicolon_joined_text(authorized_by_str)
+            result["authorizedBy"] = authorized_by_list
+        if complies_with_str is not None:
+            complies_with_list = GEOMETransformer._parse_semicolon_joined_text(complies_with_str)
+            result["compliesWith"] = complies_with_list
+        return result
+
+    @staticmethod
+    def parse_permit_freetext(text: str) -> dict[str, list[str]]:
+        original_string = str(text)
 
         # If the string is NA
         if original_string.lower() in PERMIT_STRINGS_TO_IGNORE:
