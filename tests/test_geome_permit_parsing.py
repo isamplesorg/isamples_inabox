@@ -69,6 +69,11 @@ structured_data_test_values = [
         ["bar"],
     ),
     (
+        "Complies_with:foo Authorized_by:bar",
+        ["foo"],
+        ["bar"],
+    ),
+    (
         "complies_with:foo",
         ["foo"],
         None,
@@ -77,6 +82,26 @@ structured_data_test_values = [
         "authorized_by:bar",
         None,
         ["bar"],
+    ),
+    (
+        "complies_with:foo1,foo2 authorized_by:bar1,bar2",
+        ["foo1", "foo2"],
+        ["bar1", "bar2"],
+    ),
+    (
+        "complies_with:foo1;foo2 authorized_by:bar1;bar2",
+        ["foo1", "foo2"],
+        ["bar1", "bar2"],
+    ),
+    (
+        "compliesWith:foo1;foo2 authorizedBy:bar1;bar2",
+        ["foo1", "foo2"],
+        ["bar1", "bar2"],
+    ),
+    (
+        "complies with:foo1;foo2 authorized by:bar1;bar2",
+        ["foo1", "foo2"],
+        ["bar1", "bar2"],
     ),
 ]
 

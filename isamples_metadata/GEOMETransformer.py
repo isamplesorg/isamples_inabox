@@ -14,8 +14,12 @@ PERMIT_STRINGS_TO_IGNORE = ['nan', 'na', 'no data', 'unknown', 'none_required']
 
 TISSUE_ENTITY = "Tissue"
 JSON_TIME_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
-PERMIT_STRUCTURED_TEXT_COMPLIES_WITH_PATTERN = re.compile(r"complies_with:([^\s]+)(\s+authorized_by:(.*))?")
-PERMIT_STRUCTURED_TEXT_AUTHORIZED_BY_PATTERN = re.compile(r"authorized_by:([^\s]+)(\s+complies_with:(.*))?")
+
+complies_with_str = r"complies(?:_| )?with:([^\s]+)(\s+authorized(?:_| )??by:(.*))?"
+PERMIT_STRUCTURED_TEXT_COMPLIES_WITH_PATTERN = re.compile(complies_with_str, re.IGNORECASE)
+
+authorized_by_str = r"authorized(?:_| )?by:([^\s]+)(\s+complies(?:_| )?with:(.*))?"
+PERMIT_STRUCTURED_TEXT_AUTHORIZED_BY_PATTERN = re.compile(authorized_by_str, re.IGNORECASE)
 
 
 class GEOMETransformer(Transformer):
@@ -463,8 +467,8 @@ class GEOMETransformer(Transformer):
             return GEOMETransformer.parse_permit_freetext(text)
 
     @staticmethod
-    def _parse_semicolon_joined_text(text: str) -> list[str]:
-        return text.split(";")
+    def _split_delimited_text(text: str) -> list[str]:
+        return re.split(";|,", text)
 
     @staticmethod
     def parse_permit_structured_text(text: str) -> dict[str, list[str]]:
@@ -481,10 +485,10 @@ class GEOMETransformer(Transformer):
                 complies_with_str = match.group(1)
                 authorized_by_str = match.group(3)
         if authorized_by_str is not None:
-            authorized_by_list = GEOMETransformer._parse_semicolon_joined_text(authorized_by_str)
+            authorized_by_list = GEOMETransformer._split_delimited_text(authorized_by_str)
             result["authorizedBy"] = authorized_by_list
         if complies_with_str is not None:
-            complies_with_list = GEOMETransformer._parse_semicolon_joined_text(complies_with_str)
+            complies_with_list = GEOMETransformer._split_delimited_text(complies_with_str)
             result["compliesWith"] = complies_with_list
         return result
 
