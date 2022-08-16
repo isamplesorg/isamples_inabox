@@ -1,6 +1,8 @@
 import csv
 from typing import Any
 
+from frictionless import describe
+
 
 def import_isamples_csv(file_path: str) -> list[dict[str, Any]]:
     """
@@ -10,9 +12,7 @@ def import_isamples_csv(file_path: str) -> list[dict[str, Any]]:
 
     Returns: A list of dictionaries containing the records
     """
-    with open(file_path, newline="") as csvfile:
-        csvreader = csv.DictReader(csvfile, delimiter="\t", quoting=csv.QUOTE_NONE)
-        rows = []
-        for row in csvreader:
-            rows.append(row)
-        return rows
+    # TODO sort out paths
+    package = describe("/Users/mandeld/iSamples/isamples_docker/isb/isamples_inabox/isb_lib/data_import/datapackage.json", type="package")
+    print(package)
+    return package

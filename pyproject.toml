@@ -41,6 +41,7 @@ torchvision = "^0.2.2"
 transformers = "^4.20.1"
 
 connegp = "0.2"
+frictionless = "^4.40.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.3"
