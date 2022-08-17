@@ -1,5 +1,5 @@
 import pytest
-from frictionless import Resource
+from frictionless import validate, Resource
 
 from isb_lib.data_import import csv_import
 
@@ -11,6 +11,8 @@ CSV_items = [
 @pytest.mark.parametrize("csv_file_path", CSV_items)
 def test_load_csv(csv_file_path: str):
     records = csv_import.create_isamples_package(csv_file_path)
+    report = validate(records.to_dict(), type="package")
+    assert report.valid
     print(f"values are {records.values()}")
     print(f"items are {records.items()}")
     print(f"resources are {records.resources}")

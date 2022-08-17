@@ -6,7 +6,7 @@ from tabulate import tabulate
 
 import isb_lib.core
 from isb_lib.data_import import csv_import
-from frictionless import validate
+from frictionless import validate_package
 
 
 @click.group()
@@ -38,11 +38,11 @@ def main(ctx, db_url, solr_url, verbosity, heart_rate):
     help="Path to the CSV file containing the samples to load",
     required=True
 )
-def validate_package(file: str):
+def validate_isamples_package(file: str):
     package = csv_import.create_isamples_package(file)
-    report = validate(package.to_dict(), type="package")
+    report = package.validate()
     if report.valid:
-        logging.info("Validation successful.")
+        print("Validation successful.")
     else:
         errors = report.flatten(['code', 'message'])
         print(tabulate(errors, headers=['code', 'message']))
