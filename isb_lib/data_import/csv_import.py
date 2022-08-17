@@ -1,10 +1,10 @@
 import csv
 from typing import Any
 
-from frictionless import describe
+from frictionless import describe, Package
 
 
-def import_isamples_csv(file_path: str) -> list[dict[str, Any]]:
+def import_isamples_csv(file_path: str) -> Package:
     """
     Opens the specified file and return it as a list of iSamples Core record dictionaries
     Args:
