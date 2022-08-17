@@ -1,7 +1,13 @@
-import csv
-from typing import Any
+from frictionless import Package, Resource
+from pathlib import Path
+import os.path
+import json
 
-from frictionless import describe, Package
+p = Path(__file__)
+SCHEMA_JSON = {}
+schema_json_path = os.path.join(p.parent, "isamples_simple_schema.json")
+with open(schema_json_path) as schema_json_file:
+    SCHEMA_JSON = json.load(schema_json_file)
 
 
 def import_isamples_csv(file_path: str) -> Package:
@@ -12,7 +18,6 @@ def import_isamples_csv(file_path: str) -> Package:
 
     Returns: A list of dictionaries containing the records
     """
-    # TODO sort out paths
-    package = describe("/Users/mandeld/iSamples/isamples_docker/isb/isamples_inabox/isb_lib/data_import/datapackage.json", type="package")
-    print(package)
+    data_resource = Resource(source=file_path, format="csv", mediatype="text/csv", schema=SCHEMA_JSON)
+    package = Package(resources=[data_resource], name="isamples", title="isamples", id="isamples")
     return package
