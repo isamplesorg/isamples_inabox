@@ -46,7 +46,9 @@ def things_from_isamples_package(session: Session, package: Package, max_entries
         thing.tcreated = datetime.datetime.now()
         thing.resolved_url = url
         thing.authority_id = authority_id
-        thing.resolved_content = row
+        # This is a little goofy but seems to work…
+        json_str = json.dumps(row, default=str)
+        thing.resolved_content = json.loads(json_str)
         save_or_update_thing(session, thing)
         things.append(thing)
     return things
