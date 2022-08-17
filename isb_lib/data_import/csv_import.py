@@ -46,6 +46,7 @@ def things_from_isamples_package(session: Session, package: Package, max_entries
         thing.tcreated = datetime.datetime.now()
         thing.resolved_url = url
         thing.authority_id = authority_id
+        thing.resolved_content = row
         save_or_update_thing(session, thing)
         things.append(thing)
     return things

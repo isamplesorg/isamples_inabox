@@ -84,5 +84,33 @@ def load_records(ctx: Context, file: str, max_records: int):
     logging.info(f"Successfully imported {len(things)} things.")
 
 
+def _validate_resolved_content(thing: isb_lib.models.thing.Thing) -> dict:
+    return isb_lib.core.validate_resolved_content(config.Settings().authority_id, thing)
+
+
+def reparse_as_core_record(thing: isb_lib.models.thing.Thing) -> list[dict]:
+    # No transformation necessary since we already import the data in our solr format
+    resolved_content = _validate_resolved_content(thing)
+    return [resolved_content]
+
+
+@main.command("populate_isb_core_solr")
+@click.pass_context
+def populate_isb_core_solr(ctx):
+    db_url = ctx.obj["db_url"]
+    solr_url = ctx.obj["solr_url"]
+    solr_importer = isb_lib.core.CoreSolrImporter(
+        db_url=db_url,
+        authority_id=config.Settings().authority_id,
+        db_batch_size=1000,
+        solr_batch_size=1000,
+        solr_url=solr_url
+    )
+    allkeys = solr_importer.run_solr_import(
+        reparse_as_core_record
+    )
+    logging.info(f"Total keys= {len(allkeys)}")
+
+
 if __name__ == "__main__":
     main()
