@@ -1,7 +1,5 @@
-from typing import Generator
-
 import pytest
-from frictionless import Resource, Row
+from frictionless import Resource
 
 from isb_lib.data_import import csv_import
 
@@ -12,7 +10,7 @@ CSV_items = [
 
 @pytest.mark.parametrize("csv_file_path", CSV_items)
 def test_load_csv(csv_file_path: str):
-    records = csv_import.import_isamples_csv(csv_file_path)
+    records = csv_import.create_isamples_package(csv_file_path)
     print(f"values are {records.values()}")
     print(f"items are {records.items()}")
     print(f"resources are {records.resources}")
@@ -22,4 +20,5 @@ def test_load_csv(csv_file_path: str):
             break
         print(f"row is {row}")
         print(f"row errors are {row.errors}")
+        assert row.errors is None or len(row.errors) == 0
 

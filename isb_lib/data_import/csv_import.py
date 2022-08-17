@@ -10,7 +10,7 @@ with open(schema_json_path) as schema_json_file:
     SCHEMA_JSON = json.load(schema_json_file)
 
 
-def import_isamples_csv(file_path: str) -> Package:
+def create_isamples_package(file_path: str) -> Package:
     """
     Opens the specified file and return it as a list of iSamples Core record dictionaries
     Args:
