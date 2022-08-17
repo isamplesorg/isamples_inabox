@@ -1,4 +1,5 @@
 import logging
+
 import click
 import click_config_file
 from click import Context
@@ -7,6 +8,10 @@ from tabulate import tabulate
 import isb_lib.core
 from isb_lib.data_import import csv_import
 from frictionless import validate_package
+
+from isb_lib.data_import.csv_import import things_from_isamples_package
+from isb_web import config
+from isb_web.sqlmodel_database import SQLModelDAO
 
 
 @click.group()
@@ -27,7 +32,7 @@ from frictionless import validate_package
 @click_config_file.configuration_option(config_file_name="isb.cfg")
 @click.pass_context
 def main(ctx, db_url, solr_url, verbosity, heart_rate):
-    isb_lib.core.things_main(ctx, db_url, solr_url, verbosity, heart_rate)
+    isb_lib.core.things_main(ctx, config.Settings().database_url, config.Settings().solr_url, verbosity, heart_rate)
 
 
 @main.command("validate")
@@ -44,42 +49,39 @@ def validate_isamples_package(file: str):
     if report.valid:
         print("Validation successful.")
     else:
-        errors = report.flatten(['code', 'message'])
-        print(tabulate(errors, headers=['code', 'message']))
+        print_report_errors(report)
+
+
+def print_report_errors(report):
+    errors = report.flatten(['code', 'message'])
+    print(tabulate(errors, headers=['code', 'message']))
 
 
 @main.command("load")
 @click.option(
-    "-m",
-    "--max_records",
-    type=int,
-    default=1000,
-    help="Maximum records to load, -1 for all",
-)
-@click.option(
     "-f",
     "--file",
     type=str,
-    default=None,
-    help="Path to the CSV file containing the samples to load"
+    help="Path to the CSV file containing the samples to load",
+    required=True
+)
+@click.option(
+    "-m",
+    "--max_records",
+    type=int,
+    default=-1,
+    help="Maximum records to load, -1 for all",
 )
 @click.pass_context
-def load_records(ctx: Context, max_records: int, file_path: str):
-    package = csv_import.create_isamples_package(file_path)
-    report = validate_package(package.to_dict(), type="package")
+def load_records(ctx: Context, file: str, max_records: int):
+    package = csv_import.create_isamples_package(file)
+    report = package.validate()
     if not report.valid:
-        print(report.to_summary())
-    # if package.validate():
-    #     pac
-    # if len(package.metadata_errors) > 0:
-    #     print("Error")
-    # session = SQLModelDAO(ctx.obj["db_url"]).get_session()
-    # max_created = sqlmodel_database.last_time_thing_created(
-    #     session, isb_lib.opencontext_adapter.OpenContextItem.AUTHORITY_ID
-    # )
-    # L.info("loadRecords: %s", str(session))
-    # # ctx.obj["db_url"] = db_url
-    # load_open_context_entries(session, max_records, max_created)
+        print_report_errors(report)
+        return
+    session = SQLModelDAO(ctx.obj["db_url"]).get_session()
+    things = things_from_isamples_package(session, package, max_records)
+    logging.info(f"Successfully imported {len(things)} things.")
 
 
 if __name__ == "__main__":
