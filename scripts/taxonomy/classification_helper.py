@@ -1,6 +1,6 @@
 import collections
 from model import get_model
-import SESARClassifierInput
+from SESARClassifierInput import SESARClassifierInput
 
 
 def checkInformative(description_map, text, collection):
@@ -38,7 +38,7 @@ def checkInvalid(collection, field_to_value):
     return False
 
 
-def SESAR_classify_by_sampleType(field_to_value):
+def classify_by_sampleType(field_to_value):
     """Use the sampleType field in the SESAR record and
     check if it falls into any of the defined rules
     If it does not, return None"""
@@ -93,12 +93,17 @@ def classify_by_rule(description_map, text, collection, labelType):
 
         # check if record is invalid
         # i.e., not a sample
-        if checkInvalid(field_to_value):
+        if checkInvalid(collection, field_to_value):
             return "Invalid"
 
         # check if the fields fall into the rules
         # if it does not, return None
-        return SESAR_classify_by_sampleType(field_to_value)
+        result = classify_by_sampleType(field_to_value)
+        if not result:
+            return result
+        else:
+            # map to controlled vocabulary
+            return SESARClassifierInput.source_to_CV[result]
 
 
 def classify_by_machine(text, collection, labelType):
@@ -110,4 +115,8 @@ def classify_by_machine(text, collection, labelType):
     # config file should have "FINE_TUNED_MODEL" : path/to/model/checkpoint
     if collection == "SESAR" and labelType == "material":
         model = get_model("scripts/taxonomy/assets/SESAR_material_config.json")
-    return model.predict(text)
+        prediction, prob = model.predict(text)
+        return (
+            SESARClassifierInput.source_to_CV[prediction],
+            prob
+        )

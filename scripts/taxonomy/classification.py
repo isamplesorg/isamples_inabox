@@ -102,9 +102,10 @@ def main(
 
             # print out the full hierarchy of the label
             print(
-                f"context: {full_context}",
-                f"material: {full_material}",
-                f"specimen: {full_specimen}"
+                f"Gold label (hierarchical) :  "
+                f"material: {full_material} / ",
+                f"specimen: {full_specimen} / "
+                f"context: {full_context} ",
             )
 
             print("-----------------")
