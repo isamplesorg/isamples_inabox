@@ -1,7 +1,9 @@
+import json
 import logging
 
 import click
 import click_config_file
+import os.path
 from click import Context
 from tabulate import tabulate
 
@@ -82,6 +84,38 @@ def load_records(ctx: Context, file: str, max_records: int):
     session = SQLModelDAO(ctx.obj["db_url"]).get_session()
     things = things_from_isamples_package(session, package, max_records)
     logging.info(f"Successfully imported {len(things)} things.")
+
+
+@main.command("sitemap")
+@click.option(
+    "-f",
+    "--file",
+    type=str,
+    help="Path to the CSV file containing the samples to load",
+    required=True
+)
+@click.option(
+    "-d",
+    "--directory",
+    type=str,
+    help="Path to the JSON sitemap directory",
+    required=True
+)
+@click.option(
+    "-m",
+    "--max_records",
+    type=int,
+    default=-1,
+    help="Maximum records to load, -1 for all",
+)
+def write_json_sitemap(file: str, directory: str, max_records: int):
+    package = csv_import.create_isamples_package(file)
+    isb_core_dicts = csv_import.isb_core_dicts_from_isamples_package(package)
+    for core_dict in isb_core_dicts:
+        dict_id = core_dict["@id"]
+        target_path = os.path.join(directory, f"{dict_id}.json")
+        with open(target_path, "w", newline="") as target_file:
+            target_file.write(json.dumps(core_dict, indent=2, default=str))
 
 
 def _validate_resolved_content(thing: isb_lib.models.thing.Thing) -> dict:

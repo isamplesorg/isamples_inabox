@@ -12,9 +12,9 @@ CSV_items = [
 ]
 
 
-@pytest.mark.parametrize("csv_file_path,json_file_path", CSV_items)
-def test_load_csv(csv_file_path: str, json_file_path: str):
-    records = csv_import.create_isamples_package(csv_file_path)
+@pytest.mark.parametrize("csv_file_path", CSV_items)
+def test_load_csv(csv_file_path: tuple):
+    records = csv_import.create_isamples_package(csv_file_path[0])
     report = validate(records.to_dict(), type="package")
     assert report.valid
     first_resource: Resource = records.resources[0]
@@ -38,9 +38,7 @@ def test_serialized_json_dict(dict1: dict, dict2: dict):
 @pytest.mark.parametrize("csv_file_path,json_file_path", CSV_items)
 def test_unflatten_csv_row(csv_file_path: str, json_file_path: str):
     records = csv_import.create_isamples_package(csv_file_path)
-    with open(json_file_path) as json_file:
-        json_str = json_file.read()
-        json_contents = json.loads(json_str)
+    json_contents = json_dict_from_file_path(json_file_path)
     first_resource: Resource = records.resources[0]
     for row in first_resource:
         unflattened_row = csv_import.unflatten_csv_row(row)
@@ -48,3 +46,17 @@ def test_unflatten_csv_row(csv_file_path: str, json_file_path: str):
         test_serialized_json_dict(unflattened_row, json_contents)
 
 
+def json_dict_from_file_path(json_file_path: str) -> dict:
+    with open(json_file_path) as json_file:
+        json_str = json_file.read()
+        json_contents = json.loads(json_str)
+    return json_contents
+
+
+@pytest.mark.parametrize("csv_file_path,json_file_path", CSV_items)
+def test_isb_core_dicts_from_isamples_package(csv_file_path: str, json_file_path: str):
+    records = csv_import.create_isamples_package(csv_file_path)
+    isb_core_dicts = csv_import.isb_core_dicts_from_isamples_package(records)
+    assert len(isb_core_dicts) == 1
+    json_dict = json_dict_from_file_path(json_file_path)
+    test_serialized_json_dict(isb_core_dicts[0], json_dict)

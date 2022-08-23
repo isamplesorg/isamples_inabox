@@ -42,22 +42,22 @@ def unflatten_csv_row(row: dict) -> dict:
     Returns:
         The row dictionary expanded out to the iSB Core Format
     """
-    flattened_row = dict(row)
+    unflattened_row = dict(row)
     produced_by_dict = {}
-    flattened_row["producedBy"] = produced_by_dict
+    unflattened_row["producedBy"] = produced_by_dict
     produced_by_sampling_site_dict = {}
     produced_by_dict["samplingSite"] = produced_by_sampling_site_dict
     produced_by_sampling_site_location_dict = {}
     produced_by_sampling_site_dict["location"] = produced_by_sampling_site_location_dict
     curation_dict = {}
-    flattened_row["curation"] = curation_dict
+    unflattened_row["curation"] = curation_dict
 
-    row_id = flattened_row.pop("id")
-    flattened_row["sampleidentifier"] = row_id
-    flattened_row["@id"] = row_id
+    row_id = unflattened_row.pop("id")
+    unflattened_row["sampleidentifier"] = row_id
+    unflattened_row["@id"] = row_id
     for k, v in row.items():
         if k.startswith("producedBy"):
-            flattened_row.pop(k)
+            unflattened_row.pop(k)
             if "location" in k:
                 k = k.replace("producedBy_samplingSite_location_", "")
                 if k == "elevationInMeters":
@@ -68,7 +68,7 @@ def unflatten_csv_row(row: dict) -> dict:
             else:
                 produced_by_dict[k.replace("producedBy_", "")] = v
         elif k.startswith("curation"):
-            flattened_row.pop(k)
+            unflattened_row.pop(k)
             if k == "curation_location":
                 k = "curationLocation"
             elif k == "curation_accessContraints":
@@ -76,10 +76,10 @@ def unflatten_csv_row(row: dict) -> dict:
             else:
                 k = k.replace("curation_", "")
             curation_dict[k] = v
-    return flattened_row
+    return unflattened_row
 
 
-def things_from_isamples_package(session: Session, package: Package, max_entries: int) -> list[Thing]:
+def things_from_isamples_package(session: Session, package: Package, max_entries: int = -1) -> list[Thing]:
     first_resource: Resource = package.resources[0]
     num_things = 0
     url =  f"file://{first_resource.path}"
@@ -98,3 +98,14 @@ def things_from_isamples_package(session: Session, package: Package, max_entries
         save_or_update_thing(session, thing)
         things.append(thing)
     return things
+
+
+def isb_core_dicts_from_isamples_package(package: Package, max_entries: int = -1) -> list[dict]:
+    first_resource: Resource = package.resources[0]
+    num_dicts = 0
+    dicts = []
+    for row in first_resource:
+        if 0 < max_entries <= num_dicts:
+            break
+        dicts.append(unflatten_csv_row(row))
+    return dicts
