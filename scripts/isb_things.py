@@ -12,6 +12,8 @@ from isb_lib.data_import import csv_import
 from frictionless import validate_package
 
 from isb_lib.data_import.csv_import import things_from_isamples_package
+from isb_lib.sitemaps import build_sitemap
+from isb_lib.sitemaps.gh_pages_sitemap import GHPagesSitemapIndexIterator
 from isb_web import config
 from isb_web.sqlmodel_database import SQLModelDAO
 
@@ -116,6 +118,7 @@ def write_json_sitemap(file: str, directory: str, max_records: int):
         target_path = os.path.join(directory, f"{dict_id}.json")
         with open(target_path, "w", newline="") as target_file:
             target_file.write(json.dumps(core_dict, indent=2, default=str))
+    build_sitemap(directory, "http://foo.bar.baz/", GHPagesSitemapIndexIterator(directory))
 
 
 def _validate_resolved_content(thing: isb_lib.models.thing.Thing) -> dict:
