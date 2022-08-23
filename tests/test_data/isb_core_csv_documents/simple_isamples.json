@@ -31,7 +31,7 @@
 	"producedBy": {
 		"samplingSite": {
 			"location": {
-				"elevationInMeters": 2792,
+				"elevation": 2792,
 				"latitude": "32.4434174",
 				"longitude": "-110.7881222"
 			},
@@ -53,8 +53,8 @@
 	"curation": {
 		"label": "A special label for curation.",
 		"description": "A description of how the sample is curated.",
-		"accessContraints": "Any constraints associated with curation.",
-		"location": "Where the sample is curated.",
+		"accessConstraints": "Any constraints associated with curation.",
+		"curationLocation": "Where the sample is curated.",
 		"responsibility": "The institution responsible for curation."
 	},
 	"sampleidentifier": "DOI:12345",

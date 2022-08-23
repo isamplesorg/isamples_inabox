@@ -59,14 +59,23 @@ def unflatten_csv_row(row: dict) -> dict:
         if k.startswith("producedBy"):
             flattened_row.pop(k)
             if "location" in k:
-                produced_by_sampling_site_location_dict[k.replace("producedBy_samplingSite_location_", "")] = v
+                k = k.replace("producedBy_samplingSite_location_", "")
+                if k == "elevationInMeters":
+                    k = "elevation"
+                produced_by_sampling_site_location_dict[k] = v
             elif "samplingSite" in k:
                 produced_by_sampling_site_dict[k.replace("producedBy_samplingSite_", "")] = v
             else:
                 produced_by_dict[k.replace("producedBy_", "")] = v
         elif k.startswith("curation"):
             flattened_row.pop(k)
-            curation_dict[k.replace("curation_", "")] = v
+            if k == "curation_location":
+                k = "curationLocation"
+            elif k == "curation_accessContraints":
+                k = "accessConstraints"
+            else:
+                k = k.replace("curation_", "")
+            curation_dict[k] = v
     return flattened_row
 
 
