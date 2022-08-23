@@ -1,4 +1,4 @@
-from scripts.taxonomy.ClassifierInput import ClassifierInput
+from ClassifierInput import ClassifierInput
 
 
 class SESARClassifierInput(ClassifierInput):
@@ -24,7 +24,7 @@ class SESARClassifierInput(ClassifierInput):
     ]
 
     # material related words
-    SESAR_CV_words = {
+    SESAR_CV_words = [
         'anthropogenic',
         'biogenic',
         'dispersed',
@@ -49,6 +49,27 @@ class SESARClassifierInput(ClassifierInput):
         'soil,',
         'solid',
         'water'
+    ]
+
+    # SESAR source labels to CV mapping
+    source_to_CV = {
+        "Biology": "Biogenic non-organic material",
+        "EarthMaterial": "Natural Solid Material",
+        "Gas": "Gaseous material",
+        "Ice": "Any Ice",
+        "Liquid": "Liquid water",
+        "Material": "Material",
+        "Mineral": "Mineral",
+        "Organic Material": "Organic Material",
+        "Other": "Material",
+        "Particulate": "Particulate",
+        "Rock": "Rock",
+        "Sediment": "Sediment",
+        "Soil": "Soil",
+        "experimentMaterial": "Material",
+        "Sediment or Rock": "Natural Solid Material",
+        "Natural Solid Material": "Natural Solid Material",
+        "Mixed soil, sediment or rock": "Mixed soil, sediment or rock"
     }
 
     def __init__(self, thing):
