@@ -3,7 +3,7 @@ from typing import Optional
 
 import requests
 
-from isb_lib.sitemaps import SitemapIndexEntry, UrlSetEntry
+from isb_lib.sitemaps import SitemapIndexEntry, UrlSetEntry, ThingUrlSetEntry
 from isb_web import isb_solr_query
 
 MAX_URLS_IN_SITEMAP = 50000
@@ -35,7 +35,7 @@ class ThingUrlSetIterator:
             raise StopIteration
         next_thing = self._things[self._thing_index]
         timestamp_str = next_thing.get("sourceUpdatedTime")
-        next_url_set_entry = UrlSetEntry(next_thing["id"], timestamp_str)
+        next_url_set_entry = ThingUrlSetEntry(next_thing["id"], timestamp_str)
         # Update the necessary state
         self.num_urls += 1
         self._thing_index += 1

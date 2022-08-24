@@ -41,6 +41,14 @@ class UrlSetEntry:
         self.identifier = identifier
         self.last_mod_str = last_mod
 
+    def loc_suffix(self):
+        return self.identifier
+
+
+class ThingUrlSetEntry(UrlSetEntry):
+    def loc_suffix(self):
+        return f"thing/{self.identifier}?full=false&format=core"
+
 
 table = str.maketrans(
     {
@@ -70,7 +78,7 @@ http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">\n"""
         await aiodf.fsync()
         for entry in urls:
             loc_str = xmlesc(
-                os.path.join(host, f"thing/{entry.identifier}?full=false&format=core")
+                os.path.join(host, entry.loc_suffix())
             )
             lastmod_str = xmlesc(entry.last_mod_str)
             url_str = f"  <url>\n    <loc>{loc_str}</loc>\n    <lastmod>{lastmod_str}</lastmod>\n  </url>\n"

@@ -33,7 +33,7 @@ class GHPagesUrlSetIterator:
         # Dont read past the bounds
         if self._filename_index == len(self._filenames):
             raise StopIteration
-        next_filename = os.path.splitext(self._filenames[self._filename_index])
+        next_filename = os.path.basename(self._filenames[self._filename_index])
         # TODO: this is a placeholder, need a way to maintain this state somehow
         timestamp_str = str(datetime.datetime.now())
         next_url_set_entry = UrlSetEntry(next_filename, timestamp_str)
