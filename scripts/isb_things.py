@@ -104,13 +104,20 @@ def load_records(ctx: Context, file: str, max_records: int):
     required=True
 )
 @click.option(
+    "-u",
+    "--url",
+    type=str,
+    help="URL prefix to use when writing out the sitemap files",
+    required=True
+)
+@click.option(
     "-m",
     "--max_records",
     type=int,
     default=-1,
     help="Maximum records to load, -1 for all",
 )
-def write_json_sitemap(file: str, directory: str, max_records: int):
+def write_json_sitemap(file: str, directory: str, url: str, max_records: int):
     package = csv_import.create_isamples_package(file)
     isb_core_dicts = csv_import.isb_core_dicts_from_isamples_package(package)
     for core_dict in isb_core_dicts:
@@ -118,7 +125,7 @@ def write_json_sitemap(file: str, directory: str, max_records: int):
         target_path = os.path.join(directory, f"{dict_id}.json")
         with open(target_path, "w", newline="") as target_file:
             target_file.write(json.dumps(core_dict, indent=2, default=str))
-    build_sitemap(directory, "http://foo.bar.baz/", GHPagesSitemapIndexIterator(directory))
+    build_sitemap(directory, url, GHPagesSitemapIndexIterator(directory))
 
 
 def _validate_resolved_content(thing: isb_lib.models.thing.Thing) -> dict:
