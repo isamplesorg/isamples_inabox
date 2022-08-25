@@ -103,7 +103,8 @@ https://www.sitemaps.org/schemas/sitemap/0.9/siteindex.xsd">\n"""
         await writer(header)
         await aiodf.fsync()
         for sitemap_index_entry in sitemap_index_entries:
-
+            # TODO: This is wrong and doesn't work for the JSON sitemap.  Why is this hardcoded into the path?
+            # Removing it will fix the JSON case but break the Things case.  Figure out how to reconcile the two.
             loc_str = xmlesc(
                 os.path.join(host, "sitemaps", sitemap_index_entry.sitemap_filename)
             )
