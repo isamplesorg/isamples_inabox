@@ -3,7 +3,7 @@ from typing import Optional
 
 import requests
 
-from isb_lib.sitemaps import SitemapIndexEntry, UrlSetEntry, ThingUrlSetEntry
+from isb_lib.sitemaps import SitemapIndexEntry, UrlSetEntry, ThingUrlSetEntry, ThingSitemapIndexEntry
 from isb_web import isb_solr_query
 
 MAX_URLS_IN_SITEMAP = 50000
@@ -44,7 +44,7 @@ class ThingUrlSetIterator:
         return next_url_set_entry
 
     def sitemap_index_entry(self) -> SitemapIndexEntry:
-        return SitemapIndexEntry(
+        return ThingSitemapIndexEntry(
             f"sitemap-{self.sitemap_index}.xml", self.last_tstamp_str or ""
         )
 

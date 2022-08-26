@@ -33,6 +33,14 @@ class SitemapIndexEntry:
         self.sitemap_filename = sitemap_filename
         self.last_mod_str = last_mod
 
+    def loc_suffix(self):
+        return self.sitemap_filename
+
+
+class ThingSitemapIndexEntry(SitemapIndexEntry):
+    def loc_suffix(self):
+        return f"sitemaps/{self.sitemap_filename}"
+
 
 class UrlSetEntry:
     """Individual url entry in an urlset"""
@@ -80,8 +88,10 @@ http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">\n"""
             loc_str = xmlesc(
                 os.path.join(host, entry.loc_suffix())
             )
-            lastmod_str = xmlesc(entry.last_mod_str)
-            url_str = f"  <url>\n    <loc>{loc_str}</loc>\n    <lastmod>{lastmod_str}</lastmod>\n  </url>\n"
+            lastmod_str = ""
+            if entry.last_mod_str is not None:
+                lastmod_str = f"\n    <lastmod>{xmlesc(entry.last_mod_str)}</lastmod>"
+            url_str = f"  <url>\n    <loc>{loc_str}</loc>{lastmod_str}\n  </url>\n"
             await writer(url_str)
         await aiodf.fsync()
 
@@ -103,13 +113,8 @@ https://www.sitemaps.org/schemas/sitemap/0.9/siteindex.xsd">\n"""
         await writer(header)
         await aiodf.fsync()
         for sitemap_index_entry in sitemap_index_entries:
-            # TODO: This is wrong and doesn't work for the JSON sitemap.  Why is this hardcoded into the path?
-            # Removing it will fix the JSON case but break the Things case.  Figure out how to reconcile the two.
-            # loc_str = xmlesc(
-            #     os.path.join(host, "sitemaps", sitemap_index_entry.sitemap_filename)
-            # )
             loc_str = xmlesc(
-                os.path.join(host, sitemap_index_entry.sitemap_filename)
+                os.path.join(host, sitemap_index_entry.loc_suffix())
             )
             lastmod_str = xmlesc(sitemap_index_entry.last_mod_str)
             await writer(
