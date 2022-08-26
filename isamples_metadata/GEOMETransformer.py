@@ -149,8 +149,6 @@ class GEOMETransformer(Transformer):
         return ["Organic material"]
 
     def has_specimen_categories(self) -> typing.List[str]:
-        # TODO: implement
-        # ["'Whole organism'  unless record/entity, record/basisOfRecord, or record/collectionCode indicate otherwise"]
         return ["Whole organism"]
 
     def informal_classification(self) -> typing.List[str]:
