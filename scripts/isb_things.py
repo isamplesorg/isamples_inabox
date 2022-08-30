@@ -9,7 +9,6 @@ from tabulate import tabulate
 
 import isb_lib.core
 from isb_lib.data_import import csv_import
-from frictionless import validate_package
 
 from isb_lib.data_import.csv_import import things_from_isamples_package
 from isb_lib.sitemaps import build_sitemap

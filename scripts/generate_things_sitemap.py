@@ -7,6 +7,7 @@ from isb_lib.sitemaps.thing_sitemap import (
     ThingSitemapIndexIterator
 )
 
+
 @click.command()
 @click.option(
     "-p",

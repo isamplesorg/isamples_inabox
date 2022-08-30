@@ -82,7 +82,7 @@ def unflatten_csv_row(row: dict) -> dict:
 def things_from_isamples_package(session: Session, package: Package, max_entries: int = -1) -> list[Thing]:
     first_resource: Resource = package.resources[0]
     num_things = 0
-    url =  f"file://{first_resource.path}"
+    url = f"file://{first_resource.path}"
     authority_id = isb_web.config.Settings().authority_id
     things = []
     for row in first_resource:
