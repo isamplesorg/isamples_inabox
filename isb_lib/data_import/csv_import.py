@@ -43,13 +43,13 @@ def unflatten_csv_row(row: dict) -> dict:
         The row dictionary expanded out to the iSB Core Format
     """
     unflattened_row = dict(row)
-    produced_by_dict = {}
+    produced_by_dict: dict = {}
     unflattened_row["producedBy"] = produced_by_dict
-    produced_by_sampling_site_dict = {}
+    produced_by_sampling_site_dict: dict = {}
     produced_by_dict["samplingSite"] = produced_by_sampling_site_dict
-    produced_by_sampling_site_location_dict = {}
+    produced_by_sampling_site_location_dict: dict = {}
     produced_by_sampling_site_dict["location"] = produced_by_sampling_site_location_dict
-    curation_dict = {}
+    curation_dict: dict = {}
     unflattened_row["curation"] = curation_dict
 
     row_id = unflattened_row.pop("id")
