@@ -448,6 +448,14 @@ optional = false
 python-versions = ">=3.6"
 
 [[package]]
+name = "et-xmlfile"
+version = "1.1.0"
+description = "An implementation of lxml.xmlfile for the standard library"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[[package]]
 name = "executing"
 version = "1.0.0"
 description = "Get the currently executing AST node of a frame, and other information"
@@ -1223,6 +1231,17 @@ description = "NumPy is the fundamental package for array computing with Python.
 category = "main"
 optional = false
 python-versions = ">=3.8"
+
+[[package]]
+name = "openpyxl"
+version = "3.0.10"
+description = "A Python library to read/write Excel 2010 xlsx/xlsm files"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+et-xmlfile = "*"
 
 [[package]]
 name = "packaging"
@@ -2341,6 +2360,19 @@ optional = false
 python-versions = ">=3.7"
 
 [[package]]
+name = "xlrd"
+version = "2.0.1"
+description = "Library for developers to extract data from Microsoft Excel (tm) .xls spreadsheet files"
+category = "main"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*"
+
+[package.extras]
+test = ["pytest-cov", "pytest"]
+docs = ["sphinx"]
+build = ["twine", "wheel"]
+
+[[package]]
 name = "xmltodict"
 version = "0.12.0"
 description = "Makes working with XML feel like you are working with JSON"
@@ -2375,7 +2407,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "af13fda0c6497bb7d3fff8f918dc478a43a2e1c7369816e4aa75451359eef8fa"
+content-hash = "f6ca75c9a178aa42a97c0293da3a073cb3e038740d5f81376f1e12df1f00c24a"
 
 [metadata.files]
 accept-types = [
@@ -2595,6 +2627,7 @@ entrypoints = [
     {file = "entrypoints-0.4-py3-none-any.whl", hash = "sha256:f174b5ff827504fd3cd97cc3f8649f3693f51538c7e4bdf3ef002c8429d42f9f"},
     {file = "entrypoints-0.4.tar.gz", hash = "sha256:b706eddaa9218a19ebcd67b56818f05bb27589b1ca9e8d797b74affad4ccacd4"},
 ]
+et-xmlfile = []
 executing = []
 fastapi = [
     {file = "fastapi-0.65.3-py3-none-any.whl", hash = "sha256:d3e3c0ac35110efb22ee3ed28201cf32f9d11a9a0e52d7dd676cad25f5219523"},
@@ -2871,6 +2904,7 @@ notebook = [
     {file = "notebook-6.4.12.tar.gz", hash = "sha256:6268c9ec9048cff7a45405c990c29ac9ca40b0bc3ec29263d218c5e01f2b4e86"},
 ]
 numpy = []
+openpyxl = []
 packaging = [
     {file = "packaging-21.3-py3-none-any.whl", hash = "sha256:ef103e05f519cdc783ae24ea4e2e0f508a9c99b2d4969652eed6a2e1ea5bd522"},
     {file = "packaging-21.3.tar.gz", hash = "sha256:dd47c42927d89ab911e606518907cc2d3a1f38bbd026385970643f9c5b8ecfeb"},
@@ -3399,6 +3433,7 @@ websockets = [
 ]
 werkzeug = []
 widgetsnbextension = []
+xlrd = []
 xmltodict = [
     {file = "xmltodict-0.12.0-py2.py3-none-any.whl", hash = "sha256:8bbcb45cc982f48b2ca8fe7e7827c5d792f217ecf1792626f808bf41c3b86051"},
     {file = "xmltodict-0.12.0.tar.gz", hash = "sha256:50d8c638ed7ecb88d90561beedbf720c9b4e851a9fa6c47ebd64e99d166d8a21"},

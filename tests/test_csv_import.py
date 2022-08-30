@@ -12,6 +12,10 @@ CSV_items = [
     (
         "./test_data/isb_core_csv_documents/simple_isamples.csv",
         "./test_data/isb_core_csv_documents/simple_isamples.json"
+    ),
+    (
+        "./test_data/isb_core_csv_documents/simple_isamples.xls",
+        "./test_data/isb_core_csv_documents/simple_isamples.json"
     )
 ]
 
