@@ -46,7 +46,7 @@
        working-directory: ./tests
        run: |
          source ../.venv/bin/activate       
-         pytest --cov --cov-fail-under=45
+         pytest --cov --cov-fail-under=64
      - name: flake8 linter
        run:  |
          source ./.venv/bin/activate
