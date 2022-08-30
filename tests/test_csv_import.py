@@ -26,11 +26,11 @@ def test_load_csv(csv_file_path: tuple):
         assert row.errors is None or len(row.errors) == 0
 
 
-def test_serialized_json_dict(dict1: dict, dict2: dict):
+def _check_serialized_json_dict(dict1: dict, dict2: dict):
     """Simple method that will try to serialize non-str to str in order to compare against a serialized JSON dict"""
     for k, v in dict1.items():
         if type(v) is dict:
-            test_serialized_json_dict(v, dict2[k])
+            _check_serialized_json_dict(v, dict2[k])
         else:
             assert str(v) == str(dict2[k])
 
@@ -40,10 +40,10 @@ def test_unflatten_csv_row(csv_file_path: str, json_file_path: str):
     records = csv_import.create_isamples_package(csv_file_path)
     json_contents = json_dict_from_file_path(json_file_path)
     first_resource: Resource = records.resources[0]
-    for row in first_resource:
-        unflattened_row = csv_import.unflatten_csv_row(row)
-        assert unflattened_row is not None
-        test_serialized_json_dict(unflattened_row, json_contents)
+    row = iter(first_resource).__next__()
+    unflattened_row = csv_import.unflatten_csv_row(row)
+    assert unflattened_row is not None
+    _check_serialized_json_dict(unflattened_row, json_contents)
 
 
 def json_dict_from_file_path(json_file_path: str) -> dict:
@@ -57,6 +57,6 @@ def json_dict_from_file_path(json_file_path: str) -> dict:
 def test_isb_core_dicts_from_isamples_package(csv_file_path: str, json_file_path: str):
     records = csv_import.create_isamples_package(csv_file_path)
     isb_core_dicts = csv_import.isb_core_dicts_from_isamples_package(records)
-    assert len(isb_core_dicts) == 1
+    assert len(isb_core_dicts) == 2
     json_dict = json_dict_from_file_path(json_file_path)
-    test_serialized_json_dict(isb_core_dicts[0], json_dict)
+    _check_serialized_json_dict(isb_core_dicts[0], json_dict)
