@@ -6,6 +6,10 @@ from isb_lib.data_import import csv_import
 
 CSV_items = [
     (
+        "./test_data/isb_core_csv_documents/simple_isamples.tsv",
+        "./test_data/isb_core_csv_documents/simple_isamples.json"
+    ),
+    (
         "./test_data/isb_core_csv_documents/simple_isamples.csv",
         "./test_data/isb_core_csv_documents/simple_isamples.json"
     )

@@ -26,7 +26,7 @@ def create_isamples_package(file_path: str) -> Package:
 
     Returns: A list of dictionaries containing the records
     """
-    data_resource = Resource(source=file_path, format="tsv", mediatype="text/tsv", schema=SCHEMA_JSON, trusted=True)
+    data_resource = Resource(source=file_path, schema=SCHEMA_JSON, trusted=True)
     package = Package(resources=[data_resource], name="isamples", title="isamples", id="isamples", trusted=True)
     return package
 
