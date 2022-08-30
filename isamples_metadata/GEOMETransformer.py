@@ -524,6 +524,10 @@ class GEOMETransformer(Transformer):
 
         return GEOMETransformer._format_result_object([original_string])
 
+    @staticmethod
+    def geo_to_h3(content: typing.Dict) -> typing.Optional[str]:
+        return isamples_metadata.Transformer.geo_to_h3(_content_latitude(content), _content_longitude(content))
+
 
 class GEOMEChildTransformer(GEOMETransformer):
     """GEOME child record subclass transformer -- uses some fields from the parent and some from the child"""
@@ -646,7 +650,3 @@ def _content_latitude(content: typing.Dict) -> typing.Optional[float]:
 
 def _content_longitude(content: typing.Dict) -> typing.Optional[float]:
     return _geo_location_float_value(content, "decimalLongitude")
-
-
-def geo_to_h3(content: typing.Dict) -> typing.Optional[str]:
-    return isamples_metadata.Transformer.geo_to_h3(_content_latitude(content), _content_longitude(content))
