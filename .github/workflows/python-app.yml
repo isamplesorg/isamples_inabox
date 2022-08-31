@@ -59,11 +59,11 @@
      - name: Test with pytest
        working-directory: ./tests
        run: |
-         pytest --cov --cov-fail-under=64
+         /home/runner/.local/venv/bin/python3.9 -m pytest --cov --cov-fail-under=64
      - name: flake8 linter
        run:  |
-         python -m flake8 --count --max-complexity 10 --ignore E501,W503 --show-source --statistics --exclude ./.venv .
+         /home/runner/.local/venv/bin/python3.9 -m flake8 --count --max-complexity 10 --ignore E501,W503 --show-source --statistics --exclude ./.venv .
      - name: Run mypy
        run: |
-         pip install mypy
-         mypy --install-types --non-interactive --namespace-packages
+         /home/runner/.local/venv/bin/python3.9 -m pip install mypy
+         /home/runner/.local/venv/bin/python3.9 -m mypy --install-types --non-interactive --namespace-packages
