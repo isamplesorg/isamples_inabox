@@ -40,6 +40,9 @@
      - name: Hacked install of pybind11
        run: |
          /home/runner/.local/venv/bin/python3.9 -m pip install pybind11
+     - name: Hacked install of fasttext
+       run: |
+         /home/runner/.local/venv/bin/python3.9 -m pip install fasttext
      - name: Install dependencies
        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
        run: |
