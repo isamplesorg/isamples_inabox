@@ -45,9 +45,6 @@ frictionless = "^4.40.0"
 openpyxl = "3.0.10"
 xlrd = "2.0.1"
 
-# Try explicitly specifying this, since it doesn't seem to be found in pip.
-pybind11 = "2.10.0"
-
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.3"
 jupyter = "^1.0.0"
