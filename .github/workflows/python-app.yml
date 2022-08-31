@@ -41,6 +41,9 @@
        run: poetry install --no-interaction --no-root
      - name: Install
        run: |
+         poetry env info
+         poetry env use 3.9
+         poetry env info         
          poetry install --no-interaction --no-root
      - name: Test with pytest
        working-directory: ./tests
