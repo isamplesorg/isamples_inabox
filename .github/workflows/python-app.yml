@@ -38,7 +38,11 @@
          pip install pybind11
      - name: Install dependencies
        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-       run: poetry install --no-interaction --no-root
+       run: |
+         poetry env info
+         poetry env use 3.9
+         poetry env info
+         poetry install --no-interaction --no-root
      - name: Install
        run: |
          poetry env info
