@@ -33,16 +33,9 @@
        with:
          virtualenvs-create: false
          virtualenvs-in-project: false
-     # - name: Cache Poetry virtualenv
-     #   id: cache
-     #   uses: actions/cache@v2
-     #   with:
-     #     path: $VENV
-     #     key: venv-${{ runner.os }}-#{{ hashFiles('**/poetry.lock') }}
-     # - name: Hacked install of pybind11
-    #    run: |
-    #      source $VENV
-    #      pip install pybind11
+     - name: Hacked install of pybind11
+       run: |
+         pip install pybind11
      - name: Install dependencies
        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
        run: poetry install --no-interaction --no-root
