@@ -35,7 +35,7 @@
        id: cache
        uses: actions/cache@v2
        with:
-         path: .venv
+         path: $VENV
          key: venv-${{ runner.os }}-#{{ hashFiles('**/poetry.lock') }}
      - name: Hacked install of pybind11
        run: |
@@ -44,8 +44,10 @@
      - name: Install dependencies
        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
        run: poetry install --no-interaction --no-root
-     - name: Install 
-       run: poetry install --no-interaction
+     - name: Install
+       run: |
+         source $VENV
+         poetry install --no-interaction
      - name: Test with pytest
        working-directory: ./tests
        run: |
