@@ -1,6 +1,49 @@
 import collections
 from model import get_model
-from SESARClassifierInput import SESARClassifierInput
+
+# SESAR test record igsn prefix
+SESAR_test_igsn = [
+    "IEKTS",
+    "IEKCM",
+    "IEKEL",
+    "IESDE",
+    "MEG",
+    "MCT IEJKH",
+    "IESER",
+    "IELL2",
+    "IELL1",
+    "LLS",
+    "IEHS1",
+    "HSU",
+    "IECAO",
+    "IESBC"
+]
+SESAR_CV_words = {
+    'anthropogenic',
+    'biogenic',
+    'dispersed',
+    'fluid',
+    'frozen',
+    'gaseous',
+    'ice',
+    'liquid',
+    'material',
+    'media',
+    'metal',
+    'mineral',
+    'mixed',
+    'natural',
+    'non-aqueous',
+    'non-organic',
+    'organic',
+    'particulate',
+    'rock',
+    'sediment',
+    'soil',
+    'soil,',
+    'solid',
+    'water'
+}
 
 
 def checkInformative(description_map, text, collection):
@@ -11,7 +54,7 @@ def checkInformative(description_map, text, collection):
         #       && only contains sampleType
         informative = False
         if "description" not in description_map:
-            for cv in SESARClassifierInput.SESAR_CV_words:
+            for cv in SESAR_CV_words:
                 if cv in text:
                     informative = True
                     break
@@ -24,36 +67,34 @@ def checkInformative(description_map, text, collection):
     return informative
 
 
-def checkInvalid(collection, field_to_value):
+def checkInvalid(field_to_value):
     """Checks if the record is invalid,
     i.e., not a sample record"""
-    if collection == "SESAR":
-        if field_to_value["igsnPrefix"] != "":
-            for test_igsn in SESARClassifierInput.SESAR_test_igsn:
-                if test_igsn in field_to_value["igsnPrefix"]:
-                    return True
-        if field_to_value["sampleType"] == "Hole" or \
-                field_to_value["sampleType"] == "Site":
-            return True
+    if field_to_value["igsnPrefix"] != "":
+        for test_igsn in SESAR_test_igsn:
+            if test_igsn in field_to_value["igsnPrefix"]:
+                return True
+    if field_to_value["sampleType"] == "Hole" or \
+            field_to_value["sampleType"] == "Site":
+        return True
     return False
 
 
 def classify_by_sampleType(field_to_value):
-    """Use the sampleType field in the SESAR record and
+    """Use the sampleType field in the record and
     check if it falls into any of the defined rules
     If it does not, return None"""
-    if "IODP" in field_to_value["cruiseFieldPrgrm"] or \
-            "ODP" in field_to_value["cruiseFieldPrgrm"]:
-        if "core" in field_to_value["sampleType"].lower():
+    if "IODP" in field_to_value["cruiseFieldPrgrm"]:
+        if field_to_value["sampleType"] == "Core":
             return "Mixture of sediment and rock"
         if field_to_value["sampleType"] == "Individual Sample":
             return "Sediment or Rock"
         if "macrofossil" in field_to_value["description"].lower():
             return "Rock"
-    if "dredge" in field_to_value["sampleType"].lower():
+    if field_to_value["sampleType"] == "Dredge":
         return "Natural Solid Material"
     if field_to_value["primaryLocationType"] == "wetland" and \
-            "core" in field_to_value["sampleType"].lower():
+            field_to_value["sampleType"] == "Core":
         return "Material"
     if field_to_value["sampleType"] == "U-channel":
         return "Sediment"
@@ -93,17 +134,12 @@ def classify_by_rule(description_map, text, collection, labelType):
 
         # check if record is invalid
         # i.e., not a sample
-        if checkInvalid(collection, field_to_value):
+        if checkInvalid(field_to_value):
             return "Invalid"
 
         # check if the fields fall into the rules
         # if it does not, return None
-        result = classify_by_sampleType(field_to_value)
-        if not result:
-            return result
-        else:
-            # map to controlled vocabulary
-            return SESARClassifierInput.source_to_CV[result]
+        return classify_by_sampleType(field_to_value)
 
 
 def classify_by_machine(text, collection, labelType):
@@ -115,8 +151,4 @@ def classify_by_machine(text, collection, labelType):
     # config file should have "FINE_TUNED_MODEL" : path/to/model/checkpoint
     if collection == "SESAR" and labelType == "material":
         model = get_model("scripts/taxonomy/assets/SESAR_material_config.json")
-        prediction, prob = model.predict(text)
-        return (
-            SESARClassifierInput.source_to_CV[prediction],
-            prob
-        )
+    return model.predict(text)
