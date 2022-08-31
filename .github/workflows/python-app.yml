@@ -31,6 +31,10 @@
        with:
          virtualenvs-create: true
          virtualenvs-in-project: true
+     - name: Hacked install of pybind11
+       run: |
+         source ./.venv/bin/activate       
+         pip install pybind11         
      - name: Cache Poetry virtualenv
        id: cache
        uses: actions/cache@v2
