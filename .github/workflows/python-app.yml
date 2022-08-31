@@ -45,15 +45,18 @@
          poetry install --no-interaction --no-root
      - name: Install
        run: |
-         poetry install --no-interaction --no-root
+         poetry install --no-interaction
      - name: Test with pytest
        working-directory: ./tests
        run: |
+         source ../.venv/bin/activate
          pytest --cov --cov-fail-under=64
      - name: flake8 linter
        run:  |
+         source ./.venv/bin/activate
          flake8 --count --max-complexity 10 --ignore E501,W503 --show-source --statistics --exclude ./.venv .
      - name: Run mypy
        run: |
-         poetry run python -m pip install mypy
-         poetry run python -m mypy --install-types --non-interactive --namespace-packages
+         source ./.venv/bin/activate
+         pip install mypy
+         mypy --install-types --non-interactive --namespace-packages
