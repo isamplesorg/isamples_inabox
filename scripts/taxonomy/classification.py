@@ -76,11 +76,11 @@ def main(
             ).transform()
 
             # parse the thing to classifier input form
-            input = SESARClassifierInput(thing.resolved_content)
-            input.parse_thing()
+            sesar_input = SESARClassifierInput(thing.resolved_content)
+            sesar_input.parse_thing()
 
-            description_map = input.get_description_map()
-            material_text = input.get_material_text()
+            description_map = sesar_input.get_description_map()
+            material_text = sesar_input.get_material_text()
 
             # get the material label prediction result of the record
             label, prob = get_classification_result(
@@ -116,11 +116,11 @@ def main(
             ).transform()
 
             # parse the thing to classifier input form
-            input = OpenContextClassifierInput(thing.resolved_content)
-            input.parse_thing()
+            oc_input = OpenContextClassifierInput(thing.resolved_content)
+            oc_input.parse_thing()
 
-            material_text = input.get_material_text()
-            sample_text = input.get_sample_text()
+            material_text = oc_input.get_material_text()
+            sample_text = oc_input.get_sample_text()
 
             # print out the classifier input form of this record
             print(material_text)
