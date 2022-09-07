@@ -5,6 +5,7 @@ from requests import Response
 import isb_lib.identifiers.datacite as datacite
 from isb_lib.identifiers.datacite import _dois_headers, _dois_auth, _validate_response, _doi_or_none, dois_url, \
     doi_from_id, _attribute_dict_with_doi_or_prefix, _datacite_post_bytes
+from isb_lib.identifiers.identifier import DataciteIdentifier, IGSNIdentifier
 
 
 def test_datacite_metadata():
@@ -89,3 +90,35 @@ def test_attribute_dict_with_doi_or_prefix_only_prefix():
 def test_datacite_post_bytes():
     datacite_post_bytes = _datacite_post_bytes("123456", None)
     assert len(datacite_post_bytes) > 0
+
+
+def test_datacite_identifier_bad_args():
+    with pytest.raises(ValueError):
+        DataciteIdentifier(None, None, [], [], "", 2022)
+    with pytest.raises(ValueError):
+        DataciteIdentifier("doi", None, [], [], "", 2022)
+    with pytest.raises(ValueError):
+        DataciteIdentifier("doi", None, ["creator 1"], [], "", 2022)
+
+
+def test_datacite_identifier_good_args():
+    datacite_id = DataciteIdentifier("doi", None, ["creator 1"], ["title 1"], "publisher", 2022)
+    assert datacite_id._is_doi is True
+    assert datacite_id.__str__() is not None
+    assert len(datacite_id.metadata_dict()) > 0
+    prefix_datacite_id = DataciteIdentifier(None, "prefix", ["creator 1"], ["title 1"], "publisher", 2022)
+    assert prefix_datacite_id._is_doi is False
+    assert prefix_datacite_id.__str__() is not None
+    assert len(datacite_id.metadata_dict()) > 0
+
+
+def test_igsn_identifier_good_args():
+    datacite_id = IGSNIdentifier("doi", None, ["creator 1"], ["title 1"], "publisher", 2022)
+    assert datacite_id._is_doi is True
+    assert datacite_id.__str__() is not None
+    assert len(datacite_id.metadata_dict()) > 0
+    prefix_datacite_id = IGSNIdentifier(None, "prefix", ["creator 1"], ["title 1"], "publisher", 2022)
+    assert prefix_datacite_id._is_doi is False
+    assert prefix_datacite_id.__str__() is not None
+    assert len(datacite_id.metadata_dict()) > 0
+
