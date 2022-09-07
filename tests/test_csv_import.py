@@ -2,6 +2,9 @@ import pytest
 from frictionless import validate, Resource
 import json
 
+from sqlalchemy.pool import StaticPool
+from sqlmodel import create_engine, SQLModel, Session
+
 from isb_lib.data_import import csv_import
 
 CSV_items = [
@@ -56,6 +59,13 @@ def test_unflatten_csv_row(csv_file_path: str, json_file_path: str):
     unflattened_row = csv_import.unflatten_csv_row(row)
     assert unflattened_row is not None
     _check_serialized_json_dict(unflattened_row, json_contents)
+
+
+@pytest.mark.parametrize("csv_file_path,json_file_path", CSV_items)
+def test_things_from_isamples_package(csv_file_path: str, json_file_path: str):
+    records = csv_import.create_isamples_package(csv_file_path)
+    things = csv_import.things_from_isamples_package(None, records)
+    assert len(things) > 0
 
 
 def json_dict_from_file_path(json_file_path: str) -> dict:
