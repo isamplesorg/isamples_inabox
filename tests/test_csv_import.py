@@ -2,9 +2,6 @@ import pytest
 from frictionless import validate, Resource
 import json
 
-from sqlalchemy.pool import StaticPool
-from sqlmodel import create_engine, SQLModel, Session
-
 from isb_lib.data_import import csv_import
 
 CSV_items = [

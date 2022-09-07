@@ -1,7 +1,6 @@
 import pytest
 
-from isb_web.profiles import get_profile_from_qsa, get_all_profiles_response_headers, get_profile_from_http, \
-    _get_profile_from_headers, ProfilesMediatypesException
+from isb_web.profiles import get_profile_from_qsa, get_all_profiles_response_headers, _get_profile_from_headers, ProfilesMediatypesException
 
 
 def test_get_profile_from_qsa_isamples():

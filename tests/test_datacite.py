@@ -121,4 +121,3 @@ def test_igsn_identifier_good_args():
     assert prefix_datacite_id._is_doi is False
     assert prefix_datacite_id.__str__() is not None
     assert len(datacite_id.metadata_dict()) > 0
-
