@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Mapping
 
 import connegp
 import fastapi
@@ -62,7 +62,7 @@ def get_profile_from_qsa(profiles_string: str = None) -> Optional[Profile]:
     return None
 
 
-def _get_profile_from_headers(headers: dict) -> Optional[Profile]:
+def _get_profile_from_headers(headers: Mapping) -> Optional[Profile]:
     if headers.get("Accept-Profile") is not None:
         try:
             ap = connegp.AcceptProfileHeaderParser(headers.get("Accept-Profile"))
