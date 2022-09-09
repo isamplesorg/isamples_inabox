@@ -1,4 +1,6 @@
 import pytest
+import json
+
 from fastapi.testclient import TestClient
 from sqlmodel import Session, SQLModel, create_engine
 from sqlmodel.pool import StaticPool
@@ -163,6 +165,18 @@ def test_get_thing(client: TestClient, session: Session):
     assert data.get("@id") is not None
 
 
+def test_get_thing_page(client: TestClient, session: Session):
+    response = client.get(f"/thingpage/{TEST_IGSN}")
+    data = response.content
+    assert response.status_code == 200
+    assert len(data) > 0
+
+
+def test_non_existent_thing_pae(client: TestClient, session: Session):
+    response = client.get("/thingpage/6666666")
+    assert response.status_code == 404
+
+
 def test_get_thing_core_format(client: TestClient, session: Session):
     response = client.get(f"/thing/{TEST_IGSN}?format=core")
     assert response.status_code == 200
@@ -186,3 +200,14 @@ def test_get_thing_list_types(client: TestClient, session: Session):
     data = response.json()
     assert response.status_code == 200
     assert "item_type" in data[0]
+
+
+def test_get_things_for_sitemap(client: TestClient, session: Session):
+    data_dict = {
+        "identifiers": [TEST_IGSN]
+    }
+    post_data = json.dumps(data_dict).encode("utf-8")
+    response = client.post("/things", data=post_data)
+    assert response.status_code == 200
+    response_data = response.json()
+    assert response_data[0]["id"] == TEST_IGSN
