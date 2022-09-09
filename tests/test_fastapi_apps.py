@@ -274,4 +274,3 @@ def test_manage_with_invalid_authorization_header(manage_client: TestClient, ses
     }
     response = manage_client.get("/userinfo", headers=headers, allow_redirects=False)
     assert response.status_code == 400
-
