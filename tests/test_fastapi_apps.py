@@ -5,7 +5,7 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session, SQLModel, create_engine
 from sqlmodel.pool import StaticPool
 from isb_lib.models import thing
-from isb_web.main import get_session, app
+from isb_web.main import get_session, app, manage_app
 
 
 def _test_model():
@@ -142,6 +142,17 @@ def client_fixture(session: Session):
     app.dependency_overrides.clear()
 
 
+@pytest.fixture(name="manage_client")
+def manage_client_fixture(session: Session):
+    def get_session_override():
+        return session
+
+    manage_app.dependency_overrides[get_session] = get_session_override
+    client = TestClient(manage_app)
+    yield client
+    manage_app.dependency_overrides.clear()
+
+
 TEST_IGSN = "IGSN:123456"
 TEST_RESOLVED_URL = "http://foo/bar"
 TEST_AUTHORITY_ID = "SESAR"
@@ -229,3 +240,38 @@ def test_get_things_for_sitemap(client: TestClient, session: Session):
     assert response.status_code == 200
     response_data = response.json()
     assert response_data[0]["id"] == TEST_IGSN
+
+
+def test_manage_logout(manage_client: TestClient, session: Session):
+    headers = {
+        "authorization": "Bearer 123456"
+    }
+    response = manage_client.get("/logout", headers=headers, allow_redirects=False)
+    assert response.status_code == 307
+
+
+def test_manage_login(manage_client: TestClient, session: Session):
+    response = manage_client.get("/login", allow_redirects=False)
+    assert response.status_code == 302
+
+
+def test_manage_no_auth_header_protected(manage_client: TestClient, session: Session):
+    response = manage_client.get("/userinfo", allow_redirects=False)
+    assert response.status_code == 400
+
+
+def test_manage_with_invalid_token_header(manage_client: TestClient, session: Session):
+    headers = {
+        "authorization": "Bearer 123456"
+    }
+    response = manage_client.get("/userinfo", headers=headers, allow_redirects=False)
+    assert response.status_code == 401
+
+
+def test_manage_with_invalid_authorization_header(manage_client: TestClient, session: Session):
+    headers = {
+        "authorization": "123456"
+    }
+    response = manage_client.get("/userinfo", headers=headers, allow_redirects=False)
+    assert response.status_code == 400
+
