@@ -20,8 +20,6 @@ import functools
 import os.path
 from aiofile import AIOFile, Writer
 
-from isb_lib.utilities.url_utilities import joined_url
-
 INDEX_XML = "sitemap-index.xml"
 
 logging.getLogger("requests").setLevel(logging.WARNING)

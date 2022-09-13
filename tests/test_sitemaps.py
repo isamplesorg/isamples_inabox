@@ -11,7 +11,6 @@ import requests
 from isb_lib.sitemaps import SitemapIndexEntry, ThingSitemapIndexEntry, UrlSetEntry, ThingUrlSetEntry, \
     write_urlset_file, write_sitemap_index_file, INDEX_XML, build_sitemap, SiteMap
 from isb_lib.sitemaps.gh_pages_sitemap import GHPagesSitemapIndexIterator
-from isb_lib.utilities.url_utilities import joined_url
 from test_utils import LocalFileAdapter
 
 
