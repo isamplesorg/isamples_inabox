@@ -20,6 +20,8 @@ import functools
 import os.path
 from aiofile import AIOFile, Writer
 
+from isb_lib.utilities.url_utilities import joined_url
+
 INDEX_XML = "sitemap-index.xml"
 
 logging.getLogger("requests").setLevel(logging.WARNING)
@@ -255,7 +257,7 @@ class SiteMapIterator(object):
 
 
 class SiteMap(object):
-    def __init__(self, url, start_from: datetime.datetime, alt_rules=None):
+    def __init__(self, url, start_from: datetime.datetime, alt_rules=None, session=requests.Session(), url_prefix=None):
         self.sitemap_url = url
         self.sitemap_alternate_links = False
         self.sitemap_rules = [("", "parse")]
@@ -270,7 +272,8 @@ class SiteMap(object):
             )
         else:
             self.start_from = None
-        self._session = requests.Session()
+        self._session = session
+        self._url_prefix = url_prefix
         self._cbs = []
         self._all_sitemaps: list[str] = []  # list of all sitemaps visited
         if alt_rules is not None:
@@ -343,7 +346,7 @@ class SiteMap(object):
 
     def scanItems(self, iter=None):
         if iter is None:
-            response = requests.get(self.sitemap_url)
+            response = self._session.get(self.sitemap_url)
             iter = self.parseSitemap(response)
         # if handed an iterator, iterate...
         if isinstance(iter, types.GeneratorType):
@@ -351,6 +354,8 @@ class SiteMap(object):
                 task = action.get("task", None)
                 if task == "sitemap":
                     url = action["body"]["url"]
+                    if self._url_prefix is not None:
+                        url = os.path.join(self._url_prefix, url)
                     r = self._session.get(url)
                     for item in self.scanItems(action["body"]["cb"](r)):
                         yield item
