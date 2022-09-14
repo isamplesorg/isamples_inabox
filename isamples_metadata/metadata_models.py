@@ -1,6 +1,6 @@
 import os.path
 import logging
-from isamples_metadata import config
+from isb_web import config
 
 from isamples_metadata.Transformer import Transformer
 from scripts.taxonomy.model import Model, get_model
@@ -13,9 +13,20 @@ _OPENCONTEXT_MATERIAL_MODEL = None
 _OPENCONTEXT_SAMPLE_MODEL = None
 
 def set_model(collection, label_type):
-    # TODO : load the model from isb_web_config.env
+    """
+        Set the pretrained models by loading them from the file system
+        Prerequisite: In order to use this, make sure that there is a pydantic settings file on the
+        at the root of this repository named "isamples_web_config.env" with at least these variables set:
+
+        SESAR_MATERIAL_MODEL_PATH = "/absolute/path/to/model"
+        OPENCONTEXT_MATERIAL_MODEL_PATH = "/absolute/path/to/model"
+        OPENCONTEXT_SAMPLE_MODEL_PATH = "/absolute/path/to/model"
+
+        :param collection : the collection type of the sample
+        :param label_type : the field that we want to predict 
+    """
     if collection == "SESAR":
-        _MODEL_PATH = config.Settings().sesar_model_path
+        _MODEL_PATH = config.Settings().sesar_material_model_path
     elif collection == "OPENCONTEXT" and label_type == "material":
         _MODEL_PATH = config.Settings().opencontext_material_model_path
     elif collection == "OPENCONTEXT" and label_type == "sample":
@@ -32,6 +43,7 @@ def set_model(collection, label_type):
         _OPENCONTEXT_MATERIAL_MODEL = get_model(_MODEL_PATH)
     elif collection == "OPENCONTEXT" and label_type == "sample":
         _OPENCONTEXT_SAMPLE_MODEL = get_model(_MODEL_PATH)
+
 # load and initialize the models 
 set_model("SESAR", "material")
 set_model("OPENCONTEXT", "material")
@@ -51,18 +63,14 @@ class SESARPredictor:
     ) -> str:
         """
         Invoke the pre-trained BERT model to predict the material type label for the specified string inputs.
-        Prerequisite: In order to use this, make sure that there is a pydantic settings file on the
-        environment path, named "isamples_metadata.env" with at least this variable set:
 
-        FASTTEXT_MODEL_PATH = "/absolute/path/to/model"
-
-        :param context: The unprocessed inputs to the model, taken from a source record
-        :return: String label to be used as the sampled feature for the source record. If the model couldn't be loaded Transformer.NOT_PROVIDED will be returned.
+        :param source_record: the raw source of a record
+        :return: iSamples CV that corresponds to the label that is the prediction result of the field
         """
         if not self._model_valid:
             logging.error(
                 "Returning Transformer.NOT_PROVIDED since we couldn't load the model at path %s.",
-                    config.Settings().sesar_model_path
+                    config.Settings().sesar_material_model_path
             )
             return Transformer.NOT_PROVIDED
 
@@ -82,16 +90,24 @@ class SESARPredictor:
 
 
 class OpenContextPredictor:
-
+    
     def __init__(self, name: str, model: Model):
         self._name = name
         self._model = model
         self._model_valid = model is not None
         self._description_map = None
 
+    # TODO : find the field that invokes the predictor function
+    # in the OpenContextTransformer
     def predict_material_type(
         self, source_record : dict
     ) -> str:
+        """
+        Invoke the pre-trained BERT model to predict the material type label for the specified string inputs.
+
+        :param source_record: the raw source of a record
+        :return: String label that is the prediction result of the field
+        """
         if not self._model_valid:
             logging.error(
                 "Returning Transformer.NOT_PROVIDED since we couldn't load the model at path %s.",
@@ -116,6 +132,12 @@ class OpenContextPredictor:
     def predict_sample_type(
         self, source_record : dict
     ) -> str:
+        """
+        Invoke the pre-trained BERT model to predict the sample type label for the specified string inputs.
+
+        :param source_record: the raw source of a record
+        :return: String label that is the prediction result of the field
+        """
         if not self._model_valid:
             logging.error(
                 "Returning Transformer.NOT_PROVIDED since we couldn't load the model at path %s.",
