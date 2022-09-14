@@ -106,7 +106,7 @@ def classify_by_rule(description_map, text, collection, labelType):
             return SESARClassifierInput.source_to_CV[result]
 
 
-def classify_by_machine(text, collection, labelType):
+def classify_by_machine(model, text, collection, labelType):
     """ Returns the machine prediction on the given
     input record
     """
@@ -114,9 +114,23 @@ def classify_by_machine(text, collection, labelType):
     # https://drive.google.com/drive/folders/1FreG1_ivysxPMXH0httxw4Ihftx-R2N6
     # config file should have "FINE_TUNED_MODEL" : path/to/model/checkpoint
     if collection == "SESAR" and labelType == "material":
-        model = get_model("scripts/taxonomy/assets/SESAR_material_config.json")
         prediction, prob = model.predict(text)
         return (
             SESARClassifierInput.source_to_CV[prediction],
             prob
         )
+    elif collection == "OPENCONTEXT":
+        if labelType == "material":
+            prediction, prob = model.predict(text)
+            # TODO : return iSamples CV mapping
+            return (
+                prediction,
+                prob
+            )
+        elif labelType == "sample":
+            prediction, prob = model.predict(text)
+            # TODO : return iSamples CV mapping
+            return (
+                prediction,
+                prob
+            )

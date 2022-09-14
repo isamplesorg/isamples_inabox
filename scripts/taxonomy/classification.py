@@ -11,15 +11,16 @@ from SESARClassifierInput import SESARClassifierInput
 from OpenContextClassifierInput import OpenContextClassifierInput
 
 
-def get_classification_result(description_map, text, collection, labelType):
+def get_classification_result(model, description_map, text, collection, labelType):
     """Return the classification result"""
     # first pass : see if the record falls in the defined rules
     label = classify_by_rule(description_map, text, collection, labelType)
     if label:
         return (label, -1)  # set sentinel value as probability
     else:
-        # second pass : pass the record to the model
-        machine_prediction = classify_by_machine(text, collection, labelType)
+        # second pass : deriving the prediction by machine
+        # we pass the text to a pretrained model to get the prediction result
+        machine_prediction = classify_by_machine(model, text, collection, labelType)
         return machine_prediction  # (predicted label, probability)
 
 

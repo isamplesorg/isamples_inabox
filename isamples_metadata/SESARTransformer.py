@@ -2,6 +2,7 @@ import typing
 import logging
 
 import isamples_metadata.Transformer
+import isamples_metadata.metadata_models
 from isamples_metadata.Transformer import (
     Transformer,
     AbstractCategoryMapper,
@@ -11,6 +12,7 @@ from isamples_metadata.Transformer import (
     StringEndsWithCategoryMapper,
     AbstractCategoryMetaMapper,
 )
+from isamples_metadata.metadata_models import SESARMaterialPredictor
 from isb_lib.sesar_adapter import fullIgsn
 
 
@@ -283,7 +285,14 @@ class SESARTransformer(Transformer):
 
     def has_material_categories(self) -> typing.List[str]:
         material = self._material_type()
-        return MaterialCategoryMetaMapper.categories(material)
+        if not material:
+            # get the prediction result
+            categories = SESARMaterialPredictor.predict_material_type(
+                self.source_record
+            )
+            return categories
+        else:
+            return MaterialCategoryMetaMapper.categories(material)
 
     def has_specimen_categories(self) -> typing.List[str]:
         sample_type = self._source_record_description()["sampleType"]
