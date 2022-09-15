@@ -1,5 +1,7 @@
+from importlib.util import module_for_loader
 import os.path
 import logging
+import json
 from isb_web import config
 
 from isamples_metadata.Transformer import Transformer
@@ -52,14 +54,16 @@ set_model("OPENCONTEXT", "sample")
 
 class SESARPredictor:
 
-    def __init__(self, name: str, model: Model):
+    def __init__(self, name: str, model: Model, record_path: str = None):
         self._name = name
         self._model = model
         self._model_valid = model is not None
         self._description_map = None
+        self._record_path = record_path
+        self._source_record = None
 
     def predict_material_type(
-        self, source_record : dict
+        self, source_record : dict = {}
     ) -> str:
         """
         Invoke the pre-trained BERT model to predict the material type label for the specified string inputs.
@@ -73,6 +77,14 @@ class SESARPredictor:
                     config.Settings().sesar_material_model_path
             )
             return Transformer.NOT_PROVIDED
+
+        # initialize the source record field
+        if self._record_path:
+            # open the file 
+            with open(self._record_path) as json_file:
+                self._source_record = json.load(json_file)
+        else:
+            self._source_record = source_record
 
         # extract the data that the model requires for classification
         sesar_input = SESARClassifierInput(source_record)
@@ -89,13 +101,14 @@ class SESARPredictor:
         return SESARClassifierInput.source_to_CV[raw_predict]
 
 
-class OpenContextPredictor:
+class OpenContextMaterialPredictor:
     
     def __init__(self, name: str, model: Model):
         self._name = name
         self._model = model
         self._model_valid = model is not None
         self._description_map = None
+        
 
     # TODO : find the field that invokes the predictor function
     # in the OpenContextTransformer
@@ -128,7 +141,16 @@ class OpenContextPredictor:
 
         # TODO: return the OpenContext CV mapping that corresponds to the raw prediction
         return raw_predict
-    
+
+
+class OpenContextSamplePredictor:
+
+    def __init__(self, name: str, model: Model):
+        self._name = name
+        self._model = model
+        self._model_valid = model is not None
+        self._description_map = None
+        
     def predict_sample_type(
         self, source_record : dict
     ) -> str:
@@ -162,5 +184,5 @@ class OpenContextPredictor:
 
 
 SESAR_MATERIAL_PREDICTOR = SESARPredictor("Sesar_material", _SESAR_MATERIAL_MODEL)
-OPENCONTEXT_MATERIAL_PREDICTOR = SESARPredictor("OpenContext_material", _OPENCONTEXT_MATERIAL_MODEL)
-OPENCONTEXT_SAMPLE_PREDICTOR = SESARPredictor("OpenContext_sample", _OPENCONTEXT_SAMPLE_MODEL)
+OPENCONTEXT_MATERIAL_PREDICTOR = OpenContextMaterialPredictor("OpenContext_material", _OPENCONTEXT_MATERIAL_MODEL)
+OPENCONTEXT_SAMPLE_PREDICTOR = OpenContextSamplePredictor("OpenContext_sample", _OPENCONTEXT_SAMPLE_MODEL)
