@@ -10,46 +10,45 @@ from scripts.taxonomy.classification import get_classification_result
 from scripts.taxonomy.SESARClassifierInput import SESARClassifierInput
 from scripts.taxonomy.OpenContextClassifierInput import OpenContextClassifierInput
 
-_SESAR_MATERIAL_MODEL = None
-_OPENCONTEXT_MATERIAL_MODEL = None
-_OPENCONTEXT_SAMPLE_MODEL = None
+class MetadataModelLoader:
+    def __init__(self):
+        self._SESAR_MATERIAL_MODEL = None
+        self._OPENCONTEXT_MATERIAL_MODEL = None
+        self._OPENCONTEXT_SAMPLE_MODEL = None
 
-def set_model(collection, label_type):
-    """
-        Set the pretrained models by loading them from the file system
-        Prerequisite: In order to use this, make sure that there is a pydantic settings file on the
-        at the root of this repository named "isamples_web_config.env" with at least these variables set:
+    def load_model_from_path(self, collection, label_type, model_path):
+        """
+            Set the pretrained models by loading them from the file system
+            Prerequisite: In order to use this, make sure that there is a pydantic settings file on the
+            at the root of this repository named "isamples_web_config.env" with at least these variables sets
 
-        SESAR_MATERIAL_MODEL_PATH = "/absolute/path/to/model"
-        OPENCONTEXT_MATERIAL_MODEL_PATH = "/absolute/path/to/model"
-        OPENCONTEXT_SAMPLE_MODEL_PATH = "/absolute/path/to/model"
+            :param collection : the collection type of the sample
+            :param label_type : the field that we want to predict 
+            :param model_path : the file path of the model 
+        """
 
-        :param collection : the collection type of the sample
-        :param label_type : the field that we want to predict 
-    """
-    if collection == "SESAR":
-        _MODEL_PATH = config.Settings().sesar_material_model_path
-    elif collection == "OPENCONTEXT" and label_type == "material":
-        _MODEL_PATH = config.Settings().opencontext_material_model_path
-    elif collection == "OPENCONTEXT" and label_type == "sample":
-        _MODEL_PATH = config.Settings().opencontext_sample_model_path
-    
-    if not os.path.exists(_MODEL_PATH):
-        logging.error(
-            "Unable to locate model at path %s.  All predictions will return NOT_PROVIDED.",
-            _MODEL_PATH,
-        )
-    elif collection == "SESAR":
-        _SESAR_MATERIAL_MODEL = get_model(_MODEL_PATH)
-    elif collection == "OPENCONTEXT" and label_type == "material":
-        _OPENCONTEXT_MATERIAL_MODEL = get_model(_MODEL_PATH)
-    elif collection == "OPENCONTEXT" and label_type == "sample":
-        _OPENCONTEXT_SAMPLE_MODEL = get_model(_MODEL_PATH)
+        if not os.path.exists(model_path):
+            logging.error(
+                "Unable to locate model at path %s.  All predictions will return NOT_PROVIDED.",
+                model_path
+            )
+        
+        if collection == "SESAR":
+            self._SESAR_MATERIAL_MODEL = get_model(model_path)
+        if collection == "OPENCONTEXT" and label_type == "material":
+            self._OPENCONTEXT_MATERIAL_MODEL = get_model(model_path)
+        if collection == "OPENCONTEXT" and label_type == "sample":
+            self._OPENCONTEXT_SAMPLE_MODEL = get_model(model_path)
 
-# load and initialize the models 
-set_model("SESAR", "material")
-set_model("OPENCONTEXT", "material")
-set_model("OPENCONTEXT", "sample")
+    def initialize_models(self):
+        """
+            Invokes the load_model function to load all of the possible models
+            that are available based on the config 
+        """
+        
+        self.load_model_from_path("SESAR", "material", config.Settings().sesar_material_model_path)
+        self.load_model_from_path("OPENCONTEXT", "material",config.Settings().opencontext_material_model_path)
+        self.load_model_from_path("OPENCONTEXT", "sample",config.Settings().opencontext_sample_model_path)
 
 
 class SESARPredictor:
@@ -181,8 +180,5 @@ class OpenContextSamplePredictor:
         # TODO: return the OpenContext CV mapping that corresponds to the raw prediction
         return raw_predict
 
-
-
-SESAR_MATERIAL_PREDICTOR = SESARPredictor("Sesar_material", _SESAR_MATERIAL_MODEL)
-OPENCONTEXT_MATERIAL_PREDICTOR = OpenContextMaterialPredictor("OpenContext_material", _OPENCONTEXT_MATERIAL_MODEL)
-OPENCONTEXT_SAMPLE_PREDICTOR = OpenContextSamplePredictor("OpenContext_sample", _OPENCONTEXT_SAMPLE_MODEL)
+mml = MetadataModelLoader()
+mml.initialize_models()

@@ -63,7 +63,7 @@ class Settings(BaseSettings):
     # The destination URL fragment where to drop users after they logout of the management application.
     logout_redirect_fragment: str = "/isamples_central/ui"
 
-    # The list of orcid ids that are allowed to add other orcid ids to the iSB instance.
+    # The list of orcid ids that are allowedUR@kla-tencor.com to add other orcid ids to the iSB instance.
     orcid_superusers: list[str] = []
 
     # The authority id used for samples directly created in the iSB instance
