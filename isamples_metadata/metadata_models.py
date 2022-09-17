@@ -50,7 +50,16 @@ class MetadataModelLoader:
         self.load_model_from_path("OPENCONTEXT", "material",config.Settings().opencontext_material_model_path)
         self.load_model_from_path("OPENCONTEXT", "sample",config.Settings().opencontext_sample_model_path)
 
+    def get_sesar_material_model(self):
+        return self._SESAR_MATERIAL_MODEL
 
+    def get_oc_material_model(self):
+        return self._OPENCONTEXT_MATERIAL_MODEL
+    
+    def get_oc_sample_model(self):
+        return self._OPENCONTEXT_SAMPLE_MODEL
+
+    
 class SESARPredictor:
 
     def __init__(self, name: str, model: Model, record_path: str = None):
