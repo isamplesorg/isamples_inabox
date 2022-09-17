@@ -10,10 +10,12 @@ from isamples_metadata.Transformer import (
 )
 
 from isamples_metadata.metadata_models import (
-    MetadataModelLoader,
+    get_oc_material_model,
+    get_oc_sample_model,
     OpenContextMaterialPredictor,
     OpenContextSamplePredictor
 )
+
 
 class MaterialCategoryMetaMapper(AbstractCategoryMetaMapper):
     _anthropogenicMaterialMapper = StringEqualityCategoryMapper(
@@ -169,20 +171,20 @@ class OpenContextTransformer(Transformer):
         item_category = self.source_record.get("item category") or ""
         if not item_category:
             # TODO : need more specification on when to call the predict function
-            # call the classifier for prediction 
-            ocm_model = MetadataModelLoader.get_oc_material_model()
-            ocm = OpenContextMaterialPredictor(ocm_model)
-            return ocm.predict_material_type(self.source_record)
+            # call the classifier for prediction
+            ocm_model = get_oc_material_model()
+            ocmp = OpenContextMaterialPredictor("ocm",ocm_model)
+            return [ocmp.predict_material_type(self.source_record)]
         return MaterialCategoryMetaMapper.categories(item_category)
 
     def has_specimen_categories(self) -> typing.List[str]:
         item_category = self.source_record.get("item category") or ""
         if not item_category:
             # TODO : need more specification on when to call the predict function
-            # call the classifier for prediction 
-            ocm_model = MetadataModelLoader.get_oc_material_model()
-            ocm = OpenContextSamplePredictor(ocm_model)
-            return ocm.predict_material_type(self.source_record)
+            # call the classifier for prediction
+            ocm_model = get_oc_sample_model()
+            ocmp = OpenContextSamplePredictor("ocm",ocm_model)
+            return [ocmp.predict_sample_type(self.source_record)]
         return SpecimenCategoryMetaMapper.categories(item_category)
 
     def _context_label_pieces(self) -> typing.List[str]:

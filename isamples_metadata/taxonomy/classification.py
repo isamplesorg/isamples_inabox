@@ -1,0 +1,143 @@
+import click
+import click_config_file
+from isamples_metadata import SESARTransformer, OpenContextTransformer
+
+import isb_lib
+from isb_lib.core import ThingRecordIterator
+from isb_web.sqlmodel_database import SQLModelDAO
+from isamples_metadata.taxonomy.create_hierarchy_json import getFullLabel, getHierarchyMapping
+from isamples_metadata.taxonomy.classification_helper import classify_by_machine, classify_by_rule
+from isamples_metadata.taxonomy.SESARClassifierInput import SESARClassifierInput
+from isamples_metadata.taxonomy.OpenContextClassifierInput import OpenContextClassifierInput
+from isamples_metadata.metadata_models import (
+    get_sesar_material_model,
+    SESARMaterialPredictor
+)
+
+def get_classification_result(model, description_map, text, collection, labelType):
+    """Return the classification result"""
+    # first pass : see if the record falls in the defined rules
+    label = classify_by_rule(description_map, text, collection, labelType)
+    if label:
+        return (label, -1)  # set sentinel value as probability
+    else:
+        # second pass : deriving the prediction by machine
+        # we pass the text to a pretrained model to get the prediction result
+        # load the model
+
+        machine_prediction = classify_by_machine(model, text, collection, labelType)
+        return machine_prediction  # (predicted label, probability)
+
+
+@click.command()
+@click.option(
+    "-d",
+    "--db_url",
+    default=None,
+    help="Postgres database URL",
+)
+@click.option("-s", "--solr_url", default=None, help="Solr index URL")
+@click.option(
+    "-m",
+    "--max_records",
+    type=int,
+    default=1000,
+    help="Maximum records to load, -1 for all",
+)
+@click.option(
+    "-a",
+    "--authority_id",
+    default="SESAR",
+    help="Collection type",
+)
+@click.option(
+    "-v",
+    "--verbosity",
+    default="DEBUG",
+    help="Specify logging level",
+    show_default=True,
+)
+@click_config_file.configuration_option()
+@click.pass_context
+def main(
+    ctx, db_url: str, solr_url: str, max_records: int,
+    authority_id: str, verbosity: str
+):
+    isb_lib.core.things_main(ctx, db_url, solr_url, verbosity)
+    db_session = SQLModelDAO(db_url).get_session()
+    thing_iterator = ThingRecordIterator(
+        db_session,
+        authority_id=authority_id,
+        page_size=max_records
+    )
+    context_mapping = getHierarchyMapping("context")
+    material_mapping = getHierarchyMapping("material")
+    specimen_mapping = getHierarchyMapping("specimen")
+
+    for thing in thing_iterator.yieldRecordsByPage():
+        # print(f"thing is {thing.id}")
+        if authority_id == "SESAR":
+            transformed = SESARTransformer.SESARTransformer(
+                thing.resolved_content
+            ).transform()
+
+            # parse the thing to classifier input form
+            sesar_input = SESARClassifierInput(thing.resolved_content)
+            sesar_input.parse_thing()
+
+            description_map = sesar_input.get_description_map()
+            material_text = sesar_input.get_material_text()
+
+            # get the material label prediction result of the record
+            # load the model
+            sesar_model = get_sesar_material_model()
+            # load the model predictor
+            smp = SESARMaterialPredictor("sesar_material_clf",sesar_model)
+            label = smp.predict_material_type(
+                thing.resolved_content
+            )
+
+            print(
+                f"Predicted (probability, label) : {label}"
+            )
+
+            # gold label of the record
+            context_label = transformed['hasContextCategory']
+            material_label = transformed['hasMaterialCategory']
+            specimen_label = transformed['hasSpecimenCategory']
+
+            full_context = [getFullLabel(context_label, context_mapping)]
+            full_material = [getFullLabel(material_label, material_mapping)]
+            full_specimen = [getFullLabel(specimen_label, specimen_mapping)]
+
+            # print out the full hierarchy of the label
+            print(
+                f"Gold label (hierarchical) :  "
+                f"material: {full_material} / ",
+                f"specimen: {full_specimen} / "
+                f"context: {full_context} ",
+            )
+
+            print("-----------------")
+        else:
+
+            transformed = OpenContextTransformer.OpenContextTransformer(
+                thing.resolved_content
+            ).transform()
+
+            # parse the thing to classifier input form
+            oc_input = OpenContextClassifierInput(thing.resolved_content)
+            oc_input.parse_thing()
+
+            material_text = oc_input.get_material_text()
+            sample_text = oc_input.get_sample_text()
+
+            # print out the classifier input form of this record
+            print(material_text)
+            print(sample_text)
+
+    db_session.close()
+
+
+if __name__ == "__main__":
+    main()
