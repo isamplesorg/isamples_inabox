@@ -1,4 +1,4 @@
-from isamples_metadata.metadata_models import (
+from scripts.taxonomy.metadata_models import (
     MetadataModelLoader,
     SESARMaterialPredictor,
     OpenContextMaterialPredictor,

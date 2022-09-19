@@ -2,7 +2,6 @@ import typing
 import logging
 
 import isamples_metadata.Transformer
-import isamples_metadata.metadata_models
 from isamples_metadata.Transformer import (
     Transformer,
     AbstractCategoryMapper,
@@ -12,7 +11,7 @@ from isamples_metadata.Transformer import (
     StringEndsWithCategoryMapper,
     AbstractCategoryMetaMapper,
 )
-from isamples_metadata.metadata_models import (
+from scripts.taxonomy.metadata_models import (
     MetadataModelLoader,
     SESARMaterialPredictor
 )

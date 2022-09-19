@@ -5,13 +5,10 @@ from isamples_metadata import SESARTransformer, OpenContextTransformer
 import isb_lib
 from isb_lib.core import ThingRecordIterator
 from isb_web.sqlmodel_database import SQLModelDAO
-from create_hierarchy_json import getFullLabel, getHierarchyMapping
-from isamples_metadata.SESARClassifierInput import SESARClassifierInput
-from isamples_metadata.OpenContextClassifierInput import OpenContextClassifierInput
-from isamples_metadata.metadata_models import (
-    MetadataModelLoader,
-    SESARMaterialPredictor,
-)
+from scripts.taxonomy.create_hierarchy_json import getFullLabel, getHierarchyMapping
+from scripts.taxonomy.SESARClassifierInput import SESARClassifierInput
+from scripts.taxonomy.OpenContextClassifierInput import OpenContextClassifierInput
+from scripts.taxonomy.metadata_models import MetadataModelLoader , SESARMaterialPredictor 
 
 
 @click.command()

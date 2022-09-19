@@ -9,7 +9,7 @@ from isamples_metadata.Transformer import (
     AbstractCategoryMapper,
 )
 
-from isamples_metadata.metadata_models import (
+from scripts.taxonomy.metadata_models import (
     MetadataModelLoader,
     OpenContextMaterialPredictor,
     OpenContextSamplePredictor
