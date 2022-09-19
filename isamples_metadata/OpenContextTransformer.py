@@ -10,8 +10,7 @@ from isamples_metadata.Transformer import (
 )
 
 from isamples_metadata.metadata_models import (
-    get_oc_material_model,
-    get_oc_sample_model,
+    MetadataModelLoader,
     OpenContextMaterialPredictor,
     OpenContextSamplePredictor
 )
@@ -172,8 +171,8 @@ class OpenContextTransformer(Transformer):
         if not item_category:
             # TODO : need more specification on when to call the predict function
             # call the classifier for prediction
-            ocm_model = get_oc_material_model()
-            ocmp = OpenContextMaterialPredictor("ocm",ocm_model)
+            ocm_model = MetadataModelLoader.get_oc_material_model()
+            ocmp = OpenContextMaterialPredictor(ocm_model)
             return [ocmp.predict_material_type(self.source_record)]
         return MaterialCategoryMetaMapper.categories(item_category)
 
@@ -182,8 +181,8 @@ class OpenContextTransformer(Transformer):
         if not item_category:
             # TODO : need more specification on when to call the predict function
             # call the classifier for prediction
-            ocm_model = get_oc_sample_model()
-            ocmp = OpenContextSamplePredictor("ocm",ocm_model)
+            ocm_model = MetadataModelLoader.get_oc_sample_model()
+            ocmp = OpenContextSamplePredictor(ocm_model)
             return [ocmp.predict_sample_type(self.source_record)]
         return SpecimenCategoryMetaMapper.categories(item_category)
 

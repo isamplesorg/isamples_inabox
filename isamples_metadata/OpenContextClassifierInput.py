@@ -1,4 +1,4 @@
-from ClassifierInput import ClassifierInput
+from isamples_metadata.ClassifierInput import ClassifierInput
 
 
 class OpenContextClassifierInput(ClassifierInput):
