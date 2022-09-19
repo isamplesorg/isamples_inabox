@@ -1,6 +1,7 @@
 import collections
 import logging
 import json
+import os
 from isb_web import config
 
 from isamples_metadata.Transformer import Transformer
@@ -36,6 +37,11 @@ class MetadataModelLoader:
         elif collection == "OPENCONTEXT" and label_type == "sample":
             config_path = config.Settings().opencontext_sample_config_path
         # read the model config file
+        if not os.path.exists(config_path):
+            logging.error(
+                "Unable to locate pretrained models",
+            )
+            return 
         with open(config_path) as json_file:
             config_json = json.load(json_file)
         # use the model config to get the pretrained model
