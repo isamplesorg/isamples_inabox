@@ -8,7 +8,7 @@ from isb_web.sqlmodel_database import SQLModelDAO
 from scripts.taxonomy.create_hierarchy_json import getFullLabel, getHierarchyMapping
 from scripts.taxonomy.SESARClassifierInput import SESARClassifierInput
 from scripts.taxonomy.OpenContextClassifierInput import OpenContextClassifierInput
-from scripts.taxonomy.metadata_models import MetadataModelLoader , SESARMaterialPredictor 
+from scripts.taxonomy.metadata_models import MetadataModelLoader, SESARMaterialPredictor
 
 
 @click.command()
