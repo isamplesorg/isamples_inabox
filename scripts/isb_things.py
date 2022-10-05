@@ -6,7 +6,7 @@ import click
 import click_config_file
 import os.path
 
-from isamples_frictionless import isamples_frictionless
+import isamples_frictionless
 from click import Context
 from frictionless import Report
 

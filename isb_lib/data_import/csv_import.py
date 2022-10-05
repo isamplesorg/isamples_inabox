@@ -1,7 +1,7 @@
 import datetime
 from typing import Optional
 
-from isamples_frictionless import isamples_frictionless
+import isamples_frictionless
 from frictionless import Package, Resource
 from sqlmodel import Session
 
