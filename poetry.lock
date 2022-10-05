@@ -868,8 +868,8 @@ test = ["jsonschema", "pytest (>=3.6.0)", "pytest-cov", "pytz"]
 
 [[package]]
 name = "isamples-frictionless"
-version = "0.1.3"
-description = ""
+version = "0.1.4"
+description = "iSamples integration with frictionless.io"
 category = "main"
 optional = false
 python-versions = "^3.9"
