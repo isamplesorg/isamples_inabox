@@ -867,7 +867,7 @@ widgetsnbextension = ">=4.0,<5.0"
 test = ["jsonschema", "pytest (>=3.6.0)", "pytest-cov", "pytz"]
 
 [[package]]
-name = "isamples_frictionless"
+name = "isamples-frictionless"
 version = "0.1.0"
 description = ""
 category = "main"
@@ -2426,7 +2426,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "cd061957bc3a44e7d0b5f49694249ded834b210cffd015a086101cbd4db5a90a"
+content-hash = "c8352ecbbd67789835f6e4b652f2180e921c2ace38d99fe498633af348c2ca9f"
 
 [metadata.files]
 accept-types = [
