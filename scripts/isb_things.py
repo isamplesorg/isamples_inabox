@@ -5,7 +5,10 @@ import sys
 import click
 import click_config_file
 import os.path
+
+import isamples_frictionless
 from click import Context
+from frictionless import Report
 from tabulate import tabulate
 
 import isb_lib.core
@@ -57,9 +60,8 @@ def validate_isamples_package(file: str):
         sys.exit(-1)
 
 
-def print_report_errors(report):
-    errors = report.flatten(['code', 'message'])
-    print(tabulate(errors, headers=['code', 'message']))
+def print_report_errors(report: Report):
+    print(isamples_frictionless.report_errors_as_str(report))
 
 
 @main.command("load")
