@@ -9,7 +9,6 @@ import os.path
 import isamples_frictionless
 from click import Context
 from frictionless import Report
-from tabulate import tabulate
 
 import isb_lib.core
 from isb_lib.data_import import csv_import
