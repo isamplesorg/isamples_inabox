@@ -867,7 +867,7 @@ widgetsnbextension = ">=4.0,<5.0"
 test = ["jsonschema", "pytest (>=3.6.0)", "pytest-cov", "pytz"]
 
 [[package]]
-name = "isamples-frictionless"
+name = "isamples_frictionless"
 version = "0.1.0"
 description = ""
 category = "main"
