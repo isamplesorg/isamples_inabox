@@ -447,3 +447,15 @@ def all_orcid_ids(session: Session) -> list[str]:
     for row in orcid_id_rows:
         orcid_ids.append(row[0])
     return orcid_ids
+
+
+def dump_things_with_ids_to_file(session: Session, identifiers: list[str], file_path: str):
+    quoted_identifiers = [ f"'{identifier}'" for identifier in identifiers]
+    sql = f"copy (select * from thing where id in ({','.join(quoted_identifiers)})) to '{file_path}'"
+    session.execute(sql)
+
+
+def load_things_from_file(session: Session, file_path: str):
+    sql = f"copy thing from '{file_path}'"
+    session.execute(sql)
+    session.commit()
