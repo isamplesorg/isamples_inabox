@@ -1,7 +1,11 @@
 # Setting up an integration test with a list of identifiers
+## Prerequisites
+
+1. A full database of iSamples content (running locally or on a server where it can be dumped -- like mars)
+2. A running Docker container with the iSB stack.  There should be no data in the stack, but it should have the database and solr schema created.  Simply bringing up the container should be enough to create the schemas.
 
 ## DB Permissions
-Note that the user that runs the script needs to be a superuser or have the pg_read_server_files, pg_write_server_files, or pg_execute_server_program role.
+Note that the user that runs the script needs to be a superuser or have the pg_read_server_files, pg_write_server_files, or pg_execute_server_program role.  I tested the setup on hyde and the `isb_writer` account has the necessary privileges to execute the queries.
 
 ## Dumping the data
 There's a script in `scripts/indexing_integration_test/manage_things_with_ids.py` that will dump the data to a specified file.  It takes as input a file with a list of identifiers formatted like the `sample_input_file` in the same directory.  You run it like this:
