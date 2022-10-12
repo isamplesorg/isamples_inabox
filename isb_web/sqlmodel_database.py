@@ -450,7 +450,7 @@ def all_orcid_ids(session: Session) -> list[str]:
 
 
 def dump_things_with_ids_to_file(session: Session, identifiers: list[str], file_path: str):
-    quoted_identifiers = [ f"'{identifier}'" for identifier in identifiers]
+    quoted_identifiers = [f"'{identifier}'" for identifier in identifiers]
     sql = f"copy (select * from thing where id in ({','.join(quoted_identifiers)})) to '{file_path}'"
     session.execute(sql)
 
