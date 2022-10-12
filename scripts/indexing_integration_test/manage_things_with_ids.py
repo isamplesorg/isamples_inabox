@@ -3,7 +3,11 @@ import click_config_file
 from click import Context
 
 import isb_lib.core
-from isb_web.sqlmodel_database import dump_things_with_ids_to_file, SQLModelDAO, load_things_from_file
+from isb_web.sqlmodel_database import (
+    dump_things_with_ids_to_file,
+    SQLModelDAO,
+    load_things_from_file,
+)
 
 
 @click.group()
@@ -47,7 +51,7 @@ def dump(ctx: Context, input_file: str, output_file: str):
     help="The file path to the dumped file from the load command.",
 )
 @click.pass_context
-def dump(ctx: Context, input_file: str):
+def load(ctx: Context, input_file: str):
     session = SQLModelDAO(ctx.obj["db_url"]).get_session()
     load_things_from_file(session, input_file)
 
