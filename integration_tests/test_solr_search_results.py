@@ -2,6 +2,7 @@ import pytest
 import requests
 import typing
 import os
+import json
 
 
 @pytest.fixture
@@ -132,28 +133,50 @@ def test_geographic_search_terms(
         assert appears_in_search_text
 
 
-solr_test_values = [
-    (
-        "IGSN:NHB002GWT",
-        {
-            "hasContextCategory": ["Earth interior"],
-            "hasMaterialCategory": ["Mineral"],
-            "hasSpecimenCategory": ["Other solid object"]
-        }
-    ),
-    (
-        "IGSN:NHB002GWU",
-        {
-            "hasContextCategory": ["Earth interior"],
-            "hasMaterialCategory": ["Mineral"],
-            "hasSpecimenCategory": ["Other solid object"]
-        }
-    )
-]
+def _transformed_json_to_test_tuples() -> list[tuple]:
+    """
+    We start with this structure:
 
+      "IGSN:ODP02CV44": {
+        "material": {
+          "values": [
+            "Natural Solid Material"
+          ],
+          "confidence": [
+            -1
+          ]
+        }
+      }
 
-@pytest.mark.skipif(True, reason="Only run this test manually, not intended to be automated.  Manually flip the True to False to run.")
-@pytest.mark.parametrize("id,params", solr_test_values)
+    We want to end up with this structure:
+
+    solr_test_values = [
+        (
+            "IGSN:NHB002GWT",
+            {
+                "hasContextCategory": ["Earth interior"],
+                "hasMaterialCategory": ["Mineral"],
+                "hasSpecimenCategory": ["Other solid object"]
+            }
+        )
+    ]
+    """
+    transformed_json: list[tuple] = []
+
+    with open("replaced_keys.json", "r") as schema_json_file:
+        test_model_values_dict = json.load(schema_json_file)
+        for key, value in test_model_values_dict.items():
+            current_tuple = (
+                key,
+                {
+                    "hasMaterialCategory": value.get("material").get("values")
+                }
+            )
+            transformed_json.append(current_tuple)
+    return transformed_json
+
+@pytest.mark.skipif(False, reason="Only run this test manually, not intended to be automated.  Manually flip the True to False to run.")
+@pytest.mark.parametrize("id,params", _transformed_json_to_test_tuples())
 def test_solr_integration_test(rsession: requests.Session, solr_url: str, id: str, params: dict):
     solr_query = f"id:\"{id}\""
     docs = _send_solr_query(rsession, solr_url, solr_query)
