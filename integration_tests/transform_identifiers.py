@@ -18,5 +18,3 @@ with open("test_model_values.json", "r") as schema_json_file:
         updated_file.write(str)
 
 print("Done")
-
-

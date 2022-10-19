@@ -175,6 +175,7 @@ def _transformed_json_to_test_tuples() -> list[tuple]:
             transformed_json.append(current_tuple)
     return transformed_json
 
+
 @pytest.mark.skipif(False, reason="Only run this test manually, not intended to be automated.  Manually flip the True to False to run.")
 @pytest.mark.parametrize("id,params", _transformed_json_to_test_tuples())
 def test_solr_integration_test(rsession: requests.Session, solr_url: str, id: str, params: dict):

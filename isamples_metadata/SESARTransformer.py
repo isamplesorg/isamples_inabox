@@ -18,6 +18,7 @@ from isamples_metadata.taxonomy.metadata_models import (
     SESARMaterialPredictor
 )
 
+
 def fullIgsn(v):
     return f"IGSN:{igsn_lib.normalize(v)}"
 
