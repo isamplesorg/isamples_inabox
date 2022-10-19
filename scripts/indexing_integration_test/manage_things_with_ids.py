@@ -1,6 +1,7 @@
 import click
 import click_config_file
 from click import Context
+import json
 
 import isb_lib.core
 from isb_web.sqlmodel_database import (
@@ -38,8 +39,9 @@ def dump(ctx: Context, input_file: str, output_file: str):
     session = SQLModelDAO(ctx.obj["db_url"]).get_session()
     identifiers = []
     with open(input_file, "r") as id_file:
-        for line in id_file:
-            identifiers.append(line.strip())
+        test_model_values_dict = json.load(id_file)
+        for key in test_model_values_dict.keys():
+            identifiers.append(key)
     dump_things_with_ids_to_file(session, identifiers, output_file)
 
 

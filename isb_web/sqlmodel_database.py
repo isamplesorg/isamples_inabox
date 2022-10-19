@@ -456,6 +456,6 @@ def dump_things_with_ids_to_file(session: Session, identifiers: list[str], file_
 
 
 def load_things_from_file(session: Session, file_path: str):
-    sql = f"copy thing from '{file_path}'"
+    sql = f"copy thing (id, tstamp, tcreated, item_type, authority_id, related, log, resolved_url, resolved_status, tresolved, resolve_elapsed, resolved_content, resolved_media_type, _id, identifiers, h3) from '{file_path}'"
     session.execute(sql)
     session.commit()

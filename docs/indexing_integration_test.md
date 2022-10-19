@@ -21,19 +21,24 @@ python manage_things_with_id.py -d "db_url" load --input_file /tmp/dumped_things
 ```
 
 Note that you can't run this more than once on the same database or you'll get referential integrity errors.
+Also note that the input file needs to exist in the container *where the database server is running*, but you 
+run the script itself (and pass the file path argument) in the isb container.
 
 ## Running the indexer
 Once the database is loaded back up, you can run the indexer to populate the solr index using the things db.  You run it (depending on the provider) like this:
 
 ```
-
-/usr/local/bin/python scripts/opencontext_things.py --config ./isb.cfg populate_isb_core_solr
-echo "Going to invoke GEOME solr index rebuild"
-/usr/local/bin/python scripts/geome_things.py --config ./isb.cfg populate_isb_core_solr
-echo "Going to invoke SESAR solr index rebuild"
-/usr/local/bin/python scripts/sesar_things.py --config ./isb.cfg populate_isb_core_solr
-echo "Going to invoke Smithsonian solr index rebuild"
-/usr/local/bin/python scripts/smithsonian_things.py --config ./isb.cfg populate_isb_core_solr
+/usr/local/bin/python scripts/opencontext_things.py --config ./isb.cfg populate_isb_core_solr -I
+/usr/local/bin/python scripts/geome_things.py --config ./isb.cfg populate_isb_core_solr -I
+/usr/local/bin/python scripts/sesar_things.py --config ./isb.cfg populate_isb_core_solr -I
+/usr/local/bin/python scripts/smithsonian_things.py --config ./isb.cfg populate_isb_core_solr -I
 ```
 
 Once it's done you should be able to hit solr using the local URL and query the data like usual.
+
+## Running the unit test
+After the container is up
+`apt-get install emacs` (or your favorite editor in case you need to edit things)
+`export INPUT_SOLR_URL="http://localhost:8000/thing/select"`
+`pip3 install pytest`
+`pytest test_solr_search_results.py -k "test_solr_integration_test"`
