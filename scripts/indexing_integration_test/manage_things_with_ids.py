@@ -26,7 +26,7 @@ def main(ctx: Context, db_url: str):
     "--input_file",
     type=str,
     default=None,
-    help="The file path to the list of IDs to dump.",
+    help="The file path to the list of IDs to dump.  This is a JSON file with key IDs and value expected predictions ",
 )
 @click.option(
     "--output_file",
