@@ -211,11 +211,11 @@ class SESARMaterialPredictor:
         """ Returns the machine prediction on the given
         input record
         """
-        prediction, prob = self._model.predict(text)
-        return (
-            SESARClassifierInput.source_to_CV[prediction],
+        predictions = self._model.predict(text)
+        return [(
+            SESARClassifierInput.source_to_CV[label],
             prob
-        )
+        ) for (label, prob) in predictions]
 
     def predict_material_type(
         self, source_record: dict
@@ -241,9 +241,8 @@ class SESARMaterialPredictor:
             # second pass : deriving the prediction by machine
             # we pass the text to a pretrained model to get the prediction result
             # load the model
-            machine_prediction = self.classify_by_machine(input_string)
-            label, prob = machine_prediction
-            return PredictionResult(label, prob)
+            machine_predictions = self.classify_by_machine(input_string)
+            return [ PredictionResult(label, prob) for label, prob in machine_predictions]
 
 
 class OpenContextMaterialPredictor:
