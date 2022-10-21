@@ -11,14 +11,15 @@ class OpenContextClassifierInput(ClassifierInput):
         self.OC_material_field = "Consists of_label"
         self.OC_sample_field = "Has type_label"
 
-    def build_text(self, description_map, labelType):
+    def build_text(self, description_map, labelType, description_field):
         """Return the concatenated text of informative fields in the
         description_map"""
         concatenated_text = ""
-        for key, value in description_map.items():
+        for field in description_field:
             # key would be one of the description_field defined in parse_thing
             # e.g. key : item category / value : record's key value such as "Animal Bone"
-            value = str(value)
+            key = field
+            value = str(description_map[key])
             if value == "":
                 continue
             elif key == "context label":
@@ -74,6 +75,6 @@ class OpenContextClassifierInput(ClassifierInput):
                                 value[0][sub_key]
 
         # build the concatenated text from the description_map
-        self.material_text = self.build_text(description_map, "material")
-        self.sample_text = self.build_text(description_map, "sample")
+        self.material_text = self.build_text(description_map, "material", description_field)
+        self.sample_text = self.build_text(description_map, "sample", description_field)
         self.description_map = description_map  # save the description_map

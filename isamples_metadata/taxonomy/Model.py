@@ -29,7 +29,6 @@ class Model:
         attention_mask = encoded_text["attention_mask"].to(self.device)
         with torch.no_grad():
             logits = self.classifier(input_ids, attention_mask)[0]
-
         prob, predicted_class = torch.max(logits, dim=1)
 
         predicted_class = predicted_class.cpu().item()

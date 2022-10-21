@@ -176,7 +176,7 @@ class SESARMaterialPredictor:
         # extract fields that we need to consider for the rules
         fields_to_check = [
             "supplementMetadata_sampleType",
-            "cruiseFieldPrgrm",
+            "supplementMetadata_cruiseFieldPrgrm",
             "igsnPrefix",
             "description",
             "supplementMetadata_primaryLocationType"
