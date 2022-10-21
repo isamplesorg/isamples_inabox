@@ -30,13 +30,12 @@ class Model:
         with torch.no_grad():
             logits = self.classifier(input_ids, attention_mask)[0]
         # convert logits into probability
-        prob  =  logits.softmax(dim=-1)[0]
+        prob = logits.softmax(dim=-1)[0]
         # get the top 3 high confidence predictions
         top_probs, indices = torch.topk(prob, 3)
         # convert integer labels to text labels
-        indices =[x.item() for x in indices]
+        indices = [x.item() for x in indices]
         labels = [self.config["CLASS_NAMES"][x] for x in indices]
-        
         # convert torch tensor to float type
         probs = [x.item() for x in top_probs]
-        return [(label, prob) for label, prob in zip(labels,probs)]
+        return [(label, prob) for label, prob in zip(labels, probs)]

@@ -1,4 +1,3 @@
-from dataclasses import field
 from isamples_metadata.taxonomy.ClassifierInput import ClassifierInput
 
 
@@ -88,7 +87,7 @@ class SESARClassifierInput(ClassifierInput):
         # to have consistent text content
         for field in field_order:
             if field in description_map:
-                key , value = field, description_map[field]
+                key, value = field, description_map[field]
                 if key == "igsnPrefix":
                     continue
                 elif value == "":
@@ -100,6 +99,19 @@ class SESARClassifierInput(ClassifierInput):
                     concatenated_text += value + " , "
 
         return concatenated_text[:-2]  # remove the last comma
+
+    def construct_map_order(self, description_field):
+        # construct order of keys
+        # by using description_field dict
+        # this is to enforce consistent text field for future purposes
+        field_order = []
+        for key, subkeys in description_field.items():
+            if len(subkeys) == 0:
+                field_order.append(key)
+            else:
+                for subkey in subkeys:
+                    field_order.append(key + "_" + subkey)
+        return field_order
 
     def parse_thing(self):
         """Return a map that stores the informative fields,
@@ -121,29 +133,20 @@ class SESARClassifierInput(ClassifierInput):
             "description": [],
             "collectionMethodDescr": [],
         }
-        # construct order of keys
-        field_order = []
-        for key, subkeys in description_field.items():
-            if len(subkeys) == 0:
-                field_order.append(key)
-            else:
-                for subkey in subkeys:
-                    field_order.append(key+"_"+subkey)
+        field_order = self.construct_map_order(description_field)
 
         description_map = {}  # saves value of description_field
         # parse the thing and extract data from informative fields
         for key, value in self.thing["description"].items():
+            # gold label fields
+            if key == self.SESAR_sample_field:
+                self.gold_sample = value
+            if key == self.SESAR_material_field:
+                self.gold_material = value
             if key in description_field:
-                # gold label fields
-                if key == self.SESAR_sample_field:
-                    self.gold_sample = value
-                elif key == self.SESAR_material_field:
-                    self.gold_material = value
-
                 # fields that do not have subfields
                 if len(description_field[key]) == 0:
                     description_map[key] = value
-
                 # fields that have subfields
                 else:
                     for sub_key in value:

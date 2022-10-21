@@ -2,7 +2,7 @@ import collections
 import logging
 import json
 import os
-from typing import Tuple, Optional
+from typing import Tuple, Optional, List
 from isb_web import config
 
 from isamples_metadata.taxonomy.Model import Model
@@ -175,7 +175,7 @@ class SESARMaterialPredictor:
         # 1. rule-based classification
         # extract fields that we need to consider for the rules
         fields_to_check = [
-            "supplementMetadata_sampleType",
+            "sampleType",
             "supplementMetadata_cruiseFieldPrgrm",
             "igsnPrefix",
             "description",
@@ -207,7 +207,7 @@ class SESARMaterialPredictor:
             else:
                 return None
 
-    def classify_by_machine(self, text: str) -> Tuple[str, float]:
+    def classify_by_machine(self, text: str) -> List[Tuple[str, float]]:
         """ Returns the machine prediction on the given
         input record
         """
@@ -219,7 +219,7 @@ class SESARMaterialPredictor:
 
     def predict_material_type(
         self, source_record: dict
-    ) -> PredictionResult:
+    ) -> List[PredictionResult]:
         """
         Invoke the pre-trained BERT model to predict the material type label for the specified string inputs.
 
@@ -236,13 +236,15 @@ class SESARMaterialPredictor:
         # first pass : see if the record falls in the defined rules
         label = self.classify_by_rule(input_string, description_map)
         if label:
-            return PredictionResult(label, -1)  # set sentinel value as probability
+            # map the label to iSamples CV
+            label = SESARClassifierInput.source_to_CV[label]
+            return [PredictionResult(label, -1)]  # set sentinel value as probability
         else:
             # second pass : deriving the prediction by machine
             # we pass the text to a pretrained model to get the prediction result
-            # load the model
+            # predicted label is mapped to iSamples CV
             machine_predictions = self.classify_by_machine(input_string)
-            return [ PredictionResult(label, prob) for label, prob in machine_predictions]
+            return [PredictionResult(label, prob) for label, prob in machine_predictions]
 
 
 class OpenContextMaterialPredictor:
