@@ -254,15 +254,18 @@ class OpenContextMaterialPredictor:
             raise TypeError("Model is required to be non-None")
         self._model = model
 
-    def classify_by_machine(self, text: str) -> Tuple[str, float]:
+    def classify_by_machine(self, text: str) -> List[Tuple[str, float]]:
         """ Returns the machine prediction on the given
         input record
         """
-        return self._model.predict(text)
+        predictions = self._model.predict(text)
+        return [(
+            label, prob
+        ) for (label, prob) in predictions]
 
     def predict_material_type(
         self, source_record: dict
-    ) -> PredictionResult:
+    ) -> List[PredictionResult]:
         """
         Invoke the pre-trained BERT model to predict the material type label for the specified string inputs.
 
@@ -277,8 +280,8 @@ class OpenContextMaterialPredictor:
         input_string = oc_input.get_material_text()
 
         # get the prediction result with necessary fields provided
-        label, prob = self.classify_by_machine(input_string)
-        return PredictionResult(label, prob)
+        machine_predictions = self.classify_by_machine(input_string)
+        return [PredictionResult(label, prob) for label, prob in machine_predictions]
 
 
 class OpenContextSamplePredictor:
@@ -288,19 +291,18 @@ class OpenContextSamplePredictor:
             raise TypeError("Model is required to be non-None")
         self._model = model
 
-    def classify_by_machine(self, text: str) -> Tuple[str, float]:
+    def classify_by_machine(self, text: str) -> List[Tuple[str, float]]:
         """ Returns the machine prediction on the given
         input record
         """
-        prediction, prob = self._model.predict(text)
-        return (
-            prediction,
-            prob
-        )
+        predictions = self._model.predict(text)
+        return [(
+            label, prob
+        ) for (label, prob) in predictions]
 
     def predict_sample_type(
         self, source_record: dict
-    ) -> PredictionResult:
+    ) -> List[PredictionResult]:
         """
         Invoke the pre-trained BERT model to predict the sample type label for the specified string inputs.
 
@@ -315,5 +317,6 @@ class OpenContextSamplePredictor:
         input_string = oc_input.get_sample_text()
 
         # get the prediction result with necessary fields provided
-        label, prob = self.classify_by_machine(input_string)
-        return PredictionResult(label, prob)
+        # get the prediction result with necessary fields provided
+        machine_predictions = self.classify_by_machine(input_string)
+        return [PredictionResult(label, prob) for label, prob in machine_predictions]
