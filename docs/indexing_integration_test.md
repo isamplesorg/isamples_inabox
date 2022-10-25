@@ -13,8 +13,10 @@ There's a script in `scripts/indexing_integration_test/manage_things_with_ids.py
 ```
 python manage_things_with_id.py -d "db_url" dump --input_file /tmp/source_ids --output_file /tmp/dumped_things
 ```
+You will run the dump against the *full database of iSamples content*.
+
 ## Loading the data
-After you've dumped the data, you may load it back up using the `load` command in the same script:
+After you've dumped the data, you will load it up into *the empty iSamples database* using the `load` command in the same script:
 
 ```
 python manage_things_with_id.py -d "db_url" load --input_file /tmp/dumped_things
