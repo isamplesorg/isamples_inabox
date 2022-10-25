@@ -68,8 +68,11 @@ class Transformer(ABC):
             "sampleidentifier": self.sample_identifier_string(),
             "description": self.sample_description(),
             "hasContextCategory": self.has_context_categories(),
+            "hasContextCategoryConfidence": self.has_context_category_confidences(),
             "hasMaterialCategory": self.has_material_categories(),
+            "hasMaterialCategoryConfidence": self.has_material_category_confidences(),
             "hasSpecimenCategory": self.has_specimen_categories(),
+            "hasSpecimenCategoryConfidence": self.has_specimen_category_confidences(),
             "informalClassification": self.informal_classification(),
             "keywords": self.keywords(),
             "producedBy": {
@@ -139,15 +142,27 @@ class Transformer(ABC):
         """Map from the source record into an iSamples context category"""
         pass
 
+    def has_context_category_confidences(self) -> typing.Optional[typing.List[str]]:
+        """If a machine-predicted label is used for context, subclasses should return non-None confidence values"""
+        return None
+
     @abstractmethod
     def has_material_categories(self) -> typing.List[str]:
         """Map from the source record into an iSamples material category"""
         pass
 
+    def has_material_category_confidences(self) -> typing.Optional[typing.List[str]]:
+        """If a machine-predicted label is used for material, subclasses should return non-None confidence values"""
+        return None
+
     @abstractmethod
     def has_specimen_categories(self) -> typing.List[str]:
         """Map from the source record into an iSamples specimen category"""
         pass
+
+    def has_specimen_category_confidences(self) -> typing.Optional[typing.List[str]]:
+        """If a machine-predicted label is used for specimen, subclasses should return non-None confidence values"""
+        return None
 
     @abstractmethod
     def informal_classification(self) -> typing.List[str]:
