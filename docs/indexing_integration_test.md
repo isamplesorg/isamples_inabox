@@ -41,6 +41,9 @@ Once it's done you should be able to hit solr using the local URL and query the 
 ## Running the unit test
 After the container is up
 `apt-get install emacs` (or your favorite editor in case you need to edit things)
+
 `export INPUT_SOLR_URL="http://localhost:8000/thing/select"`
+
 `pip3 install pytest`
+
 `pytest test_solr_search_results.py -k "test_solr_integration_test"`
