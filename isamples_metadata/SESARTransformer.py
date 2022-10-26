@@ -321,7 +321,6 @@ class SESARTransformer(Transformer):
             self._material_prediction_results = smp.predict_material_type(self.source_record)
             return self._material_prediction_results
 
-
     def has_material_categories(self) -> typing.List[str]:
         material = self._material_type()
         if not material:
