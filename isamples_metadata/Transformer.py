@@ -24,6 +24,10 @@ class Transformer(ABC):
 
     N2T_ARK_NO_HTTPS_PREFIX = f"{N2T_NO_HTTPS_PREFIX}ark:/"
 
+    RULE_BASED_CONFIDENCE = 1.0
+
+    HUMAN_ENTERED_CONFIDENCE = 2.0
+
     @staticmethod
     def _transform_key_to_label(
         key: str,
