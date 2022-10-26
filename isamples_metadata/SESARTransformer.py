@@ -329,7 +329,7 @@ class SESARTransformer(Transformer):
             return [prediction.value for prediction in prediction_results]
         return MaterialCategoryMetaMapper.categories(material)
 
-    def has_material_category_confidences(self) -> typing.Optional[typing.List[str]]:
+    def has_material_category_confidences(self, material_categories: list[str]) -> typing.Optional[typing.List[str]]:
         prediction_results = self._compute_material_prediction_results()
         if prediction_results is None:
             return None
