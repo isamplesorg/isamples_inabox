@@ -305,7 +305,7 @@ class SESARTransformer(Transformer):
             material_type, primary_location_type
         )
 
-    def _material_prediction_results(self) -> typing.Optional[typing.List[PredictionResult]]:
+    def _compute_material_prediction_results(self) -> typing.Optional[typing.List[PredictionResult]]:
         if self._material_type() is not None:
             # Have specified value, won't predict
             return None
@@ -325,12 +325,12 @@ class SESARTransformer(Transformer):
     def has_material_categories(self) -> typing.List[str]:
         material = self._material_type()
         if not material:
-            prediction_results = self._material_prediction_results()
+            prediction_results = self._compute_material_prediction_results()
             return [prediction.value for prediction in prediction_results]
         return MaterialCategoryMetaMapper.categories(material)
 
     def has_material_category_confidences(self) -> typing.Optional[typing.List[str]]:
-        prediction_results = self._material_prediction_results()
+        prediction_results = self._compute_material_prediction_results()
         if prediction_results is None:
             return None
         else:
