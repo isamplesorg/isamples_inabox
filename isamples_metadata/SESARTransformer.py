@@ -249,7 +249,7 @@ class SESARTransformer(Transformer):
 
     def __init__(self, source_record: typing.Dict):
         super().__init__(source_record)
-        self._material_prediction_results = None
+        self._material_prediction_results: typing.Optional[list] = None
 
     def _source_record_description(self) -> typing.Dict:
         return self.source_record["description"]
@@ -324,11 +324,11 @@ class SESARTransformer(Transformer):
     def has_material_categories(self) -> typing.List[str]:
         material = self._material_type()
         if not material:
-            prediction_results = self._compute_material_prediction_results()
+            prediction_results: list = self._compute_material_prediction_results()
             return [prediction.value for prediction in prediction_results]
         return MaterialCategoryMetaMapper.categories(material)
 
-    def has_material_category_confidences(self, material_categories: list[str]) -> typing.Optional[typing.List[str]]:
+    def has_material_category_confidences(self, material_categories: list[str]) -> typing.Optional[typing.List[float]]:
         prediction_results = self._compute_material_prediction_results()
         if prediction_results is None:
             return None
