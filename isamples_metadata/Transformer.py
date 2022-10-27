@@ -158,7 +158,7 @@ class Transformer(ABC):
         """Map from the source record into an iSamples context category"""
         pass
 
-    def has_context_category_confidences(self, context_categories: list[str]) -> typing.Optional[typing.List[str]]:
+    def has_context_category_confidences(self, context_categories: list[str]) -> typing.Optional[typing.List[float]]:
         """If a machine-predicted label is used for context, subclasses should return non-None confidence values"""
         return Transformer._rule_based_confidence_list_for_categories_list(context_categories)
 
@@ -167,7 +167,7 @@ class Transformer(ABC):
         """Map from the source record into an iSamples material category"""
         pass
 
-    def has_material_category_confidences(self, material_categories: list[str]) -> typing.Optional[typing.List[str]]:
+    def has_material_category_confidences(self, material_categories: list[str]) -> typing.Optional[typing.List[float]]:
         """If a machine-predicted label is used for material, subclasses should return non-None confidence values"""
         return Transformer._rule_based_confidence_list_for_categories_list(material_categories)
 
@@ -176,7 +176,7 @@ class Transformer(ABC):
         """Map from the source record into an iSamples specimen category"""
         pass
 
-    def has_specimen_category_confidences(self, specimen_categories: list[str]) -> typing.Optional[typing.List[str]]:
+    def has_specimen_category_confidences(self, specimen_categories: list[str]) -> typing.Optional[typing.List[float]]:
         """If a machine-predicted label is used for specimen, subclasses should return non-None confidence values"""
         return Transformer._rule_based_confidence_list_for_categories_list(specimen_categories)
 
