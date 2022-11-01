@@ -70,7 +70,7 @@ class N2TMinter(Minter):
         self.active_counter_list = None
         self.inactive_counter_list = None
         self.counter_list = []
-        self.template_str = "{}{{}}".format(shoulder_str, mask_str)
+        self.template_str = "{}{{}}".format(shoulder_str, mask_str)  # noqa: F523 -- double check this format string
         self.mask_str = mask_str
         self.original_template = self.template_str
         self.origmask = mask_str
