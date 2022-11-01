@@ -69,8 +69,8 @@ class N2TMinter(Minter):
         self.name = "N2tMinter"
         self.active_counter_list = None
         self.inactive_counter_list = None
-        self.counter_list = []
-        self.template_str = "{}{{}}".format(shoulder_str, mask_str)  # noqa: F523 -- this yields a format str
+        self.counter_list: list[tuple] = []
+        self.template_str = "{}{{}}".format(shoulder_str, mask_str)  # type: ignore[str-format] # noqa: F523 -- this yields a format str
         self.mask_str = mask_str
         self.original_template = self.template_str
         self.origmask = mask_str
@@ -123,16 +123,36 @@ class N2TMinter(Minter):
             Nothing
         """
         self.name = d.get("name", self.name)
-        self.base_count = d.get("basecount")
-        self.combined_count = d.get("oacounter")
-        self.max_combined_count = d.get("oatop")
-        self.total_count = d.get("total")
-        self.max_per_counter = d.get("percounter")
-        self.template_str = d.get("template")
-        self.mask_str = d.get("mask")
-        self.atlast_str = d.get("atlast")
-        self.active_counter_list = d.get("saclist")
-        self.inactive_counter_list = d.get("siclist")
+        basecount = d.get("basecount")
+        assert basecount is not None
+        self.base_count = basecount
+        combinedcount = d.get("oacounter")
+        assert combinedcount is not None
+        self.combined_count = combinedcount
+        maxcombinedcount = d.get("oatop")
+        assert maxcombinedcount is not None
+        self.max_combined_count = maxcombinedcount
+        totalcount = d.get("total")
+        assert totalcount is not None
+        self.total_count = totalcount
+        maxpercounter = d.get("percounter")
+        assert maxpercounter is not None
+        self.max_per_counter = maxpercounter
+        templatestr = d.get("template")
+        assert templatestr is not None
+        self.template_str = templatestr
+        maskstr = d.get("mask")
+        assert maskstr is not None
+        self.mask_str = maskstr
+        atlaststr = d.get("atlast")
+        assert atlaststr is not None
+        self.atlast_str = atlaststr
+        activecounterlist = d.get("saclist")
+        assert activecounterlist is not None
+        self.active_counter_list = activecounterlist
+        inactivecounterlist = d.get("siclist")
+        assert inactivecounterlist is not None
+        self.inactive_counter_list = inactivecounterlist
         self.counter_list = []
         i = 0
         while True:
