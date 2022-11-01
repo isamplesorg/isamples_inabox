@@ -19,7 +19,7 @@ from isb_web.sqlmodel_database import (
     save_or_update_thing,
     get_things_with_ids, insert_identifiers, all_thing_identifiers, get_thing_identifiers_for_thing,
     h3_values_without_points, h3_to_height, all_thing_primary_keys, save_draft_thing_with_id, save_person_with_orcid_id,
-    all_orcid_ids,
+    all_orcid_ids, save_namespace,
 )
 from test_utils import _add_some_things
 
@@ -457,3 +457,14 @@ def test_all_orcid_ids(session: Session):
     assert 2 == len(orcid_ids)
     assert orcid_id_1 in orcid_ids
     assert orcid_id_2 in orcid_ids
+
+
+def test_save_namespace(session: Session):
+    orcid_id = "0000-0003-2109-7692"
+    shoulder = "1234/fk44"
+    namespace = save_namespace(session, shoulder, [orcid_id])
+    assert namespace is not None
+    assert namespace.primary_key is not None
+    assert namespace.allowed_people == [orcid_id]
+    assert namespace.tstamp is not None
+    assert namespace.tcreated is not None

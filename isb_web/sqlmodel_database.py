@@ -5,6 +5,7 @@ import sqlalchemy
 import logging
 from typing import Optional, List
 
+from isb_lib.models.namespace import Namespace
 from sqlalchemy import Index, update
 from sqlalchemy.exc import ProgrammingError
 from sqlmodel import SQLModel, create_engine, Session, select
@@ -447,6 +448,18 @@ def all_orcid_ids(session: Session) -> list[str]:
     for row in orcid_id_rows:
         orcid_ids.append(row[0])
     return orcid_ids
+
+
+def save_namespace(session: Session, shoulder: str, allowed_people: list[str]) -> Namespace:
+    namespace = Namespace()
+    namespace.shoulder = shoulder
+    namespace.allowed_people = allowed_people
+    now = datetime.datetime.now()
+    namespace.tcreated = now
+    namespace.tstamp = now
+    session.add(namespace)
+    session.commit()
+    return namespace
 
 
 THING_EXPORT_FIELD_LIST = "id, tstamp, tcreated, item_type, authority_id, resolved_url, resolved_status, tresolved, resolve_elapsed, resolved_content, resolved_media_type, _id, identifiers, h3"
