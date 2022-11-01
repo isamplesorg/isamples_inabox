@@ -473,7 +473,7 @@ def test_save_namespace(session: Session):
 def test_mint_identifiers_in_namespace(session: Session):
     orcid_id = "0000-0003-2109-7692"
     shoulder = "1234/fk44"
-    namespace = save_namespace(session, shoulder, [orcid_id])
+    save_namespace(session, shoulder, [orcid_id])
     identifiers = mint_identifiers_in_namespace(session, shoulder, 10)
     assert 10 == len(identifiers)
     # Then mint again to be sure that the state is saved and the identifiers are unique
