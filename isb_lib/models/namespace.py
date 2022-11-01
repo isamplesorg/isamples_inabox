@@ -41,7 +41,7 @@ class Namespace(SQLModel, table=True):
         default=igsn_lib.time.dtnow(),
         description="The last time anything was modified in this namespace",
     )
-    minter_content: Optional[dict] = Field(
+    minter_state: Optional[dict] = Field(
         # Use the raw SQLAlchemy column in order to get the proper JSON behavior
         sa_column=sqlalchemy.Column(
             sqlalchemy.JSON,

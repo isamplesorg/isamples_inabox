@@ -5,6 +5,7 @@ import sqlalchemy
 import logging
 from typing import Optional, List
 
+from isb_lib.identifiers.noidy.n2tminter import N2TMinter
 from isb_lib.models.namespace import Namespace
 from sqlalchemy import Index, update
 from sqlalchemy.exc import ProgrammingError
@@ -460,6 +461,29 @@ def save_namespace(session: Session, shoulder: str, allowed_people: list[str]) -
     session.add(namespace)
     session.commit()
     return namespace
+
+
+def namespace_with_shoulder(session: Session, shoulder: str) -> Optional[Namespace]:
+    namespace_select = select(Namespace).where(Namespace.shoulder == shoulder)
+    result = session.exec(namespace_select)
+    return result.first()
+
+
+def mint_identifiers_in_namespace(session: Session, shoulder: str, num_identifiers: int) -> list[str]:
+    namespace = namespace_with_shoulder(session, shoulder)
+    if namespace is None:
+        raise ValueError(f"Unable to find namespace with shoulder {shoulder}, cannot mint identifier.")
+    minter = N2TMinter(shoulder)
+    if namespace.minter_state is not None:
+        minter.fromDict(namespace.minter_state)
+    identifiers = []
+    for identifier in minter.mint(num_identifiers):
+        identifiers.append(identifier)
+    namespace.minter_state = minter.asDict()
+    namespace.tstamp = datetime.datetime.now()
+    session.add(namespace)
+    session.commit()
+    return identifiers
 
 
 THING_EXPORT_FIELD_LIST = "id, tstamp, tcreated, item_type, authority_id, resolved_url, resolved_status, tresolved, resolve_elapsed, resolved_content, resolved_media_type, _id, identifiers, h3"
