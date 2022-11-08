@@ -8,7 +8,6 @@ module_names: list[str] = []
 p = Path(__file__)
 for package_name in src_package_names:
     module_directory_path = os.path.join(p.parent.parent, package_name)
-    print(f"module directory path is {module_directory_path}")
     tree = os.listdir(module_directory_path)
     for path in tree:
         if "tests" not in path and path.endswith(".py"):
