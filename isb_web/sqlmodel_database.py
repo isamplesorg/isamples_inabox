@@ -468,11 +468,10 @@ def namespace_with_shoulder(session: Session, shoulder: str) -> Optional[Namespa
     return result.first()
 
 
-def mint_identifiers_in_namespace(session: Session, shoulder: str, num_identifiers: int) -> list[str]:
-    namespace = namespace_with_shoulder(session, shoulder)
+def mint_identifiers_in_namespace(session: Session, namespace: Namespace, num_identifiers: int) -> list[str]:
     if namespace is None:
-        raise ValueError(f"Unable to find namespace with shoulder {shoulder}, cannot mint identifier.")
-    minter = N2TMinter(shoulder)
+        raise ValueError("Namespace cannot be None.  Identifiers will not be minted.")
+    minter = N2TMinter(namespace.shoulder)
     if namespace.minter_state is not None:
         minter.fromDict(namespace.minter_state)
     identifiers = []

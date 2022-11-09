@@ -481,10 +481,10 @@ def test_mint_identifiers_in_namespace(session: Session):
     namespace.shoulder = shoulder
     namespace.allowed_people = [orcid_id]
     save_or_update_namespace(session, namespace)
-    identifiers = mint_identifiers_in_namespace(session, shoulder, 10)
+    identifiers = mint_identifiers_in_namespace(session, namespace, 10)
     assert 10 == len(identifiers)
     # Then mint again to be sure that the state is saved and the identifiers are unique
-    identifiers2 = mint_identifiers_in_namespace(session, shoulder, 10)
+    identifiers2 = mint_identifiers_in_namespace(session, namespace, 10)
     set1 = set(identifiers)
     set2 = set(identifiers2)
     assert set1.isdisjoint(set2)
