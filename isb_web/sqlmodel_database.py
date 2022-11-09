@@ -1,6 +1,7 @@
 import datetime
 import typing
 
+import igsn_lib.time
 import sqlalchemy
 import logging
 from typing import Optional, List
@@ -451,12 +452,10 @@ def all_orcid_ids(session: Session) -> list[str]:
     return orcid_ids
 
 
-def save_namespace(session: Session, shoulder: str, allowed_people: list[str]) -> Namespace:
-    namespace = Namespace()
-    namespace.shoulder = shoulder
-    namespace.allowed_people = allowed_people
-    now = datetime.datetime.now()
-    namespace.tcreated = now
+def save_or_update_namespace(session: Session, namespace: Namespace) -> Namespace:
+    now = igsn_lib.time.dtnow()
+    if namespace.primary_key is None:
+        namespace.tcreated = now
     namespace.tstamp = now
     session.add(namespace)
     session.commit()

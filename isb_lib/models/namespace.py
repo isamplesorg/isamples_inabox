@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Optional
 
 import igsn_lib
+import igsn_lib.time
 import sqlalchemy
 from sqlmodel import SQLModel, Field
 
@@ -50,3 +51,17 @@ class Namespace(SQLModel, table=True):
             doc="Internal state of the minter associated with this namespace",
         ),
     )
+
+    def add_allowed_person(self, orcid_id: str):
+        """Due to intricacies of the SQLAlchemy type system, simply adding to the existing list doesnt seem to dirty
+        the field.  Use this as a hack workaround"""
+        new_people = self.allowed_people.copy()
+        new_people.append(orcid_id)
+        self.allowed_people = new_people
+
+    def remove_allowed_person(self, orcid_id: str):
+        """Due to intricacies of the SQLAlchemy type system, simply adding to the existing list doesnt seem to dirty
+        the field.  Use this as a hack workaround"""
+        new_people = self.allowed_people.copy()
+        new_people.remove(orcid_id)
+        self.allowed_people = new_people
