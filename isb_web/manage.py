@@ -320,7 +320,7 @@ def mint_noidy_identifiers(params: MintNoidyIdentifierParams, request: starlette
     namespace = sqlmodel_database.namespace_with_shoulder(session, params.shoulder)
     if namespace is None:
         raise HTTPException(404, f"unable to locate namespace with shoulder {params.shoulder}")
-    if orcid_id not in namespace.allowed_people:
+    if namespace.allowed_people is None or orcid_id not in namespace.allowed_people:
         raise HTTPException(401, f"user doesn't have access to {params.shoulder}")
     identifiers = sqlmodel_database.mint_identifiers_in_namespace(session, namespace, params.num_identifiers)
     return identifiers
