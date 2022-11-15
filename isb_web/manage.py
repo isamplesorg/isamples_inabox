@@ -304,6 +304,18 @@ class MintNoidyIdentifierParams(BaseModel):
     num_identifiers: int
 
 
+def _orcid_id_from_session_or_scope(request: starlette.requests.Request) -> Optional[str]:
+    user = request.session.get("user")
+    if user is not None:
+        return user.get("orcid", None)
+    else:
+        oauth_claims = request.scope.get("oauth2-claims")
+        if oauth_claims is not None:
+            return oauth_claims.get("sub")
+    return None
+
+
+
 @manage_api.post("/mint_noidy_identifiers", include_in_schema=False)
 def mint_noidy_identifiers(params: MintNoidyIdentifierParams, request: starlette.requests.Request,
                            session: Session = Depends(get_session)):
@@ -312,10 +324,8 @@ def mint_noidy_identifiers(params: MintNoidyIdentifierParams, request: starlette
         params: Class that contains the shoulder and number of identifiers to mint
     Return: A list of all the minted identifiers, or a 404 if the namespace doesn't exist.
     """
-    user = request.session.get("user")
-    if user is not None:
-        orcid_id = user.get("orcid", None)
-    else:
+    orcid_id = _orcid_id_from_session_or_scope(request)
+    if orcid_id is None:
         raise HTTPException(401, "no session")
     namespace = sqlmodel_database.namespace_with_shoulder(session, params.shoulder)
     if namespace is None:
