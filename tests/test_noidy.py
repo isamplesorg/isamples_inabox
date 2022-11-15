@@ -14,8 +14,10 @@ def test_noidy():
 
 def _mint_identifiers_and_assert(minter, num_identifiers):
     identifiers = minter.mint(num_identifiers)
-    returned_identifiers = 0
+    identifier_list = []
     for identifier in identifiers:
-        returned_identifiers += 1
         assert len(identifier) > 0
-    assert returned_identifiers == num_identifiers
+        identifier_list.append(identifier)
+    assert len(identifier_list) == num_identifiers
+    idset = set(identifier_list)
+    assert len(idset) == len(identifier_list)
