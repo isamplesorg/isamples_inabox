@@ -1,8 +1,10 @@
-from typing import Optional
+from typing import Optional, Any
 
+import isamples_frictionless
 from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel
 from sqlmodel import Session
+from starlette.responses import Response
 
 from isb_lib.identifiers import datacite
 import json
@@ -302,6 +304,7 @@ def manage_orcid_id_for_namespace(params: ManageOrcidForNamespaceParams, request
 class MintNoidyIdentifierParams(BaseModel):
     shoulder: str
     num_identifiers: int
+    return_filename: Optional[str] = None
 
 
 def _orcid_id_from_session_or_scope(request: starlette.requests.Request) -> Optional[str]:
@@ -315,10 +318,9 @@ def _orcid_id_from_session_or_scope(request: starlette.requests.Request) -> Opti
     return None
 
 
-
 @manage_api.post("/mint_noidy_identifiers", include_in_schema=False)
 def mint_noidy_identifiers(params: MintNoidyIdentifierParams, request: starlette.requests.Request,
-                           session: Session = Depends(get_session)):
+                           session: Session = Depends(get_session)) -> Any:
     """Mints identifiers using the noidy API.  Requires an active session.
     Args:
         params: Class that contains the shoulder and number of identifiers to mint
@@ -333,4 +335,12 @@ def mint_noidy_identifiers(params: MintNoidyIdentifierParams, request: starlette
     if namespace.allowed_people is None or orcid_id not in namespace.allowed_people:
         raise HTTPException(401, f"user doesn't have access to {params.shoulder}")
     identifiers = sqlmodel_database.mint_identifiers_in_namespace(session, namespace, params.num_identifiers)
-    return identifiers
+    if params.return_filename is None:
+        return identifiers
+    else:
+        csv_str = isamples_frictionless.insert_identifiers_into_template(identifiers)
+        headers = {
+            "Content-Disposition": f"inline; filename={params.return_filename}",
+            "Access-Control-Expose-Headers": "Content-Disposition"
+        }
+        return Response(bytes(csv_str, "utf-8"), headers=headers, media_type="text/csv")

@@ -1,3 +1,5 @@
+from typing import Optional
+
 import requests
 import click
 import json
@@ -38,27 +40,30 @@ def _post_to_mint_method(post_data: dict, identity_token: str, url: str) -> Resp
         "Content-Type": "application/json",
         "Authorization": f"Bearer {identity_token}",
     }
-    print(f"Attempting to post to {url} to mint an identifier…")
+    print(f"Attempting to post to {url} to mint identifiers…")
     response = session.post(url, post_bytes, headers=headers)
     if response.status_code == 200:
-        print(f"Success, response is {response.json()}")
+        print(f"Success response: {response}")
     else:
         print(f"Error response: {response}")
     return response
 
 
 @main.command("mint_datacite_identifiers")
+@token_option
+@url_option
+@identifiers_option
 @click.option(
     "-f",
     "--file",
     type=str,
     help="The path to the metadata JSON file",
 )
-def mint_datacite_identifiers(file: str):
+def mint_datacite_identifiers(identity_token: str, url: str, num_identifiers: int, file: str):
     with open(file) as json_file:
         data = json.load(json_file)
         post_data = {"num_drafts": num_identifiers, "datacite_metadata": data}
-        _post_to_mint_method(post_data)
+        _post_to_mint_method(post_data, identity_token, url)
 
 
 @main.command("mint_noidy_identifiers")
@@ -69,6 +74,7 @@ def mint_datacite_identifiers(file: str):
     "-f",
     "--file",
     type=str,
+    default=None,
     help="The path to the output file",
 )
 @click.option(
@@ -77,11 +83,18 @@ def mint_datacite_identifiers(file: str):
     type=str,
     help="The shoulder to use for identifier generation",
 )
-def mint_noidy_identifiers(identity_token: str, url: str, num_identifiers: int, file: str, shoulder: str):
+def mint_noidy_identifiers(identity_token: str, url: str, num_identifiers: int, file: Optional[str], shoulder: str):
     post_data = {"num_identifiers": num_identifiers, "shoulder": shoulder}
+    if file is not None:
+        post_data["return_filename"] = file
     response = _post_to_mint_method(post_data, identity_token, url)
-    minted_identifiers = response.json()
-    print(f"minted identifiers are: {minted_identifiers}")
+    if file is not None:
+        with open(file, "w") as f:
+            f.write(response.text)
+            print(f"Successfully saved csv file with {num_identifiers} newly minted identifiers to {file}")
+    else:
+        print(f"Successfully minted {num_identifiers} identifiers.")
+        print(response.json())
 
 
 if __name__ == "__main__":
