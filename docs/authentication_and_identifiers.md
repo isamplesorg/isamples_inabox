@@ -81,6 +81,13 @@ manage_api.add_middleware(
 ```
 and it takes care of all the key verification details.
 
+### HTTP Errors
+As a general convention, the http errors are as follows:
+
+1. **400** -- malformed request (likely bad token or authorization header)
+1. **401** -- insufficient permission -- user doesn't have access to update assets or the particular asset they're trying to update
+1. **404** -- unable to locate the resource with the specified identifier
+
 ## Obtaining the JWT from the UI
 In order to invoke any of the management scripts, you'll need a valid JWT.  You may obtain the JWT by logging into the iSamples UI and clicking on this link:
 ![JWT Link](jwt_link_in_ui.png)
