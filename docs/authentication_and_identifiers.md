@@ -117,6 +117,14 @@ Once all of the above has been completed, you're ready to mint new identifiers w
 
 As an alternative to using datacite for identifier minting, you may also use the iSamples built-in identifier minter, noidy.
 
+The first thing you'll need to do is create a namespace.  There's a command in `scripts/examples/mint_identifiers_cli.py`.  An example invocation follows:
+
+```
+python scripts/examples/mint_identifiers_cli.py create_namespace -i orcid_id1,orcid_id2 -t <JWT> -u http://localhost:8000/manage/add_namespace -s 1234/fk4
+```
+
+Once you've created the namespace, you can then call the service to mint identifiers.
+
 There's an example of how to call the noidy service in `scripts/examples/mint_identifiers_cli.py`.  The parameters are
 as follows:
 
