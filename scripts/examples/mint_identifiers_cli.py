@@ -116,7 +116,7 @@ def mint_noidy_identifiers(identity_token: str, url: str, num_identifiers: int, 
 def create_namespace(identity_token: str, url: str, shoulder: str, orcid_ids: str):
     post_data = {"orcid_ids": orcid_ids.split(","), "shoulder": shoulder}
     response = _post_to_mint_method(post_data, identity_token, url)
-    print(f"Successfully created namespace.")
+    print("Successfully created namespace.")
     print(response.json())
 
 
