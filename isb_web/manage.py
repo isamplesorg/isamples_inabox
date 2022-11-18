@@ -19,6 +19,7 @@ import starlette.datastructures
 import starlette_oauth2_api
 import authlib.integrations.starlette_client
 
+from isb_lib.models.namespace import Namespace
 from isb_lib.utilities import url_utilities
 from isb_web import config, sqlmodel_database
 from isb_web.sqlmodel_database import SQLModelDAO
@@ -272,6 +273,30 @@ def add_orcid_id(request: starlette.requests.Request, session: Session = Depends
     else:
         # I think the middleware should prevent this, but just in case…
         raise HTTPException(401, "no session")
+
+
+class AddNamespaceParams(BaseModel):
+    shoulder: str
+    orcid_ids: list[str]
+
+
+@manage_api.post("/add_namespace")
+def add_namespace(params: AddNamespaceParams, request: starlette.requests.Request, session: Session = Depends(get_session)):
+    orcid_id = _orcid_id_from_session_or_scope(request)
+    if orcid_id is None:
+        raise HTTPException(401, "no session")
+    elif orcid_id not in config.Settings().orcid_superusers:
+        raise HTTPException(401, "orcid id not authorized to manage")
+    else:
+        existing_namespace = sqlmodel_database.namespace_with_shoulder(session, params.shoulder)
+        if existing_namespace is not None:
+            raise HTTPException(409, f"namespace with shoulder f{params.shoulder} alaready exists")
+        else:
+            namespace = Namespace()
+            namespace.shoulder = params.shoulder
+            namespace.allowed_people = params.orcid_ids
+            namespace = sqlmodel_database.save_or_update_namespace(session, namespace)
+            return namespace
 
 
 class ManageOrcidForNamespaceParams(BaseModel):

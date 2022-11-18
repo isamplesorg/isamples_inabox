@@ -97,5 +97,28 @@ def mint_noidy_identifiers(identity_token: str, url: str, num_identifiers: int, 
         print(response.json())
 
 
+@main.command("create_namespace")
+@token_option
+@url_option
+@click.option(
+    "-s",
+    "--shoulder",
+    type=str,
+    help="The shoulder to use for identifier generation",
+)
+@click.option(
+    "-i",
+    "--orcid_ids",
+    type=str,
+    default=None,
+    help="The orcid ids permitted to create identifiers in the specified namespace, comma delimited",
+)
+def create_namespace(identity_token: str, url: str, shoulder: str, orcid_ids: str):
+    post_data = {"orcid_ids": orcid_ids.split(","), "shoulder": shoulder}
+    response = _post_to_mint_method(post_data, identity_token, url)
+    print(f"Successfully created namespace.")
+    print(response.json())
+
+
 if __name__ == "__main__":
     main()
