@@ -115,6 +115,10 @@ class Transformer(ABC):
             "authorizedBy": self.authorized_by(),
             "compliesWith": self.complies_with(),
         }
+        for index in range(1, 11):
+            h3_at_resolution = self.h3_function()(self.source_record, index)
+            field_name = f"producedBy_samplingSite_location_h3_{index}"
+            transformed_record[field_name] = h3_at_resolution
         return transformed_record
 
     @abstractmethod
@@ -291,6 +295,9 @@ class Transformer(ABC):
         """Returns a pointer to the associated compliance documentation, ideally in the form of one or more URIs."""
         pass
 
+    @abstractmethod
+    def h3_function(self)-> typing.Callable:
+        pass
 
 class AbstractCategoryMapper(ABC):
     _destination: str

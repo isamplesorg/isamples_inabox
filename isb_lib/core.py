@@ -662,7 +662,7 @@ class CoreSolrImporter:
                     core_record["source"] = self._authority_id
                     # Note that the h3 is precomputed and stored on the Thing itself because we do a
                     # "select distinct h3 from thing" query in order to determine which h3 values we need to compute
-                    # elevation for.  The full order of operations is
+                    # Cesium elevation for.  The full order of operations is
                     # (1) compute h3 on things
                     # (2) select distinct h3 to determine points that need to be computed
                     # (3) compute points and insert into Point db cache table using Cesium JS API
