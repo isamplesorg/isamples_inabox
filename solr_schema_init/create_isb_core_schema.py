@@ -74,6 +74,15 @@ def createCopyField(source, dest, maxChars=None):
     pj(res.json())
 
 
+def deleteCopyField(source, dest):
+    headers = {"Content-Type": MEDIA_JSON}
+    copyFieldData = {"source": source, "dest": [dest]}
+    data = {"delete-copy-field": copyFieldData}
+    data = json.dumps(data).encode("utf-8")
+    res = requests.post(f"{SOLR_API}schema", headers=headers, data=data)
+    pj(res.json())
+
+
 def replaceFieldType(field_type_dict: typing.Dict):
     headers = {"Content-Type": MEDIA_JSON}
     data = {"replace-field-type": field_type_dict}
@@ -233,25 +242,25 @@ createField("producedBy_resultTimeRange", "date_range", True, True, None)
 
 createField("producedBy_samplingSite_location_h3", "string", True, True, None)
 createField("producedBy_samplingSite_location_h3_1", "string", False, False, None, False, True)
-createCopyField("producedBy_samplingSite_location_h3", "producedBy_samplingSite_location_h3_1", 1)
+deleteCopyField("producedBy_samplingSite_location_h3", "producedBy_samplingSite_location_h3_1")
 createField("producedBy_samplingSite_location_h3_2", "string", False, False, None, False, True)
-createCopyField("producedBy_samplingSite_location_h3", "producedBy_samplingSite_location_h3_2", 2)
+deleteCopyField("producedBy_samplingSite_location_h3", "producedBy_samplingSite_location_h3_2")
 createField("producedBy_samplingSite_location_h3_3", "string", False, False, None, False, True)
-createCopyField("producedBy_samplingSite_location_h3", "producedBy_samplingSite_location_h3_3", 3)
+deleteCopyField("producedBy_samplingSite_location_h3", "producedBy_samplingSite_location_h3_3")
 createField("producedBy_samplingSite_location_h3_4", "string", False, False, None, False, True)
-createCopyField("producedBy_samplingSite_location_h3", "producedBy_samplingSite_location_h3_4", 4)
+deleteCopyField("producedBy_samplingSite_location_h3", "producedBy_samplingSite_location_h3_4")
 createField("producedBy_samplingSite_location_h3_5", "string", False, False, None, False, True)
-createCopyField("producedBy_samplingSite_location_h3", "producedBy_samplingSite_location_h3_5", 5)
+deleteCopyField("producedBy_samplingSite_location_h3", "producedBy_samplingSite_location_h3_5")
 createField("producedBy_samplingSite_location_h3_6", "string", False, False, None, False, True)
-createCopyField("producedBy_samplingSite_location_h3", "producedBy_samplingSite_location_h3_6", 6)
+deleteCopyField("producedBy_samplingSite_location_h3", "producedBy_samplingSite_location_h3_6")
 createField("producedBy_samplingSite_location_h3_7", "string", False, False, None, False, True)
-createCopyField("producedBy_samplingSite_location_h3", "producedBy_samplingSite_location_h3_7", 7)
+deleteCopyField("producedBy_samplingSite_location_h3", "producedBy_samplingSite_location_h3_7")
 createField("producedBy_samplingSite_location_h3_8", "string", False, False, None, False, True)
-createCopyField("producedBy_samplingSite_location_h3", "producedBy_samplingSite_location_h3_8", 8)
+deleteCopyField("producedBy_samplingSite_location_h3", "producedBy_samplingSite_location_h3_8")
 createField("producedBy_samplingSite_location_h3_9", "string", False, False, None, False, True)
-createCopyField("producedBy_samplingSite_location_h3", "producedBy_samplingSite_location_h3_9", 9)
+deleteCopyField("producedBy_samplingSite_location_h3", "producedBy_samplingSite_location_h3_9")
 createField("producedBy_samplingSite_location_h3_10", "string", False, False, None, False, True)
-createCopyField("producedBy_samplingSite_location_h3", "producedBy_samplingSite_location_h3_10", 10)
+deleteCopyField("producedBy_samplingSite_location_h3", "producedBy_samplingSite_location_h3_10")
 createField("producedBy_samplingSite_location_cesium_height", "pfloat", True, True, None)
 # Nested document support
 # Note that the solr docs indicate we need these fields, but they already existed in our schema, keeping here for
