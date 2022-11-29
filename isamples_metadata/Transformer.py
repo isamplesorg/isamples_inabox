@@ -28,6 +28,8 @@ class Transformer(ABC):
 
     HUMAN_ENTERED_CONFIDENCE = 2.0
 
+    DEFAULT_H3_RESOLUTION = 15
+
     @staticmethod
     def _transform_key_to_label(
         key: str,
@@ -445,9 +447,9 @@ class StringPairedCategoryMapper(AbstractCategoryMapper):
         )
 
 
-def geo_to_h3(latitude: typing.Optional[float], longitude: typing.Optional[float]) -> typing.Optional[str]:
+def geo_to_h3(latitude: typing.Optional[float], longitude: typing.Optional[float], resolution: int = Transformer.DEFAULT_H3_RESOLUTION) -> typing.Optional[str]:
     if latitude is not None and longitude is not None:
         # Set the resolution value to 15, which is the maximum
-        return h3.geo_to_h3(latitude, longitude, 15)
+        return h3.geo_to_h3(latitude, longitude, resolution)
     else:
         return None
