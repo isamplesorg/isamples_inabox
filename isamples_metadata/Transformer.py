@@ -296,8 +296,9 @@ class Transformer(ABC):
         pass
 
     @abstractmethod
-    def h3_function(self)-> typing.Callable:
+    def h3_function(self) -> typing.Callable:
         pass
+
 
 class AbstractCategoryMapper(ABC):
     _destination: str
