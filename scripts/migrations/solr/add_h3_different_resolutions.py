@@ -51,7 +51,7 @@ def save_mutated_batch(current_mutated_batch, rsession, solr_url):
 def mutate_record(record: dict) -> Optional[dict]:
     # Do whatever work is required to mutate the record to update things…
     record_copy = record.copy()
-    for index in range(1, 11):
+    for index in range(0, 11):
         h3_at_resolution = geo_to_h3(
             record.get("producedBy_samplingSite_location_latitude"),
             record.get("producedBy_samplingSite_location_longitude"),

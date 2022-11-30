@@ -252,6 +252,7 @@ createField("producedBy_samplingSite_location_h3_8", "string", False, False, Non
 createField("producedBy_samplingSite_location_h3_9", "string", False, False, None, False, True)
 createField("producedBy_samplingSite_location_h3_10", "string", False, False, None, False, True)
 createField("producedBy_samplingSite_location_cesium_height", "pfloat", True, True, None)
+createField("producedBy_samplingSite_location_h3_0", "string", False, False, None, False, True)
 # Nested document support
 # Note that the solr docs indicate we need these fields, but they already existed in our schema, keeping here for
 # reference purposes

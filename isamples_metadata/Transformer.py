@@ -115,7 +115,7 @@ class Transformer(ABC):
             "authorizedBy": self.authorized_by(),
             "compliesWith": self.complies_with(),
         }
-        for index in range(1, 11):
+        for index in range(0, 11):
             h3_at_resolution = self.h3_function()(self.source_record, index)
             field_name = f"producedBy_samplingSite_location_h3_{index}"
             transformed_record[field_name] = h3_at_resolution
