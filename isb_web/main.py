@@ -22,7 +22,6 @@ import isamples_metadata.GEOMETransformer
 from isb_lib.core import MEDIA_GEO_JSON, MEDIA_JSON, MEDIA_NQUADS
 from isb_lib.models.thing import Thing
 from isb_lib.utilities import h3_utilities
-from isb_lib.utilities.h3_utilities import estimate_resolution, get_h3_solr_query_from_bb
 from isb_web import sqlmodel_database, analytics, manage
 from isb_web.analytics import AnalyticsEvent
 from isb_web import schemas
@@ -37,7 +36,6 @@ from isamples_metadata.SmithsonianTransformer import SmithsonianTransformer
 
 import logging
 
-from isb_web.isb_solr_query import clip_float
 from isb_web.schemas import ThingPage
 from isb_web.sqlmodel_database import SQLModelDAO
 import isb_lib.stac
@@ -362,17 +360,15 @@ min_cells_q = fastapi.Query(
 @app.get(
     "/h3_counts/",
     name="Get H3 GeoJSON grid of record counts",
-    description=(
-            "Return a GeoJSON feature collection of H3 cells for the "
-            "provided bounding box or globally. "
-            "bb is min_longitude, min_latitude, max_longitude, max_latitude"
-    ),
+    description=("Return a GeoJSON feature collection of H3 cells for the provided bounding box or globally. "
+                 "bb is min_longitude, min_latitude, max_longitude, max_latitude"
+                 ),
 )
 def get_h3_grid(
-    resolution: typing.Optional[int] = resolution_q,
-    exclude_poles: bool = exclude_poles_q,
-    bb: typing.Optional[str] = bb_q,
-    q: str = None,
+        resolution: typing.Optional[int] = resolution_q,
+        exclude_poles: bool = exclude_poles_q,
+        bb: typing.Optional[str] = bb_q,
+        q: str = None,
 ) -> geojson.FeatureCollection:
     solr_query_params = h3_utilities.get_h3_solr_query_from_bb(bb, resolution, q)
     record_counts = h3_utilities.get_record_counts(
