@@ -21,7 +21,7 @@ def main(ctx):
 
 def add_h3_values(solr_url: str):
     total_records = 0
-    batch_size = 10000
+    batch_size = 50000
     current_mutated_batch = []
     rsession = requests.session()
     iterator = ISBCoreSolrRecordIterator(
@@ -51,7 +51,7 @@ def save_mutated_batch(current_mutated_batch, rsession, solr_url):
 def mutate_record(record: dict) -> Optional[dict]:
     # Do whatever work is required to mutate the record to update things…
     record_copy = record.copy()
-    for index in range(0, 11):
+    for index in range(0, 15):
         h3_at_resolution = geo_to_h3(
             record.get("producedBy_samplingSite_location_latitude"),
             record.get("producedBy_samplingSite_location_longitude"),
