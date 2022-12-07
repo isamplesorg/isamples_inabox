@@ -5,6 +5,8 @@ import geojson
 import h3
 from isb_web.isb_solr_query import clip_float, solr_records_forh3_counts
 
+# Mainly adapted from https://github.com/datadavev/seeh3/blob/main/app/seeh3.py
+
 BB_REGEX = r"^([+-]?[0-9]+(\.[0-9]+)?,?){4}$"
 
 # These are H3 cells from resolutions 0-16 that overlap the north or south poles

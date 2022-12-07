@@ -360,7 +360,7 @@ min_cells_q = fastapi.Query(
 
 
 @app.get(
-    "/counts/",
+    "/h3_counts/",
     name="Get H3 GeoJSON grid of record counts",
     description=(
             "Return a GeoJSON feature collection of H3 cells for the "
