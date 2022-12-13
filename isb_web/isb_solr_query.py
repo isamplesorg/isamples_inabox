@@ -7,7 +7,6 @@ import fastapi
 import logging
 import urllib.parse
 import isb_web.config
-from isb_lib.utilities import h3_utilities
 
 BASE_URL = isb_web.config.Settings().solr_url
 _RPT_FIELD = "producedBy_samplingSite_location_rpt"
