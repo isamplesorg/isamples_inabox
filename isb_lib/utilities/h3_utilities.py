@@ -1,3 +1,5 @@
+from typing import Any
+
 from .antimeridian_splitter import split_polygon
 import math
 import typing
@@ -98,7 +100,7 @@ def estimate_resolution(bb,) -> int:  # noqa: C901 -- simple enough in spite of 
 
 def get_h3_solr_query_from_bb(bb: str, resolution: str, q: str) -> H3SolrQueryParams:
     if bb is not None and len(bb) > 4:
-        bbox = bb.split(",")
+        bbox: list = bb.split(",")
         bbox = [float(v) for v in bbox]
         bbox[0] = clip_float(bbox[0], -180, 180)
         bbox[1] = clip_float(bbox[1], -90, 90)
@@ -118,7 +120,7 @@ def get_h3_solr_query_from_bb(bb: str, resolution: str, q: str) -> H3SolrQueryPa
 
 def get_record_counts(
     query: str = "*:*", resolution: int = 1, exclude_poles: bool = True
-) -> dict[str, RecordCount]:
+) -> dict[Any, dict[str, Any]]:
     """
     Facet records matching query on resolution, returning dict with keys being h3.
     """
@@ -140,7 +142,7 @@ def get_record_counts(
         except KeyError:
             pass
     if total == 0:
-        log_total = 0
+        log_total: float = 0
     else:
         log_total = math.log(total)
     for k in counts.keys():
