@@ -1,6 +1,5 @@
 import logging
-import typing
-from typing import Optional, Any
+from typing import Any
 
 from fastapi import FastAPI, HTTPException
 from isamples_metadata.SESARTransformer import SESARTransformer
@@ -13,7 +12,6 @@ from isamples_metadata.SmithsonianTransformer import SmithsonianTransformer
 from pydantic import BaseModel
 
 from isamples_metadata.metadata_exceptions import MetadataException
-from isb_web import isb_enums
 from isb_web.isb_enums import ISBAuthority, ISBReturnField
 
 debug_api = FastAPI()
