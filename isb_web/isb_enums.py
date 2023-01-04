@@ -24,3 +24,15 @@ class ISBAuthority(_NoValue):
     OPENCONTEXT = "opencontext"
     SESAR = "sesar"
     SMITHSONIAN = "smithsonian"
+
+
+class ISBReturnField(_NoValue):
+    """Return field parameter for interactive debugging"""
+
+    CONTEXT = "context"
+    MATERIAL = "material"
+    SPECIMEN = "specimen"
+    ALL = "all"
+
+    def dictionary_key(self) -> str:
+        return f"has{self.value.capitalize()}Category"

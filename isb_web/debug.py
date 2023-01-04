@@ -14,7 +14,7 @@ from pydantic import BaseModel
 
 from isamples_metadata.metadata_exceptions import MetadataException
 from isb_web import isb_enums
-from isb_web.isb_enums import ISBAuthority
+from isb_web.isb_enums import ISBAuthority, ISBReturnField
 
 debug_api = FastAPI()
 # dao: Optional[SQLModelDAO] = None
@@ -26,6 +26,7 @@ _L = logging.getLogger("manage")
 class DebugTransformParams(BaseModel):
     input_record: dict
     authority: ISBAuthority
+    return_field: ISBReturnField
 
 
 @debug_api.post("/debug_transform")
@@ -37,14 +38,24 @@ def debug_transform(params: DebugTransformParams) -> Any:
     """
     try:
         if params.authority == ISBAuthority.GEOME:
-            return GEOMETransformer(params.input_record).transform()
+            transformed = GEOMETransformer(params.input_record).transform()
         elif params.authority == ISBAuthority.OPENCONTEXT:
-            return OpenContextTransformer(params.input_record).transform()
+            transformed = OpenContextTransformer(params.input_record).transform()
         elif params.authority == ISBAuthority.SESAR:
-            return SESARTransformer(params.input_record).transform()
+            transformed = SESARTransformer(params.input_record).transform()
         elif params.authority == ISBAuthority.SMITHSONIAN:
-            return SmithsonianTransformer(params.input_record).transform()
+            transformed = SmithsonianTransformer(params.input_record).transform()
         else:
             raise HTTPException(500, "Specified authority is not an input we can transform")
     except MetadataException as e:
         raise HTTPException(415, str(e))
+
+    if params.return_field != ISBReturnField.ALL:
+        key = params.return_field.dictionary_key()
+        confidence_key = f"{key}Confidence"
+        return {
+            key: transformed.get(key),
+            confidence_key: transformed.get(confidence_key)
+        }
+    else:
+        return transformed
