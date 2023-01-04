@@ -15,3 +15,12 @@ class ISBFormat(_NoValue):
     CORE = "core"
     FULL = "full"
     SOLR = "solr"
+
+
+class ISBAuthority(_NoValue):
+    """Format parameter for known iSB authorities"""
+
+    GEOME = "geome"
+    OPENCONTEXT = "opencontext"
+    SESAR = "sesar"
+    SMITHSONIAN = "smithsonian"
