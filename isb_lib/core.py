@@ -6,7 +6,7 @@ import datetime
 import hashlib
 import json
 import typing
-
+import time
 import igsn_lib.time
 
 from isamples_metadata import SESARTransformer
@@ -593,6 +593,7 @@ class ThingRecordIterator:
     def yieldRecordsByPage(self):
         while True:
             n = 0
+            ns = time.time_ns()
             things = sqlmodel_database.paged_things_with_ids(
                 self._session,
                 self._authority_id,
@@ -603,6 +604,8 @@ class ThingRecordIterator:
                 self._id,
                 self._only_resolved_content
             )
+            new_ns = time.time_ns()
+            print(f"Took {(new_ns - ns) / 1000000} ms to fetch resolved content")
             max_id_in_page = 0
             for rec in things:
                 n += 1
