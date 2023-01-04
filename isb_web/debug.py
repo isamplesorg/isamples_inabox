@@ -1,6 +1,7 @@
 import logging
 from typing import Any
 
+import fastapi
 from fastapi import FastAPI, HTTPException
 from isamples_metadata.SESARTransformer import SESARTransformer
 
@@ -25,6 +26,11 @@ class DebugTransformParams(BaseModel):
     input_record: dict
     authority: ISBAuthority
     return_field: ISBReturnField
+
+
+@debug_api.get("/", include_in_schema=False)
+async def root(request: fastapi.Request):
+    return fastapi.responses.RedirectResponse(url=f"{request.scope.get('root_path')}/docs")
 
 
 @debug_api.post("/debug_transform")
