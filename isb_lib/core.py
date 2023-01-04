@@ -9,6 +9,7 @@ import typing
 
 import igsn_lib.time
 
+from isamples_metadata import SESARTransformer
 from isamples_metadata.metadata_exceptions import MetadataException
 from isb_lib.models.thing import Thing
 from isamples_metadata.Transformer import Transformer
@@ -576,6 +577,7 @@ class ThingRecordIterator:
         offset: int = 0,
         limit: int = -1,
         min_time_created: Optional[datetime.datetime] = None,
+        only_resolved_content: bool = False
     ):
         self._session = session
         self._authority_id = authority_id
@@ -586,6 +588,7 @@ class ThingRecordIterator:
         self._id = offset
         self._limit = limit
         self._total_selected = 0
+        self._only_resolved_content = only_resolved_content
 
     def yieldRecordsByPage(self):
         while True:
@@ -598,6 +601,7 @@ class ThingRecordIterator:
                 self._offset,
                 self._min_time_created,
                 self._id,
+                self._only_resolved_content
             )
             max_id_in_page = 0
             for rec in things:
@@ -607,7 +611,10 @@ class ThingRecordIterator:
                     n = 0
                     break
                 yield rec
-                max_id_in_page = rec.primary_key
+                if self._only_resolved_content:
+                    max_id_in_page = rec[0]
+                else:
+                    max_id_in_page = rec.primary_key
             if n == 0:
                 break
             # Grab the next page, by only selecting records with _id > than the last one we fetched
@@ -634,6 +641,7 @@ class CoreSolrImporter:
             page_size=db_batch_size,
             offset=offset,
             min_time_created=min_time_created,
+            only_resolved_content=True
         )
         self._db_batch_size = db_batch_size
         self._solr_batch_size = solr_batch_size
@@ -654,13 +662,13 @@ class CoreSolrImporter:
             core_records = []
             for thing in self._thing_iterator.yieldRecordsByPage():
                 try:
-                    core_records_from_thing = core_record_function(thing)
+                    core_records_from_thing = core_record_function(thing[1])
                 except MetadataException as e:
-                    getLogger().info(f"Excluding record {thing.id} from index due to known exclusion: \"{e}\".")
+                    getLogger().info(f"Excluding record {thing[0]} from index due to known exclusion: \"{e}\".")
                     continue
                 except Exception as e:
                     getLogger().error("Failed trying to run transformer, skipping record %s exception %s",
-                                      thing.resolved_content, e)
+                                      thing[1], e)
                     continue
 
                 for core_record in core_records_from_thing:
@@ -675,8 +683,9 @@ class CoreSolrImporter:
                     #  computed the h3 just grab it off the Thing
                     # Step 3 in this sequence of events is both slow and API rate-limited by Cesium, so we take great
                     # pain to ensure that we're only querying the absolute minimum
-                    core_record["producedBy_samplingSite_location_h3_15"] = thing.h3
-                    core_record["producedBy_samplingSite_location_cesium_height"] = h3_to_height.get(thing.h3)
+                    h3 = SESARTransformer.geo_to_h3(thing[1])
+                    core_record["producedBy_samplingSite_location_h3_15"] = h3
+                    core_record["producedBy_samplingSite_location_cesium_height"] = h3_to_height.get(h3)
                     core_records.append(core_record)
                 for r in core_records:
                     allkeys.add(r["id"])

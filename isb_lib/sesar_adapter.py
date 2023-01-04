@@ -174,13 +174,13 @@ def reparseThing(thing: Thing) -> Thing:
     return thing
 
 
-def reparseAsCoreRecord(thing: Thing) -> typing.List[typing.Dict]:
-    _validateResolvedContent(thing)
-    if thing.resolved_content is not None:
-        transformer = isamples_metadata.SESARTransformer.SESARTransformer(thing.resolved_content)
-        return [isb_lib.core.coreRecordAsSolrDoc(transformer)]
-    else:
-        return []
+def reparseAsCoreRecord(resolved_content: dict) -> typing.List[typing.Dict]:
+    # _validateResolvedContent(thing)
+    # if thing.resolved_content is not None:
+    transformer = isamples_metadata.SESARTransformer.SESARTransformer(resolved_content)
+    return [isb_lib.core.coreRecordAsSolrDoc(transformer)]
+    # else:
+    #     return []
 
 
 def _sesar_last_updated(dict: typing.Dict) -> typing.Optional[datetime.datetime]:

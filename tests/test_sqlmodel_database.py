@@ -2,6 +2,8 @@ import datetime
 import random
 
 import pytest
+from sqlalchemy.engine import Row
+
 from isb_lib.models.namespace import Namespace
 from sqlalchemy.orm.attributes import flag_modified
 from sqlmodel import Session, SQLModel, create_engine
@@ -126,6 +128,19 @@ def test_paged_things_with_ids(session: Session):
     assert 5 == len(things_with_tcreated)
     all_things = paged_things_with_ids(session, authority, 200, 100, 0, None, 0)
     assert 15 == len(all_things)
+
+
+def test_paged_things_with_ids_only_resolved_content(session: Session):
+    authority = "test_authority"
+    old_tcreated = datetime.datetime(1978, month=11, day=22)
+    _add_some_things(session, 10, authority, old_tcreated)
+    things_resolved_content = paged_things_with_ids(session, authority, 200, 10, 0, None, 0, True)
+    # This should be everything, check we get 10 back
+    assert 10 == len(things_resolved_content)
+    first_row = things_resolved_content[0]
+    assert type(first_row) is Row
+    assert type(first_row[0]) is int
+    assert type(first_row[1]) is dict
 
 
 def test_things_for_sitemap(session: Session):

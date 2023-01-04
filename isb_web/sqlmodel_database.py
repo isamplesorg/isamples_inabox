@@ -173,8 +173,13 @@ def _base_thing_select(
     limit: int = 100,
     offset: int = 0,
     min_id: int = 0,
+    only_resolved_content: bool = False
 ) -> SelectOfScalar[Thing]:
-    thing_select = select(Thing).filter(Thing.resolved_status == status)
+    if only_resolved_content:
+        thing_select = select(Thing.primary_key, Thing.resolved_content)
+    else:
+        thing_select = select(Thing)
+    thing_select = thing_select.filter(Thing.resolved_status == status)
     if authority is not None:
         thing_select = thing_select.filter(Thing.authority_id == authority)
     if offset > 0:
@@ -194,8 +199,9 @@ def paged_things_with_ids(
     offset: int = 0,
     min_time_created: Optional[datetime.datetime] = None,
     min_id: int = 0,
-) -> List[Thing]:
-    thing_select = _base_thing_select(authority, status, limit, offset, min_id)
+    only_resolved_content: bool = False
+) -> list:
+    thing_select = _base_thing_select(authority, status, limit, offset, min_id, only_resolved_content)
 
     if min_time_created is not None:
         thing_select = thing_select.filter(Thing.tcreated >= min_time_created)
