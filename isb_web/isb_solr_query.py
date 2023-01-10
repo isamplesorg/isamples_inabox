@@ -1,5 +1,5 @@
 import typing
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Mapping
 
 import requests
 import geojson
@@ -357,7 +357,7 @@ def reliquery_solr_query(query: str) -> dict:
     """
     url = get_solr_url("select")
     headers = {"Accept": "application/json"}
-    params = {
+    params: Mapping = {
         "q": query,
         "rows": MAX_RELIQUERY_ROWS,
         "wt": "json",
