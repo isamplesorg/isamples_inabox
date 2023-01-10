@@ -1,4 +1,5 @@
 import os
+import datetime
 from typing import Optional
 
 import uvicorn
@@ -13,13 +14,12 @@ import fastapi.responses
 import accept_types
 import json
 from fastapi.params import Query, Depends
-from pydantic import BaseModel
 from sqlmodel import Session
 import geojson
 
 import isb_web
 import isamples_metadata.GEOMETransformer
-from isb_lib.core import MEDIA_GEO_JSON, MEDIA_JSON, MEDIA_NQUADS
+from isb_lib.core import MEDIA_GEO_JSON, MEDIA_JSON, MEDIA_NQUADS, SOLR_TIME_FORMAT
 from isb_lib.models.thing import Thing
 from isb_lib.utilities import h3_utilities
 from isb_web import sqlmodel_database, analytics, manage, debug
@@ -36,6 +36,7 @@ from isamples_metadata.SmithsonianTransformer import SmithsonianTransformer
 
 import logging
 
+from isb_web.api_types import ThingsSitemapParams, ReliqueryResponse, ReliqueryParams
 from isb_web.schemas import ThingPage
 from isb_web.sqlmodel_database import SQLModelDAO
 import isb_lib.stac
@@ -269,6 +270,25 @@ async def get_solr_select(request: fastapi.Request):
     return isb_solr_query.solr_query(params)
 
 
+@app.post(f"/{THING_URL_PATH}/reliquery", response_model=ReliqueryResponse)
+def get_reliquery(request: fastapi.Request, params: ReliqueryParams) -> ReliqueryResponse:
+    solr_response_dict = isb_solr_query.reliquery_solr_query(params.query)
+    json_response = solr_response_dict.get("response")
+    docs = json_response.get("docs")
+    identifiers = []
+    for dict in docs:
+        identifiers.append(dict["id"])
+    reliquery_response = ReliqueryResponse(
+        query=params.query,
+        identifiers=identifiers,
+        timestamp=datetime.datetime.now().strftime(SOLR_TIME_FORMAT),
+        count=json_response.get("numFound"),
+        return_count=len(identifiers),
+        url=str(request.url),
+        description=params.description)
+    return reliquery_response
+
+
 @app.post(f"/{THING_URL_PATH}/select", response_model=typing.Any)
 async def get_solr_query(
     request: fastapi.Request, query: typing.Any = fastapi.Body(...)
@@ -379,10 +399,6 @@ def get_h3_grid(
     return h3_utilities.h3s_to_feature_collection(
         set(record_counts.keys()), cell_props=record_counts
     )
-
-
-class ThingsSitemapParams(BaseModel):
-    identifiers: list[str]
 
 
 @app.post("/things", response_model=typing.Any)
