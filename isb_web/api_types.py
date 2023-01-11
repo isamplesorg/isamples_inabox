@@ -22,10 +22,18 @@ class ReliqueryResponse(BaseModel):
     identifiers: list[str] = []
     description: Optional[str]
 
+    # The following fields are only present if a query is re-executed:
+    previous_timestamp: Optional[str] = None
+    previous_url: Optional[str] = None
+    previous_count: Optional[int] = None
+
 
 class ReliqueryParams(BaseModel):
-    query: Optional[str]
-    description: Optional[str]
+    # Query and description are read out of the previous_response, if present
+    query: Optional[str] = None
+    description: Optional[str] = None
+    # Re-run a previously run reliquery
+    previous_response: Optional[ReliqueryResponse] = None
 
 
 class MintDataciteIdentifierParams(BaseModel):

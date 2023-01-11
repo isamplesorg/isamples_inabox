@@ -272,20 +272,31 @@ async def get_solr_select(request: fastapi.Request):
 
 @app.post(f"/{THING_URL_PATH}/reliquery", response_model=ReliqueryResponse)
 def get_reliquery(request: fastapi.Request, params: ReliqueryParams) -> ReliqueryResponse:
-    solr_response_dict = isb_solr_query.reliquery_solr_query(params.query)
+    timestamp_str = datetime.datetime.now().strftime(SOLR_TIME_FORMAT)
+    if params.previous_response is not None:
+        query = params.previous_response.query
+        description = f"{params.previous_response.description} re-executed at {timestamp_str}"
+    else:
+        query = params.query
+        description = params.description
+    solr_response_dict = isb_solr_query.reliquery_solr_query(query)
     json_response = solr_response_dict.get("response")
     docs = json_response.get("docs")
     identifiers = []
-    for dict in docs:
-        identifiers.append(dict["id"])
+    for response_dict in docs:
+        identifiers.append(response_dict["id"])
     reliquery_response = ReliqueryResponse(
-        query=params.query,
+        query=query,
         identifiers=identifiers,
-        timestamp=datetime.datetime.now().strftime(SOLR_TIME_FORMAT),
+        timestamp=timestamp_str,
         count=json_response.get("numFound"),
         return_count=len(identifiers),
         url=str(request.url),
-        description=params.description)
+        description=description)
+    if params.previous_response is not None:
+        reliquery_response.previous_count = params.previous_response.count
+        reliquery_response.previous_url = params.previous_response.url
+        reliquery_response.previous_timestamp = params.previous_response.timestamp
     return reliquery_response
 
 
