@@ -1,4 +1,6 @@
+import logging
 import urllib
+import random
 import requests
 
 
@@ -9,6 +11,8 @@ class SolrConnection:
         self.base_url = base_url
         if detect_nodes:
             self.servers = self._detect_nodes()
+        else:
+            self.servers = []
 
     def _zk_url_from_base_url(self) -> str:
         parsed_url = urllib.parse.urlparse(self.base_url)
@@ -29,13 +33,21 @@ class SolrConnection:
         live_nodes_url = self.zk_url + "?detail=true&path=%2Flive_nodes"
         response = requests.get(live_nodes_url)
         if response.status_code != 200:
-            raise ValueError(
+            logging.error(
                 "Unable to get live nodes in zookeeeper cluster, status: %s; reason: %s",
                 response.status_code,
                 response.reason,
             )
+            return []
         json = response.json()
         children = [d["text"] for d in json["tree"][0]["children"]]
         # e.g. 192.168.128.2:8983_solr
         nodes = [c.replace("_solr", "") for c in children]
         return [f"http://{node}{self.solr_path}" for node in nodes]
+
+    # Returns a random solr url from one of the live nodes
+    def solr_url(self) -> str:
+        if len(self.servers) > 0:
+            return random.choice(self.servers)
+        else:
+            return self.base_url

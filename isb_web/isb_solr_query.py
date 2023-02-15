@@ -7,8 +7,10 @@ import fastapi
 import logging
 import urllib.parse
 import isb_web.config
+from isb_web.isb_solr_connection import SolrConnection
 
 BASE_URL = isb_web.config.Settings().solr_url
+CONNECTION = None
 _RPT_FIELD = "producedBy_samplingSite_location_rpt"
 LONGITUDE_FIELD = "producedBy_samplingSite_location_longitude"
 LATITUDE_FIELD = "producedBy_samplingSite_location_latitude"
@@ -83,7 +85,12 @@ def clip_float(v, min_v, max_v):
 
 
 def get_solr_url(path_component: str):
-    return urllib.parse.urljoin(BASE_URL, path_component)
+    global CONNECTION
+    if CONNECTION is None:
+        # TODO: we might want to consider checking this more frequently, e.g. on a timer -- as written, it will be
+        # cached forever
+        CONNECTION = SolrConnection(BASE_URL, True)
+    return urllib.parse.urljoin(CONNECTION.solr_url(), path_component)
 
 
 def _get_heatmap(
