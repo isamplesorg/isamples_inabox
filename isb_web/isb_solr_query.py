@@ -65,6 +65,7 @@ ALLOWED_SELECT_METHODS = [
 
 L = logging.getLogger("ISB_SOLR_QUERY")
 
+session = requests.Session()
 
 def escape_solr_query_term(term):
     """Escape a query term for inclusion in a query."""
@@ -124,7 +125,7 @@ def _get_heatmap(
         params["facet.heatmap.gridLevel"] = grid_level
     # Get the solr heatmap for the provided bounds
     url = get_solr_url("select")
-    response = requests.get(url, headers=headers, params=params)
+    response = session.get(url, headers=headers, params=params)
 
     # logging.debug("Got: %s", response.url)
     res = response.json()
@@ -337,9 +338,9 @@ def solr_query(params, query=None):
             content_type = wt_map.get(v.lower(), "json")
 
     if query is None:
-        response = requests.get(url, headers=headers, params=params, stream=True)
+        response = session.get(url, headers=headers, params=params, stream=True)
     else:
-        response = requests.post(
+        response = session.post(
             url, headers=headers, params=params, json=query, stream=True
         )
     return fastapi.responses.StreamingResponse(
@@ -363,7 +364,7 @@ def reliquery_solr_query(query: str) -> dict:
         "wt": "json",
         "fl": "id"
     }
-    response = requests.get(url, headers=headers, params=params)
+    response = session.get(url, headers=headers, params=params)
     return response.json()
 
 
@@ -388,7 +389,7 @@ def solr_get_record(identifier):
     }
     url = get_solr_url("select")
     headers = {"Accept": "application/json"}
-    response = requests.get(url, headers=headers, params=params)
+    response = session.get(url, headers=headers, params=params)
     if response.status_code != 200:
         return response.status_code, None
     docs = response.json()
@@ -496,7 +497,7 @@ def solr_searchStream(params, collection=DEFAULT_COLLECTION_NAME):  # noqa: C901
     # Post the request to solr
     # The response is an open stream that is read in chunks to
     # be passed on to the client as they are received
-    response = requests.post(
+    response = session.post(
         url, headers=headers, params=qparams, data=request, stream=True
     )
     logging.info("Returning response")
@@ -516,7 +517,7 @@ def solr_luke():
     url = get_solr_url("admin/luke")
     params = {"show": "schema", "wt": "json"}
     headers = {"Accept": "application/json"}
-    response = requests.get(url, headers=headers, params=params, stream=True)
+    response = session.get(url, headers=headers, params=params, stream=True)
     return fastapi.responses.StreamingResponse(
         response.iter_content(chunk_size=2048), media_type="application/json"
     )
@@ -621,7 +622,7 @@ def solr_records_forh3_counts(
     facet = (f'facet({DEFAULT_COLLECTION_NAME}{dlm}'
              f'q="{query}"{dlm}'
              f'buckets="{field_name}"{dlm}count(*),rows={max_rows})')
-    response = requests.post(
+    response = session.post(
         url, headers=headers, data={"expr": facet}, stream=True
     )
     logging.info("Returning response")
