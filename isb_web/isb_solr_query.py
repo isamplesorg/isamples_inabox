@@ -65,7 +65,7 @@ ALLOWED_SELECT_METHODS = [
 
 L = logging.getLogger("ISB_SOLR_QUERY")
 
-session = requests.Session()
+session = requests.sessions.Session()
 
 def escape_solr_query_term(term):
     """Escape a query term for inclusion in a query."""
