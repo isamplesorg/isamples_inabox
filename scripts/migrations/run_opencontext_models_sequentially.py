@@ -6,7 +6,7 @@ from aiofile import AIOFile, Writer
 from sqlmodel import Session
 
 import isb_lib
-from isamples_metadata.SESARTransformer import SESARTransformer
+from isamples_metadata.OpenContextTransformer import OpenContextTransformer
 from isb_lib.core import ThingRecordIterator
 from isb_web.sqlmodel_database import SQLModelDAO
 
@@ -36,11 +36,11 @@ def main(ctx, db_url, file: str, verbosity):
 
 async def run_models(session: Session, dest_path: str):
     start = time.time()
-    thing_iterator = ThingRecordIterator(session, "SESAR", page_size=50000)
+    thing_iterator = ThingRecordIterator(session, "OPENCONTEXT", page_size=50000)
     counter = 0
     async with AIOFile(dest_path, "w") as aiodf:
         writer = Writer(aiodf)
-        header = "id\tmaterial_categories\tmaterial_category_confidences\n"
+        header = "id\thasMaterialCategory\thasMaterialCategoryConfidence\thasSpecimenCategory\thasSpecimenCategoryConfidence\n"
         await writer(header)
         await aiodf.fsync()
         for thing in thing_iterator.yieldRecordsByPage():
@@ -51,30 +51,39 @@ async def run_models(session: Session, dest_path: str):
                     f"{current_time - start} seconds elapsed, {counter} records processed"
                 )
             try:
-                transformer = SESARTransformer(thing.resolved_content)
+                transformer = OpenContextTransformer(thing.resolved_content)
                 id = transformer.sample_identifier_string()
                 material_categories = transformer.has_material_categories()
                 material_category_confidences = (
                     transformer.has_material_category_confidences(material_categories)
                 )
                 material_categories_str = ",".join(material_categories)
-                if (
-                    material_category_confidences is not None
-                    and len(material_category_confidences) > 0
-                ):
-                    material_category_confidences_str = ",".join(
-                        [
-                            str(confidence)
-                            for confidence in material_category_confidences
-                        ]
-                    )
-                else:
-                    material_category_confidences_str = ""
-                record_line = f"{id}\t{material_categories_str}\t{material_category_confidences_str}\n"
+                material_category_confidences_str = await category_confidences_str(
+                    material_category_confidences
+                )
+                specimen_categories = transformer.has_specimen_categories()
+                specimen_category_confidences = (
+                    transformer.has_specimen_category_confidences(specimen_categories)
+                )
+                specimen_categories_str = ",".join(specimen_categories)
+                specimen_category_confidences_str = await category_confidences_str(
+                    specimen_category_confidences
+                )
+                record_line = f"{id}\t{material_categories_str}\t{material_category_confidences_str}\t{specimen_categories_str}\t{specimen_category_confidences_str}\n"
                 await writer(record_line)
                 await aiodf.fsync()
             finally:
                 continue
+
+
+async def category_confidences_str(category_confidences: list[float]) -> str:
+    if category_confidences is not None and len(category_confidences) > 0:
+        category_confidences_str = ",".join(
+            [str(confidence) for confidence in category_confidences]
+        )
+    else:
+        category_confidences_str = ""
+    return category_confidences_str
 
 
 """
