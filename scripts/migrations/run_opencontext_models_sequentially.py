@@ -1,4 +1,6 @@
 import asyncio
+from typing import Optional
+
 import click
 import click_config_file
 import time
@@ -76,7 +78,7 @@ async def run_models(session: Session, dest_path: str):
                 continue
 
 
-async def category_confidences_str(category_confidences: list[float]) -> str:
+async def category_confidences_str(category_confidences: Optional[list[float]]) -> str:
     if category_confidences is not None and len(category_confidences) > 0:
         category_confidences_str = ",".join(
             [str(confidence) for confidence in category_confidences]
