@@ -8,12 +8,15 @@ When you create the EC2 instance, you need to select an instance type that actua
 The first pain point in getting the instance to runnin on GPU was getting the NVIDIA drivers installed.  Various webpages seemed to indicate that it might be possible to skip this step if you selected one of the preconfigured AWS GPU-support linux images, but we just selected Ubuntu.
 ### NVIDIA Documentation
 [The NVIDIA documentation](https://docs.nvidia.com/datacenter/tesla/tesla-installation-notes/index.html#ubuntu-lts) on driver installation was followed.  We followed the Ubuntu LTS steps:
-`sudo apt-get install linux-headers-$(uname -r)`
-`distribution=$(. /etc/os-release;echo $ID$VERSION_ID | sed -e 's/\.//g')`
-` wget https://developer.download.nvidia.com/compute/cuda/repos/$distribution/x86_64/cuda-keyring_1.0-1_all.deb`
-`sudo dpkg -i cuda-keyring_1.0-1_all.deb`
-`sudo apt-get update`
-`sudo apt-get -y install cuda-drivers`
+
+```
+sudo apt-get install linux-headers-$(uname -r)
+distribution=$(. /etc/os-release;echo $ID$VERSION_ID | sed -e 's/\.//g')
+wget https://developer.download.nvidia.com/compute/cuda/repos/$distribution/x86_64/cuda-keyring_1.0-1_all.deb
+sudo dpkg -i cuda-keyring_1.0-1_all.deb
+sudo apt-get update
+sudo apt-get -y install cuda-drivers
+```
 
 Once that was all done, verification happened by running the `nvidia-smi` and observing the output:
 
