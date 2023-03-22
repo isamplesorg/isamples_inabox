@@ -36,8 +36,8 @@ def parse_values_to_dict(file_path: str, authority: str) -> dict:
     values = pandas.read_csv(file_path, sep="\t")
     all_rows = {}
     num_rows = len(values)
-    for row in range(num_rows):
-        row = values.iloc[row]
+    for row_index in range(num_rows):
+        row = values.iloc[row_index]
         dict_for_row = {}
         material_categories = handle_string_column(row, "hasMaterialCategory")
         dict_for_row["hasMaterialCategory"] = material_categories
