@@ -22,7 +22,7 @@ from isb_web.sqlmodel_database import (
     get_things_with_ids, insert_identifiers, all_thing_identifiers, get_thing_identifiers_for_thing,
     h3_values_without_points, h3_to_height, all_thing_primary_keys, save_draft_thing_with_id, save_person_with_orcid_id,
     all_orcid_ids, mint_identifiers_in_namespace, save_or_update_namespace, save_taxonomy_name,
-    taxonomy_name_to_kingdom_map,
+    taxonomy_name_to_kingdom_map, kingdom_for_taxonomy_name,
 )
 from test_utils import _add_some_things
 
@@ -508,7 +508,7 @@ def test_add_orcid_id_to_namespace(session: Session):
     assert namespace.allowed_people == [orcid_id_2]
 
 
-def test_taxonomy_name_to_kingdom_map(session: Session):
+def _insert_test_taxonomy_names(session):
     name1 = TaxonomyName()
     name1.name = "name1"
     name1.kingdom = "kingdom1"
@@ -517,7 +517,22 @@ def test_taxonomy_name_to_kingdom_map(session: Session):
     name2.name = "name2"
     name2.kingdom = "kingdom2"
     save_taxonomy_name(session, name2, True)
+
+
+def test_taxonomy_name_to_kingdom_map(session: Session):
+    _insert_test_taxonomy_names(session)
     map = taxonomy_name_to_kingdom_map(session)
     assert map["name1"] == "kingdom1"
     assert map["name2"] == "kingdom2"
     assert len(map) == 2
+
+
+def test_kingdom_for_taxonomy_name(session: Session):
+    _insert_test_taxonomy_names(session)
+    kingdom = kingdom_for_taxonomy_name(session, "name1")
+    assert "kingdom1" == kingdom
+    # should work for itself, too
+    kingdom = kingdom_for_taxonomy_name(session, "kingdom1")
+    assert "kingdom1" == kingdom
+    kingdom = kingdom_for_taxonomy_name(session, "name2")
+    assert "kingdom2" == kingdom

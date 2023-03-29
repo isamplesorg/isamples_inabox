@@ -4,10 +4,14 @@ import logging
 import typing
 import re
 from typing import Optional
+
+from sqlmodel import Session
+
 import isamples_metadata
 from isamples_metadata.Transformer import (
     Transformer,
 )
+from isb_web.sqlmodel_database import kingdom_for_taxonomy_name
 
 PERMIT_STRINGS_TO_IGNORE = ['nan', 'na', 'no data', 'unknown', 'none_required']
 
@@ -25,18 +29,19 @@ class GEOMETransformer(Transformer):
     """Concrete transformer class for going from a GEOME record to an iSamples record"""
 
     def __init__(
-        self, source_record: typing.Dict, last_updated_time: Optional[datetime.datetime] = None
+        self, source_record: typing.Dict, last_updated_time: Optional[datetime.datetime] = None, session: Optional[Session] = None
     ):
         super().__init__(source_record)
         self._child_transformers = []
         self._last_updated_time = last_updated_time
+        self._session = session
         children = self._get_children()
         for child_record in children:
             entity = child_record.get("entity")
             if entity == TISSUE_ENTITY:
                 self._child_transformers.append(
                     GEOMEChildTransformer(
-                        source_record, child_record, last_updated_time
+                        source_record, child_record, last_updated_time, session
                     )
                 )
 
@@ -138,38 +143,19 @@ class GEOMETransformer(Transformer):
         return Transformer.DESCRIPTION_SEPARATOR.join(description_pieces)
 
     def has_context_categories(self) -> typing.List[str]:
+        if self._session is not None:
+            ranks = ["kingdom", "phylum", "genus"]
+            ranks_to_check = []
+            for rank in ranks:
+                value = self._source_record_main_record().get(rank)
+                if value is not None and value != "unidentified":
+                    ranks_to_check.append(value)
+            for rank in ranks_to_check:
+                kingdom = kingdom_for_taxonomy_name(self._session, rank)
+                if kingdom is not None:
+                    return [kingdom]
+        # Didn't find one, return empty
         return []
-        # Disabled pending resolution of https://github.com/isamplesorg/isamples_inabox/issues/254
-        # ranks = ["kingdom", "phylum", "genus"]
-        # ranks_to_value = {rank: None for rank in ranks}
-        # for rank in ranks:
-        #     value = self._source_record_main_record().get(rank)
-        #     if value != "unidentified":
-        #         ranks_to_value[rank] = value
-        # url = "https://api.gbif.org/v1/species/match?"
-        # for rank, value in ranks_to_value.items():
-        #     if value:
-        #         url += rank + "=" + str(value) + "&"
-        # url = url.strip("&")
-        # # use GBIF api to get kingdom value
-        # r = requests.get(url)
-        # json = r.json()
-        # kingdom = json["kingdom"]
-        # if not kingdom:
-        #     # remove parameters
-        #     # from the most specific rank
-        #     for rank in reversed(ranks):
-        #         value = ranks_to_value[rank]
-        #         if value:
-        #             query_param = rank + "=" + str(value) + "&"
-        #             url = url[:-len(query_param)]  # remove query param
-        #             r = requests.get(url)
-        #             json = r.json()
-        #             kingdom = json["kingdom"]
-        #             if kingdom:
-        #                 break
-        #
-        # return kingdom
 
     def has_material_categories(self) -> typing.List[str]:
         # TODO: implement
@@ -568,10 +554,12 @@ class GEOMEChildTransformer(GEOMETransformer):
         source_record: typing.Dict,
         child_record: typing.Dict,
         last_updated_time: Optional[datetime.datetime],
+        session: Optional[Session] = None
     ):
         self.source_record = source_record
         self.child_record = child_record
         self._last_updated_time = last_updated_time
+        self._session = session
 
     def _id_minus_prefix(self) -> str:
         return self.child_record["bcid"].removeprefix(self.ARK_PREFIX)
@@ -645,12 +633,12 @@ class GEOMEChildTransformer(GEOMETransformer):
 # Function to iterate through the identifiers and instantiate the proper GEOME Transformer based on the identifier
 # used for lookup
 def geome_transformer_for_identifier(
-    identifier: str, source_record: typing.Dict
+    identifier: str, source_record: typing.Dict, session: Session
 ) -> Optional[GEOMETransformer]:
     # Two possibilities:
     # (1) It's the sample, so instantiate the main one
     # (2) It's one of the children, so grab the child transformer
-    transformer = GEOMETransformer(source_record, None)
+    transformer = GEOMETransformer(source_record, None, session)
     # Sample identifier string for GEOM is the ARK
     if identifier == transformer.sample_identifier_string():
         return transformer
