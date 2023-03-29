@@ -57,10 +57,9 @@ def read_taxon_data(session: Session, batch_size: int, taxon_file: str):
     session.commit()
 
 
-
 """
-Takes a .tsv file from the GBIF Backbone (https://www.gbif.org/dataset/d7dddbf4-2cf0-4f39-9b2a-bb099caae36c) and 
-transforms to a database index for use when building the GEOME solr index 
+Takes a .tsv file from the GBIF Backbone (https://www.gbif.org/dataset/d7dddbf4-2cf0-4f39-9b2a-bb099caae36c) and
+transforms to a database index for use when building the GEOME solr index
 """
 if __name__ == "__main__":
     main()
