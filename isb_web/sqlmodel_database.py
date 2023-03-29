@@ -15,6 +15,7 @@ from sqlmodel.sql.expression import SelectOfScalar
 
 import isb_lib
 from isb_lib.models.person import Person
+from isb_lib.models.taxonomy_name import TaxonomyName
 from isb_lib.models.thing import Thing, ThingIdentifier, Point
 from isb_web.schemas import ThingPage
 
@@ -497,3 +498,18 @@ def load_things_from_file(session: Session, file_path: str):
     sql = f"copy thing ({THING_EXPORT_FIELD_LIST}) from '{file_path}'"
     session.execute(sql)
     session.commit()
+
+
+def save_taxonomy_name(session: Session, name: TaxonomyName, commit: bool = False):
+    session.add(name)
+    if commit:
+        session.commit()
+
+
+def taxonomy_name_to_kingdom_map(session: Session) -> dict:
+    name_select = select(TaxonomyName.name, TaxonomyName.kingdom)
+    name_rows = session.execute(name_select).fetchall()
+    name_dict = {}
+    for row in name_rows:
+        name_dict[row[0]] = row[1]
+    return name_dict
