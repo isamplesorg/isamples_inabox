@@ -160,7 +160,7 @@ async def get_thing_page(request: fastapi.Request, identifier: str, session: Ses
         raise fastapi.HTTPException(
             status_code=404, detail=f"Thing not found: {identifier}"
         )
-    content = await thing_resolved_content(identifier, item)
+    content = await thing_resolved_content(identifier, item, session)
     content_str = json.dumps(content)
     return templates.TemplateResponse(
         "thing.html", {
@@ -498,7 +498,7 @@ async def get_thing(
             format == isb_enums.ISBFormat.CORE:
         if request_profile is None:
             request_profile = profiles.ISAMPLES_PROFILE
-        content = await thing_resolved_content(identifier, item)
+        content = await thing_resolved_content(identifier, item, session)
     else:
         # If no profile explicitly requested, use the default profile here (currently original source)
         if request_profile is None:
@@ -531,14 +531,14 @@ async def resolve_thing(
     return fastapi.responses.RedirectResponse(url=url_str, status_code=302, headers=headers)
 
 
-async def thing_resolved_content(identifier: str, item: Thing) -> dict:
+async def thing_resolved_content(identifier: str, item: Thing, session: Session) -> dict:
     authority_id = item.authority_id
     if authority_id == "SESAR":
         content = SESARTransformer(item.resolved_content).transform()
     elif authority_id == "GEOME":
         content = (
             isamples_metadata.GEOMETransformer.geome_transformer_for_identifier(
-                identifier, item.resolved_content
+                identifier, item.resolved_content, session
             ).transform()
         )
     elif authority_id == "OPENCONTEXT":
