@@ -148,8 +148,8 @@ class GEOMETransformer(Transformer):
             ranks_to_check = []
             for rank in ranks:
                 value = self._source_record_main_record().get(rank)
-                if value != "unidentified":
-                    ranks_to_check.append(rank)
+                if value is not None and value != "unidentified":
+                    ranks_to_check.append(value)
             for rank in ranks_to_check:
                 kingdom = kingdom_for_taxonomy_name(self._session, rank)
                 if kingdom is not None:
