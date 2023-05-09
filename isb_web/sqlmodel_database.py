@@ -224,17 +224,29 @@ def things_for_sitemap(
     return session.exec(thing_select).all()
 
 
+def things_by_authority_count(session: Session) -> list[tuple]:
+    dbq = session.query(
+        sqlalchemy.sql.label("authority", Thing.authority_id),
+        sqlalchemy.sql.label("count", sqlalchemy.func.count(Thing.authority_id)),
+    ).group_by(Thing.authority_id)
+    return dbq.all()
+
+def things_by_authority_count_dict(session: Session) -> dict[str: int]:
+    tuples = things_by_authority_count(session)
+    things_dict = {}
+    for tuple in tuples:
+        if tuple[0] is not None:
+            things_dict[tuple[0]] = tuple[1]
+    return things_dict
+
+
 def get_thing_meta(session: Session):
     dbq = session.query(
         sqlalchemy.sql.label("status", Thing.resolved_status),
         sqlalchemy.sql.label("count", sqlalchemy.func.count(Thing.resolved_status)),
     ).group_by(Thing.resolved_status)
     meta = {"status": dbq.all()}
-    dbq = session.query(
-        sqlalchemy.sql.label("authority", Thing.authority_id),
-        sqlalchemy.sql.label("count", sqlalchemy.func.count(Thing.authority_id)),
-    ).group_by(Thing.authority_id)
-    meta["authority"] = dbq.all()
+    meta["authority"] = things_by_authority_count(session)
     return meta
 
 

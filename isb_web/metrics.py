@@ -1,10 +1,11 @@
 import logging
+import time
 from typing import Optional
 
 from fastapi import FastAPI
 from starlette.responses import PlainTextResponse
 
-from isb_web.sqlmodel_database import SQLModelDAO
+from isb_web.sqlmodel_database import SQLModelDAO, things_by_authority_count_dict
 
 metrics_api = FastAPI()
 dao: Optional[SQLModelDAO] = None
@@ -38,12 +39,8 @@ class PrometheusMetrics:
 
 @metrics_api.get("/")
 def root():
+    start_time = time.time()
     metrics = PrometheusMetrics()
-    metrics.db_counts = {
-        "OPENCONTEXT": 1,
-        "SESAR": 2,
-        "SMITHSONIAN": 3,
-        "GEOME": 4
-    }
-    metrics.db_scrape_duration_seconds = 99.9
+    metrics.db_counts = things_by_authority_count_dict(dao.get_session())
+    metrics.db_scrape_duration_seconds = time.time() - start_time
     return PlainTextResponse(metrics.metrics_string())
