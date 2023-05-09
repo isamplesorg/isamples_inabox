@@ -231,6 +231,7 @@ def things_by_authority_count(session: Session) -> list[tuple]:
     ).group_by(Thing.authority_id)
     return dbq.all()
 
+
 def things_by_authority_count_dict(session: Session) -> dict[str: int]:
     tuples = things_by_authority_count(session)
     things_dict = {}
