@@ -22,7 +22,7 @@ from isb_web.sqlmodel_database import (
     get_things_with_ids, insert_identifiers, all_thing_identifiers, get_thing_identifiers_for_thing,
     h3_values_without_points, h3_to_height, all_thing_primary_keys, save_draft_thing_with_id, save_person_with_orcid_id,
     all_orcid_ids, mint_identifiers_in_namespace, save_or_update_namespace, save_taxonomy_name,
-    taxonomy_name_to_kingdom_map, kingdom_for_taxonomy_name,
+    taxonomy_name_to_kingdom_map, kingdom_for_taxonomy_name, get_thing_meta, things_by_authority_count_dict,
 )
 from test_utils import _add_some_things
 
@@ -328,6 +328,20 @@ def test_mark_nonexistent_thing_not_found(session: Session):
     assert test_id == not_found_thing.id
     assert resolved_url == not_found_thing.resolved_url
     assert 404 == not_found_thing.resolved_status
+
+
+def test_get_thing_meta(session: Session):
+    test_save_thing(session)
+    result = get_thing_meta(session)
+    assert len(result) == 2
+    assert "status" in result
+    assert "authority" in result
+
+
+def test_things_by_authority_count_dict(session: Session):
+    test_save_thing(session)
+    result = things_by_authority_count_dict(session)
+    assert result["SESAR"] == 1
 
 
 def test_insert_thing_identifier_if_not_present():

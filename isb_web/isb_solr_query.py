@@ -628,6 +628,28 @@ def solr_records_forh3_counts(
     return response.json()
 
 
+def solr_counts_by_authority(rsession=requests.session()) -> dict[str, int]:
+    url = get_solr_url("select")
+    headers = {"Content-Type": "application/json"}
+    params = {
+        "q": "*:*",
+        "facet": "true",
+        "facet.field": "source",
+        "facet.mincount": 1
+    }
+    res = rsession.get(url, headers=headers, params=params)
+    json = res.json()
+    facet_source_counts = json["facet_counts"]["facet_fields"]["source"]
+    # The counts are a single array, with the string value followed by the count as the next item in the array, e.g.
+    # "SESAR",100,"OPENCONTEXT",245…etc, so turn them into a nice dict instead.
+    facet_counts_dict = {}
+    for index, value in enumerate(facet_source_counts):
+        if index % 2 != 0:
+            continue
+        facet_counts_dict[value] = facet_source_counts[index + 1]
+    return facet_counts_dict
+
+
 class ISBCoreSolrRecordIterator:
     """
     Iterator class for looping over all the Solr records in the ISB core Solr schema

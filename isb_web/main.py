@@ -22,7 +22,7 @@ import isamples_metadata.GEOMETransformer
 from isb_lib.core import MEDIA_GEO_JSON, MEDIA_JSON, MEDIA_NQUADS, SOLR_TIME_FORMAT
 from isb_lib.models.thing import Thing
 from isb_lib.utilities import h3_utilities
-from isb_web import sqlmodel_database, analytics, manage, debug
+from isb_web import sqlmodel_database, analytics, manage, debug, metrics
 from isb_web.analytics import AnalyticsEvent
 from isb_web import schemas
 from isb_web import crud
@@ -66,9 +66,11 @@ STAC_COLLECTION_URL_PATH = config.Settings().stac_collection_url_path
 app = fastapi.FastAPI(openapi_tags=tags_metadata)
 dao = SQLModelDAO(None)
 manage_app = manage.manage_api
-# Avoid a circular dependency but share the db connection by pushing into the manage handler
-manage.dao = dao
 debug_app = debug.debug_api
+metrics_app = metrics.metrics_api
+# Avoid a circular dependency but share the db connection by pushing into the various handlers
+manage.dao = dao
+metrics.dao = dao
 
 app.add_middleware(
     fastapi.middleware.cors.CORSMiddleware,
@@ -100,6 +102,7 @@ app.mount(
 )
 app.mount(manage.MANAGE_PREFIX, manage_app)
 app.mount(debug.DEBUG_PREFIX, debug_app)
+app.mount(metrics.METRICS_PREFIX, metrics_app)
 
 
 @app.on_event("startup")
