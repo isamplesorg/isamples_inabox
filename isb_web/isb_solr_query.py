@@ -628,7 +628,7 @@ def solr_records_forh3_counts(
     return response.json()
 
 
-def solr_counts_by_authority(rsession=requests.session()) -> dict[str: int]:
+def solr_counts_by_authority(rsession=requests.session()) -> dict[str, int]:
     url = get_solr_url("select")
     headers = {"Content-Type": "application/json"}
     params = {

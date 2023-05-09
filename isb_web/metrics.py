@@ -16,19 +16,18 @@ _L = logging.getLogger("metrics")
 
 
 class PrometheusMetrics:
-    db_counts: dict[str: int]
+    db_counts: dict[str, int]
     db_scrape_duration_seconds: float
-    solr_counts: dict[str: int]
+    solr_counts: dict[str, int]
     solr_scrape_duration_seconds: float
 
     @staticmethod
-    def _add_metrics_lines(metrics_lines: list[str], counts: dict[str: int], metric_noun: str, duration: float):
+    def _add_metrics_lines(metrics_lines: list[str], counts: dict[str, int], metric_noun: str, duration: float):
         for key, value in counts.items():
             authority_metric_name = key.lower()
             # First generate the documentation and type definition for the field
             count_field_name = f"isamples_{metric_noun}_{authority_metric_name}_count"
-            metrics_lines.append(
-                f"# HELP {count_field_name} A count of {metric_noun} from authority {key}.")
+            metrics_lines.append(f"# HELP {count_field_name} A count of {metric_noun} from authority {key}.")
             metrics_lines.append(f"# TYPE {count_field_name} gauge")
             # Then generate the value
             metrics_lines.append(f"{count_field_name} {value}")
