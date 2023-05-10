@@ -67,7 +67,6 @@ app = fastapi.FastAPI(openapi_tags=tags_metadata)
 dao = SQLModelDAO(None)
 manage_app = manage.manage_api
 debug_app = debug.debug_api
-metrics_app = metrics.metrics_api
 # Avoid a circular dependency but share the db connection by pushing into the various handlers
 manage.dao = dao
 metrics.dao = dao
@@ -102,7 +101,7 @@ app.mount(
 )
 app.mount(manage.MANAGE_PREFIX, manage_app)
 app.mount(debug.DEBUG_PREFIX, debug_app)
-app.mount(metrics.METRICS_PREFIX, metrics_app)
+app.include_router(metrics.router)
 
 
 @app.on_event("startup")
