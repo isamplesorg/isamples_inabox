@@ -2,15 +2,14 @@ import logging
 import time
 from typing import Optional
 
-from fastapi import FastAPI
+from fastapi import APIRouter
 from starlette.responses import PlainTextResponse
 
 from isb_web.isb_solr_query import solr_counts_by_authority
 from isb_web.sqlmodel_database import SQLModelDAO, things_by_authority_count_dict
 
-metrics_api = FastAPI()
+router = APIRouter(prefix="/metrics")
 dao: Optional[SQLModelDAO] = None
-METRICS_PREFIX = "/metrics"
 logging.basicConfig(level=logging.DEBUG)
 _L = logging.getLogger("metrics")
 
@@ -46,8 +45,7 @@ class PrometheusMetrics:
         return "\n".join(metrics_lines)
 
 
-@metrics_api.get("/")
-def root():
+def _root():
     db_start_time = time.time()
     metrics = PrometheusMetrics()
     metrics.db_counts = things_by_authority_count_dict(dao.get_session())
@@ -56,3 +54,15 @@ def root():
     metrics.solr_counts = solr_counts_by_authority()
     metrics.solr_scrape_duration_seconds = time.time() - db_end_time
     return PlainTextResponse(metrics.metrics_string())
+
+
+# Note that prometheus seemed unhappy with /metrics/ vs. /metrics.  Include both since they should both work.
+@router.get("")
+def root():
+    return _root()
+
+
+# Note that prometheus seemed unhappy with /metrics/ vs. /metrics.  Include both since they should both work.
+@router.get("/")
+def root_with_slash():
+    return _root()
