@@ -204,7 +204,11 @@ async def login(request: starlette.requests.Request):
     Initiate OAuth2 login with ORCID
     """
     redirect_uri = request.url_for("auth")
-    return await oauth.orcid.authorize_redirect(request, redirect_uri)
+    # check if login is for annotation purpose, if so add query param 
+    if "annotation" in request.query_params and request.query_params["annotation"]=="true" :
+        redirect_uri += "?annotation=true"
+    orcid_auth_uri = await oauth.orcid.authorize_redirect(request, redirect_uri)
+    return orcid_auth_uri
 
 
 @manage_api.get("/auth")
@@ -216,7 +220,13 @@ async def auth(request: starlette.requests.Request):
     token = await oauth.orcid.authorize_access_token(request)
     request.session["user"] = dict(token)
     redirect_url = url_utilities.joined_url(str(request.url), config.Settings().auth_response_redirect_fragment)
-    return starlette.responses.RedirectResponse(url=redirect_url)
+    # redirect_url = "http://localhost:3000/#/dois"
+    if "annotation" in request.query_params and request.query_params["annotation"]=="true":
+        # if login is for annotation purpose, add access token as query param 
+        redirect_url += "?access_token=" + token["access_token"]
+        return starlette.responses.RedirectResponse(url=redirect_url) 
+    else:
+        return starlette.responses.RedirectResponse(url=redirect_url)
 
 
 @manage_api.get("/logout")
@@ -246,6 +256,7 @@ def userinfo(request: starlette.requests.Request):
             "id_token": user.get("id_token"),
             "expires_at": user.get("expires_at"),
             "auth_time": auth_time,
+            "access_token" : user.get("access_token")
         }
     else:
         # I think the middleware should prevent this, but just in case…
