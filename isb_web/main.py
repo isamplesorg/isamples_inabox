@@ -107,7 +107,9 @@ app.include_router(metrics.router)
 @app.on_event("startup")
 def on_startup():
     dao.connect_sqlmodel(isb_web.config.Settings().database_url)
-    orcid_ids = sqlmodel_database.all_orcid_ids(dao.get_session())
+    session = dao.get_session()
+    orcid_ids = sqlmodel_database.all_orcid_ids(session)
+    session.close()
     # Superusers are allowed to mint identifiers as well, so make sure they're in the list.
     orcid_ids.extend(isb_web.config.Settings().orcid_superusers)
     # The main handler's startup is the guaranteed spot where we know we have a db connection.

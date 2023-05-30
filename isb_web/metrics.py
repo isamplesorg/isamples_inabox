@@ -2,7 +2,8 @@ import logging
 import time
 from typing import Optional
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from sqlmodel import Session
 from starlette.responses import PlainTextResponse
 
 from isb_web.isb_solr_query import solr_counts_by_authority
@@ -12,6 +13,11 @@ router = APIRouter(prefix="/metrics")
 dao: Optional[SQLModelDAO] = None
 logging.basicConfig(level=logging.DEBUG)
 _L = logging.getLogger("metrics")
+
+
+def get_session():
+    with dao.get_session() as session:
+        yield session
 
 
 class PrometheusMetrics:
@@ -45,10 +51,10 @@ class PrometheusMetrics:
         return "\n".join(metrics_lines)
 
 
-def _root():
+def _root(session: Session):
     db_start_time = time.time()
     metrics = PrometheusMetrics()
-    metrics.db_counts = things_by_authority_count_dict(dao.get_session())
+    metrics.db_counts = things_by_authority_count_dict(session)
     db_end_time = time.time()
     metrics.db_scrape_duration_seconds = db_end_time - db_start_time
     metrics.solr_counts = solr_counts_by_authority()
@@ -58,11 +64,11 @@ def _root():
 
 # Note that prometheus seemed unhappy with /metrics/ vs. /metrics.  Include both since they should both work.
 @router.get("")
-def root():
-    return _root()
+def root(session: Session = Depends(get_session)):
+    return _root(session)
 
 
 # Note that prometheus seemed unhappy with /metrics/ vs. /metrics.  Include both since they should both work.
 @router.get("/")
-def root_with_slash():
-    return _root()
+def root_with_slash(session: Session = Depends(get_session)):
+    return _root(session)
