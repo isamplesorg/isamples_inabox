@@ -45,37 +45,39 @@ class SQLModelDAO:
     def connect_sqlmodel(self, db_url: str, echo: bool = False):
         self.engine = create_engine(db_url, echo=echo)
         SQLModel.metadata.create_all(self.engine)
-        # There doesn't appear to be a SQLModel-native way of creating those, so fall back to SQLAlchemy
-        id_resolved_status_authority_id_idx = Index(
-            "_id_resolved_status_authority_id_idx",
-            Thing.primary_key,
-            Thing.resolved_status,
-            Thing.authority_id,
-        )
-        # These index creations will throw if they already exist -- there's nothing to do in that case
-        self._create_index(id_resolved_status_authority_id_idx)
+        # Disable this to try and avoid the weird postgresql pause we were seeing in production
+        if False:
+            # There doesn't appear to be a SQLModel-native way of creating those, so fall back to SQLAlchemy
+            id_resolved_status_authority_id_idx = Index(
+                "_id_resolved_status_authority_id_idx",
+                Thing.primary_key,
+                Thing.resolved_status,
+                Thing.authority_id,
+            )
+            # These index creations will throw if they already exist -- there's nothing to do in that case
+            self._create_index(id_resolved_status_authority_id_idx)
 
-        authority_id_tcreated_idx = Index(
-            "authority_id_tcreated_idx", Thing.authority_id, Thing.tcreated
-        )
-        self._create_index(authority_id_tcreated_idx)
+            authority_id_tcreated_idx = Index(
+                "authority_id_tcreated_idx", Thing.authority_id, Thing.tcreated
+            )
+            self._create_index(authority_id_tcreated_idx)
 
-        item_type_status_idx = Index(
-            "item_type_status_idx", Thing.item_type, Thing.resolved_status
-        )
-        self._create_index(item_type_status_idx)
+            item_type_status_idx = Index(
+                "item_type_status_idx", Thing.item_type, Thing.resolved_status
+            )
+            self._create_index(item_type_status_idx)
 
-        resolved_status_authority_id_idx = Index(
-            "resolved_status_authority_id_idx",
-            Thing.resolved_status,
-            Thing.authority_id,
-        )
-        self._create_index(resolved_status_authority_id_idx)
+            resolved_status_authority_id_idx = Index(
+                "resolved_status_authority_id_idx",
+                Thing.resolved_status,
+                Thing.authority_id,
+            )
+            self._create_index(resolved_status_authority_id_idx)
 
-        # guid_thing_id_idx = Index(
-        #     "guid_thing_id_idx", ThingIdentifier.guid, ThingIdentifier.thing_id
-        # )
-        # self._create_index(guid_thing_id_idx)
+            # guid_thing_id_idx = Index(
+            #     "guid_thing_id_idx", ThingIdentifier.guid, ThingIdentifier.thing_id
+            # )
+            # self._create_index(guid_thing_id_idx)
 
     def get_session(self) -> Session:
         return Session(self.engine)
