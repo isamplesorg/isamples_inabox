@@ -16,6 +16,9 @@ import json
 from fastapi.params import Query, Depends
 from sqlmodel import Session
 import geojson
+import jwt
+import starlette
+import starlette.requests
 
 import isb_web
 import isamples_metadata.GEOMETransformer
@@ -106,15 +109,15 @@ app.include_router(metrics.router)
 
 @app.on_event("startup")
 def on_startup():
-    dao.connect_sqlmodel(isb_web.config.Settings().database_url)
-    session = dao.get_session()
-    orcid_ids = sqlmodel_database.all_orcid_ids(session)
-    session.close()
+    # dao.connect_sqlmodel(isb_web.config.Settings().database_url)
+    # session = dao.get_session()
+    # orcid_ids = sqlmodel_database.all_orcid_ids(session)
+    # session.close()
     # Superusers are allowed to mint identifiers as well, so make sure they're in the list.
-    orcid_ids.extend(isb_web.config.Settings().orcid_superusers)
+    # orcid_ids.extend(isb_web.config.Settings().orcid_superusers)
     # The main handler's startup is the guaranteed spot where we know we have a db connection.
     # User the connected db session to push in to the manage handler's orcid_ids state.
-    manage.allowed_orcid_ids = orcid_ids
+    manage.allowed_orcid_ids = []#orcid_ids
 
 
 def get_session():
@@ -462,6 +465,28 @@ def solr_thing_response(identifier: str):
         status_code=status,
         detail=f"Unable to retrieve solr record for identifier: {identifier}"
     )
+
+
+@app.get("/hypothesis_jwt", include_in_schema=False)
+def hypothesis_jwt(request: starlette.requests.Request, session: Session = Depends(get_session)) -> Optional[str]:
+    # orcid_id = _orcid_id_from_session_or_scope(request)
+    # if orcid_id is None:
+    #     raise HTTPException(401, "no session")
+    # else:
+        orcid_id = "0000-0003-2109-7692"
+        CLIENT_AUTHORITY = "isample.xyz"
+        CLIENT_ID = "bfc7d002-04bb-11ee-9adf-ff833263f132"
+        CLIENT_SECRET = "9ItR2-4UlPjrAzkRTn36YFsEb1YgQf3eYtWgdyVF4qQ"
+        now = datetime.datetime.utcnow()
+        userid = f"acct:{orcid_id}@{CLIENT_AUTHORITY}"
+        payload = {
+            "aud": "localhost",
+            "iss": CLIENT_ID,
+            "sub": userid,
+            "nbf": now,
+            "exp": now + datetime.timedelta(minutes=10),
+        }
+        return jwt.encode(payload, CLIENT_SECRET, algorithm="HS256")
 
 
 @app.head(f"/{THING_URL_PATH}/{{identifier:path}}", response_model=typing.Any)
