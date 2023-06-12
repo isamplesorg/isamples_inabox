@@ -473,7 +473,8 @@ def hypothesis_jwt(request: starlette.requests.Request, session: Session = Depen
     # if orcid_id is None:
     #     raise HTTPException(401, "no session")
     # else:
-        orcid_id = "0000-0003-2109-7692"
+        # The accounts need the '-' stripped from orcids.
+        orcid_id = "0000000321097692"
         CLIENT_AUTHORITY = "isample.xyz"
         CLIENT_ID = "bfc7d002-04bb-11ee-9adf-ff833263f132"
         CLIENT_SECRET = "9ItR2-4UlPjrAzkRTn36YFsEb1YgQf3eYtWgdyVF4qQ"
