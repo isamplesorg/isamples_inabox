@@ -160,6 +160,11 @@ async def login():
 async def get_thing_page(request: fastapi.Request, identifier: str, session: Session = Depends(get_session)) -> templates.TemplateResponse:
     # Retrieve record from the database
     item = sqlmodel_database.get_thing_with_id(session, identifier)
+    item_ispartof = "unknown"
+    if item.id.startswith("ark:"):
+        item_ispartof = "https://n2t.net"
+    elif item.id.startswith("IGSN"):
+        item_ispartof = "https://igsn.org"
     if item is None:
         raise fastapi.HTTPException(
             status_code=404, detail=f"Thing not found: {identifier}"
@@ -169,7 +174,9 @@ async def get_thing_page(request: fastapi.Request, identifier: str, session: Ses
     return templates.TemplateResponse(
         "thing.html", {
             "request": request,
-            "thing_json": content_str
+            "thing_json": content_str,
+            "thing_identifier": item.id,
+            "thing_ispartof": item_ispartof
         }
     )
 
