@@ -169,6 +169,8 @@ async def get_thing_page(request: fastapi.Request, identifier: str, session: Ses
         item_ispartof = "https://n2t.net"
     elif item.id.startswith("IGSN"):
         item_ispartof = "https://igsn.org"
+    content = await thing_resolved_content(identifier, item, session)
+    content_str = json.dumps(content)
     return templates.TemplateResponse(
         "thing.html", {
             "request": request,
