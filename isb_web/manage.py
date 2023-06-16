@@ -17,6 +17,8 @@ import starlette.types
 import starlette.datastructures
 import starlette_oauth2_api
 import authlib.integrations.starlette_client
+import jwt
+import datetime
 
 from isb_lib.models.namespace import Namespace
 from isb_lib.utilities import url_utilities
@@ -127,7 +129,7 @@ manage_api.add_middleware(
             "audience": config.Settings().orcid_client_id,
         }
     },
-    public_paths={"/login", "/auth", "/logout"},
+    public_paths={"/login", "/auth", "/logout", "/hypothesis_jwt"},
 )
 
 manage_api.add_middleware(
@@ -356,3 +358,27 @@ def mint_noidy_identifiers(params: MintNoidyIdentifierParams, request: starlette
             "Access-Control-Expose-Headers": "Content-Disposition"
         }
         return Response(bytes(csv_str, "utf-8"), headers=headers, media_type="text/csv")
+
+
+@manage_api.get("/hypothesis_jwt", include_in_schema=False)
+def hypothesis_jwt(request: starlette.requests.Request, session: Session = Depends(get_session)) -> Optional[str]:
+    orcid_id = _orcid_id_from_session_or_scope(request)
+    if orcid_id is None:
+        raise HTTPException(401, "no session")
+    else:
+        # The accounts need the '-' stripped from orcids.
+        # orcid_id = "0000000321097692"
+        orcid_id = orcid_id.replace("-", "")
+        CLIENT_AUTHORITY = "isample.xyz"
+        CLIENT_ID = "bfc7d002-04bb-11ee-9adf-ff833263f132"
+        CLIENT_SECRET = "9ItR2-4UlPjrAzkRTn36YFsEb1YgQf3eYtWgdyVF4qQ"
+        now = datetime.datetime.utcnow()
+        userid = f"acct:{orcid_id}@{CLIENT_AUTHORITY}"
+        payload = {
+            "aud": "localhost",
+            "iss": CLIENT_ID,
+            "sub": userid,
+            "nbf": now,
+            "exp": now + datetime.timedelta(minutes=10),
+        }
+        return jwt.encode(payload, CLIENT_SECRET, algorithm="HS256")
