@@ -359,8 +359,8 @@ def mint_noidy_identifiers(params: MintNoidyIdentifierParams, request: starlette
         }
         return Response(bytes(csv_str, "utf-8"), headers=headers, media_type="text/csv")
 
-
-@manage_api.get("/hypothesis_jwt", include_in_schema=False)
+# This probably doesn't need to be a post!
+@manage_api.post("/hypothesis_jwt", include_in_schema=False)
 def hypothesis_jwt(request: starlette.requests.Request, session: Session = Depends(get_session)) -> Optional[str]:
     orcid_id = _orcid_id_from_session_or_scope(request)
     if orcid_id is None:

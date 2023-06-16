@@ -76,7 +76,8 @@ metrics.dao = dao
 
 app.add_middleware(
     fastapi.middleware.cors.CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["localhost", "iscaws.isample.xyz", "http://localhost:3000"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
