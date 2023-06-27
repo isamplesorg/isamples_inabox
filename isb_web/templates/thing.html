@@ -257,23 +257,23 @@ async function fetchGrantToken() {
     )
   console.log("grant token is ", grantToken);
   window.hypothesisConfig = function () {
+    var serviceConfig = {
+      "apiUrl": "http://localhost:5000/api/",
+      "authority": "isample.xyz",
+      "onLoginRequest": function () {
+         window.location.assign("http://localhost:8000/manage/login?thing={{ thing_identifier|safe }}");
+      },
+      "onLogoutRequest": function () {
+         window.location.assign("http://localhost:8000/manage/logout");
+      }
+    };
+    if (window.grantToken.length > 0) {
+      serviceConfig["grantToken"] = window.grantToken;
+    }
     var hypothesisConfig = {
-        "services": [{
-          "apiUrl": "http://localhost:5000/api/",
-          "authority": "isample.xyz",
-          "onLoginRequest": function () {
-            window.location.assign("http://localhost:8000/manage/login?thing={{ thing_identifier|safe }}");
-          },
-          "onLogoutRequest": function () {
-            window.location.assign("http://localhost:8000/manage/logout");
-          }
-        }]
+        "services": [serviceConfig]
     };
     console.log("here is the hypothesis config");
-    if (window.grantToken.length > 0) {
-      hypothesisConfig["grantToken"] = window.grantToken;
-      console.log("just set hypothesisConfig grantToken to", window.grantToken);
-    }
     return hypothesisConfig;
   };
 }
