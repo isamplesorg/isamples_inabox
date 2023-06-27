@@ -168,12 +168,19 @@ async def get_thing_page(request: fastapi.Request, identifier: str, session: Ses
         raise fastapi.HTTPException(
             status_code=404, detail=f"Thing not found: {identifier}"
         )
+    item_ispartof = "unknown"
+    if item.id.startswith("ark:"):
+        item_ispartof = "https://n2t.net"
+    elif item.id.startswith("IGSN"):
+        item_ispartof = "https://igsn.org"
     content = await thing_resolved_content(identifier, item, session)
     content_str = json.dumps(content)
     return templates.TemplateResponse(
         "thing.html", {
             "request": request,
-            "thing_json": content_str
+            "thing_json": content_str,
+            "thing_identifier": item.id,
+            "thing_ispartof": item_ispartof
         }
     )
 
