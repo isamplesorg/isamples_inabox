@@ -209,6 +209,8 @@ async def login(request: starlette.requests.Request):
     # check if login is for annotation purpose, if so add query param
     if "annotation" in request.query_params and request.query_params["annotation"] == "true":
         redirect_uri += "?annotation=true"
+    elif "thing" in request.query_params:
+        redirect_uri += f"?thing={request.query_params['thing']}"
     orcid_auth_uri = await oauth.orcid.authorize_redirect(request, redirect_uri)
     return orcid_auth_uri
 
@@ -227,6 +229,8 @@ async def auth(request: starlette.requests.Request):
         # if login is for annotation purpose, add access token as query param
         redirect_url += "?access_token=" + token["access_token"]
         return starlette.responses.RedirectResponse(url=redirect_url)
+    elif "thing" in request.query_params:
+        return starlette.responses.RedirectResponse(url=f"/thingpage/{request.query_params.get('thing')}")
     else:
         return starlette.responses.RedirectResponse(url=redirect_url)
 
