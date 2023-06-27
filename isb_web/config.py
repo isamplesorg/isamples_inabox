@@ -80,6 +80,12 @@ class Settings(BaseSettings):
     opencontext_sample_model_path: str = "UNSET"
     opencontext_sample_config_path: str = "UNSET"
 
+    hypothesis_authority: str = ""
+    hypothesis_jwt_fragment: str = ""
+    hypothesis_server_url: str = ""
+    hypothesis_login_fragment: str = ""
+    hypothesis_logout_fragment: str = ""
+
     class Config:
         env_file = "isb_web_config.env"
         case_sensitive = False
