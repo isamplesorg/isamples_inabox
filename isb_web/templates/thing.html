@@ -25,7 +25,6 @@
     src="https://cdn.jsdelivr.net/gh/isamplesorg/isamples_webui@develop/record-page/src/js/index.js"></script>
   <script src="https://hypothes.is/embed.js" async></script>
   <script>
-
 async function fetchGrantToken(authority, isamples_jwt_url, hypothesis_api_url, login_url, logout_url) {
   var grantToken = "";
   fetch(isamples_jwt_url, {
@@ -66,7 +65,7 @@ async function fetchGrantToken(authority, isamples_jwt_url, hypothesis_api_url, 
          window.location.assign(logout_url);
       }
     };
-    if (window.grantToken.length > 0) {
+    if (window.grantToken !== undefined && window.grantToken.length > 0) {
       serviceConfig["grantToken"] = window.grantToken;
     }
     var hypothesisConfig = {

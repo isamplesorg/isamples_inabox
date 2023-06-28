@@ -363,26 +363,26 @@ def mint_noidy_identifiers(params: MintNoidyIdentifierParams, request: starlette
         }
         return Response(bytes(csv_str, "utf-8"), headers=headers, media_type="text/csv")
 
-# This probably doesn't need to be a post!
+
 @manage_api.post("/hypothesis_jwt", include_in_schema=False)
 def hypothesis_jwt(request: starlette.requests.Request, session: Session = Depends(get_session)) -> Optional[str]:
     orcid_id = _orcid_id_from_session_or_scope(request)
     if orcid_id is None:
         raise HTTPException(401, "no session")
     else:
-        # The accounts need the '-' stripped from orcids.
-        # orcid_id = "0000000321097692"
+        # The hypothesis accounts require the '-' to be stripped from orcids.
+        # e.g. orcid_id = "0000000321097692"
         orcid_id = orcid_id.replace("-", "")
-        CLIENT_AUTHORITY = "isample.xyz"
-        CLIENT_ID = "bfc7d002-04bb-11ee-9adf-ff833263f132"
-        CLIENT_SECRET = "9ItR2-4UlPjrAzkRTn36YFsEb1YgQf3eYtWgdyVF4qQ"
+        client_authority = config.Settings().hypothesis_authority
+        client_id = config.Settings().hypothesis_jwt_client_id
+        client_secret = config.Settings().hypothesis_jwt_client_secret
         now = datetime.datetime.utcnow()
-        userid = f"acct:{orcid_id}@{CLIENT_AUTHORITY}"
+        userid = f"acct:{orcid_id}@{client_authority}"
         payload = {
             "aud": "localhost",
-            "iss": CLIENT_ID,
+            "iss": client_id,
             "sub": userid,
             "nbf": now,
             "exp": now + datetime.timedelta(minutes=10),
         }
-        return jwt.encode(payload, CLIENT_SECRET, algorithm="HS256")
+        return jwt.encode(payload, client_secret, algorithm="HS256")

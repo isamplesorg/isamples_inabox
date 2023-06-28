@@ -76,7 +76,7 @@ metrics.dao = dao
 
 app.add_middleware(
     fastapi.middleware.cors.CORSMiddleware,
-    allow_origins=["localhost", "iscaws.isample.xyz", "http://localhost:3000"],
+    allow_origins=config.Settings().cors_allow_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -184,8 +184,8 @@ async def get_thing_page(request: fastapi.Request, identifier: str, session: Ses
             "authority": config.Settings().hypothesis_authority,
             "isamples_jwt_url": url_utilities.joined_url(str(request.url), config.Settings().hypothesis_jwt_fragment),
             "hypothesis_api_url": config.Settings().hypothesis_server_url,
-            "login_url": url_utilities.joined_url(str(request.url), config.Settings().hypothesis_login_fragment),
-            "logout_url": url_utilities.joined_url(str(request.url), config.Settings().hypothesis_logout_fragment),
+            "login_url": url_utilities.joined_url(str(request.url), "/manage/login?thing="),
+            "logout_url": url_utilities.joined_url(str(request.url), "/manage/logout?thing="),
         }
     )
 

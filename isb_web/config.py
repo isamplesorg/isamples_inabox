@@ -83,8 +83,10 @@ class Settings(BaseSettings):
     hypothesis_authority: str = ""
     hypothesis_jwt_fragment: str = ""
     hypothesis_server_url: str = ""
-    hypothesis_login_fragment: str = ""
-    hypothesis_logout_fragment: str = ""
+    hypothesis_jwt_client_id: str = ""
+    hypothesis_jwt_client_secret: str = ""
+
+    cors_allow_origins: list[str] = []
 
     class Config:
         env_file = "isb_web_config.env"
