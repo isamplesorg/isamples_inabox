@@ -370,6 +370,8 @@ def hypothesis_jwt(request: starlette.requests.Request, session: Session = Depen
     if orcid_id is None:
         raise HTTPException(401, "no session")
     else:
+        # Full documentation of format is here: https://h.readthedocs.io/en/latest/publishers/authorization-grant-tokens/
+
         # The hypothesis accounts require the '-' to be stripped from orcids.
         # e.g. orcid_id = "0000000321097692"
         orcid_id = orcid_id.replace("-", "")
