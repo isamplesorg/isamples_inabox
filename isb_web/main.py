@@ -182,7 +182,7 @@ async def get_thing_page(request: fastapi.Request, identifier: str, session: Ses
             "thing_identifier": item.id,
             "thing_ispartof": item_ispartof,
             "authority": config.Settings().hypothesis_authority,
-            "isamples_jwt_url": url_utilities.joined_url(str(request.url), config.Settings().hypothesis_jwt_fragment),
+            "isamples_jwt_url": url_utilities.joined_url(str(request.url), "/manage/hypothesis_jwt"),
             "hypothesis_api_url": config.Settings().hypothesis_server_url,
             "login_url": url_utilities.joined_url(str(request.url), "/manage/login?thing="),
             "logout_url": url_utilities.joined_url(str(request.url), "/manage/logout?thing="),

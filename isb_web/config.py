@@ -80,12 +80,17 @@ class Settings(BaseSettings):
     opencontext_sample_model_path: str = "UNSET"
     opencontext_sample_config_path: str = "UNSET"
 
+    # The hypothesis authority to use.  Must be also configured in a running h server.
     hypothesis_authority: str = ""
-    hypothesis_jwt_fragment: str = ""
+    # The URL to the running h server.
     hypothesis_server_url: str = ""
+    # The client ID to use when signing Hypothesis JWT
     hypothesis_jwt_client_id: str = ""
+    # The client secret to use when signing Hypothesis JWT
     hypothesis_jwt_client_secret: str = ""
 
+    # List of domain names that will be accepted as valid CORS origins.  '*' is unacceptable because we need to
+    # include credentials in JavaScript requests, and '*' is disallowed when you configure things like this.
     cors_allow_origins: list[str] = []
 
     class Config:
