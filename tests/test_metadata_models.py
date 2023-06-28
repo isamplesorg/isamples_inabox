@@ -6,6 +6,7 @@ from isamples_metadata.taxonomy.metadata_models import (
 )
 import pytest
 import json
+import os
 
 SESAR_test_values = [
     "./test_data/SESAR/raw/EOI00002Hjson-ld.json",
