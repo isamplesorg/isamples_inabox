@@ -380,6 +380,7 @@ def hypothesis_jwt(request: starlette.requests.Request, session: Session = Depen
         client_secret = config.Settings().hypothesis_jwt_client_secret
         now = datetime.datetime.utcnow()
         userid = f"acct:{orcid_id}@{client_authority}"
+        logging.debug(f"Going to sign userid {userid} with client_id {client_id} and client secret {client_secret}")
         payload = {
             "aud": "localhost",
             "iss": client_id,
