@@ -14,6 +14,7 @@ SESAR_test_values = [
 ]
 
 
+@pytest.mark.skipif(os.environ.get("CI") is not None, reason="Only run this test manually, not in CI.")
 @pytest.mark.parametrize("sesar_source_path", SESAR_test_values)
 def test_sesar_prediction_equal(sesar_source_path):
     _test_sesar_material_model(
@@ -65,6 +66,7 @@ OpenContext_test_values = [
 ]
 
 
+@pytest.mark.skipif(os.environ.get("CI") is not None, reason="Only run this test manually, not in CI.")
 @pytest.mark.parametrize("opencontext_source_path", OpenContext_test_values)
 def test_opencontext_prediction_equal(opencontext_source_path):
     _test_opencontext_material_model(
