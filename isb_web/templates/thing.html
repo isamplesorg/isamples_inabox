@@ -54,6 +54,8 @@ async function fetchGrantToken(authority, isamples_jwt_url, hypothesis_api_url, 
       }
     )
   // console.log("grant token is ", grantToken);
+
+  // https://h.readthedocs.io/projects/client/en/latest/publishers/config.html?highlight=window.hypothesisConfig
   window.hypothesisConfig = function () {
     var serviceConfig = {
       "apiUrl": hypothesis_api_url,
