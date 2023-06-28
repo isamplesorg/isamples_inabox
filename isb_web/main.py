@@ -16,9 +16,6 @@ import json
 from fastapi.params import Query, Depends
 from sqlmodel import Session
 import geojson
-import jwt
-import starlette
-import starlette.requests
 
 import isb_web
 import isamples_metadata.GEOMETransformer
@@ -478,29 +475,6 @@ def solr_thing_response(identifier: str):
         status_code=status,
         detail=f"Unable to retrieve solr record for identifier: {identifier}"
     )
-
-
-@app.get("/hypothesis_jwt", include_in_schema=False)
-def hypothesis_jwt(request: starlette.requests.Request, session: Session = Depends(get_session)) -> Optional[str]:
-    # orcid_id = _orcid_id_from_session_or_scope(request)
-    # if orcid_id is None:
-    #     raise HTTPException(401, "no session")
-    # else:
-        # The accounts need the '-' stripped from orcids.
-        orcid_id = "0000000321097692"
-        CLIENT_AUTHORITY = "isample.xyz"
-        CLIENT_ID = "bfc7d002-04bb-11ee-9adf-ff833263f132"
-        CLIENT_SECRET = "9ItR2-4UlPjrAzkRTn36YFsEb1YgQf3eYtWgdyVF4qQ"
-        now = datetime.datetime.utcnow()
-        userid = f"acct:{orcid_id}@{CLIENT_AUTHORITY}"
-        payload = {
-            "aud": "localhost",
-            "iss": CLIENT_ID,
-            "sub": userid,
-            "nbf": now,
-            "exp": now + datetime.timedelta(minutes=10),
-        }
-        return jwt.encode(payload, CLIENT_SECRET, algorithm="HS256")
 
 
 @app.head(f"/{THING_URL_PATH}/{{identifier:path}}", response_model=typing.Any)
