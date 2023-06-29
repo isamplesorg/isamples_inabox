@@ -2,6 +2,7 @@ import requests
 from urllib.parse import urlparse
 import json
 
+
 class HypothesisClient(object):
 
     def __init__(self, client_id, client_secret, jwt_client_id,
@@ -66,6 +67,7 @@ class HypothesisClient(object):
     #     }
     #     return jwt.encode(claims, self.jwt_client_secret, algorithm='HS256')
 
+
 user_client_id = "f19b959c-0587-11ee-9d20-d777691595e8"
 user_client_secret = "_ovdnW1qmPOBbFYFMi5qRxPRW1Vdu_aJMCA9aDDMAkc"
 jwt_client_id = "bfc7d002-04bb-11ee-9adf-ff833263f132"
@@ -73,4 +75,4 @@ jwt_client_secret = "9ItR2-4UlPjrAzkRTn36YFsEb1YgQf3eYtWgdyVF4qQ"
 authority = "isample.xyz"
 service = "http://localhost:5000"
 client = HypothesisClient(user_client_id, user_client_secret, jwt_client_id, jwt_client_secret, authority, service)
-client.create_account("0000000321097692", "dannymandel@icloud.com", "")
+client.create_account("0000000321097692", "dannymandel@icloud.com", "Danny Mandel")
