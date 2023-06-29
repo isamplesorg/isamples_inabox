@@ -21,7 +21,7 @@ import isb_web
 import isamples_metadata.GEOMETransformer
 from isb_lib.core import MEDIA_GEO_JSON, MEDIA_JSON, MEDIA_NQUADS, SOLR_TIME_FORMAT
 from isb_lib.models.thing import Thing
-from isb_lib.utilities import h3_utilities
+from isb_lib.utilities import h3_utilities, url_utilities
 from isb_web import sqlmodel_database, analytics, manage, debug, metrics
 from isb_web.analytics import AnalyticsEvent
 from isb_web import schemas
@@ -73,7 +73,8 @@ metrics.dao = dao
 
 app.add_middleware(
     fastapi.middleware.cors.CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=config.Settings().cors_allow_origins,
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -176,7 +177,12 @@ async def get_thing_page(request: fastapi.Request, identifier: str, session: Ses
             "request": request,
             "thing_json": content_str,
             "thing_identifier": item.id,
-            "thing_ispartof": item_ispartof
+            "thing_ispartof": item_ispartof,
+            "authority": config.Settings().hypothesis_authority,
+            "isamples_jwt_url": url_utilities.joined_url(str(request.url), "/manage/hypothesis_jwt"),
+            "hypothesis_api_url": config.Settings().hypothesis_server_url,
+            "login_url": url_utilities.joined_url(str(request.url), "/manage/login?thing="),
+            "logout_url": url_utilities.joined_url(str(request.url), "/manage/logout?thing="),
         }
     )
 

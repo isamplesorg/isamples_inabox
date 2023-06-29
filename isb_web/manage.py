@@ -17,6 +17,8 @@ import starlette.types
 import starlette.datastructures
 import starlette_oauth2_api
 import authlib.integrations.starlette_client
+import jwt
+import datetime
 
 from isb_lib.models.namespace import Namespace
 from isb_lib.utilities import url_utilities
@@ -127,7 +129,7 @@ manage_api.add_middleware(
             "audience": config.Settings().orcid_client_id,
         }
     },
-    public_paths={"/login", "/auth", "/logout"},
+    public_paths={"/login", "/auth", "/logout", "/hypothesis_jwt"},
 )
 
 manage_api.add_middleware(
@@ -207,6 +209,8 @@ async def login(request: starlette.requests.Request):
     # check if login is for annotation purpose, if so add query param
     if "annotation" in request.query_params and request.query_params["annotation"] == "true":
         redirect_uri += "?annotation=true"
+    elif "thing" in request.query_params:
+        redirect_uri += f"?thing={request.query_params['thing']}"
     orcid_auth_uri = await oauth.orcid.authorize_redirect(request, redirect_uri)
     return orcid_auth_uri
 
@@ -225,6 +229,8 @@ async def auth(request: starlette.requests.Request):
         # if login is for annotation purpose, add access token as query param
         redirect_url += "?access_token=" + token["access_token"]
         return starlette.responses.RedirectResponse(url=redirect_url)
+    elif "thing" in request.query_params:
+        return starlette.responses.RedirectResponse(url=f"/thingpage/{request.query_params.get('thing')}")
     else:
         return starlette.responses.RedirectResponse(url=redirect_url)
 
@@ -356,3 +362,30 @@ def mint_noidy_identifiers(params: MintNoidyIdentifierParams, request: starlette
             "Access-Control-Expose-Headers": "Content-Disposition"
         }
         return Response(bytes(csv_str, "utf-8"), headers=headers, media_type="text/csv")
+
+
+@manage_api.post("/hypothesis_jwt", include_in_schema=False)
+def hypothesis_jwt(request: starlette.requests.Request, session: Session = Depends(get_session)) -> Optional[str]:
+    orcid_id = _orcid_id_from_session_or_scope(request)
+    if orcid_id is None:
+        raise HTTPException(401, "no session")
+    else:
+        # Full documentation of format is here: https://h.readthedocs.io/en/latest/publishers/authorization-grant-tokens/
+
+        # The hypothesis accounts require the '-' to be stripped from orcids.
+        # e.g. orcid_id = "0000000321097692"
+        orcid_id = orcid_id.replace("-", "")
+        client_authority = config.Settings().hypothesis_authority
+        client_id = config.Settings().hypothesis_jwt_client_id
+        client_secret = config.Settings().hypothesis_jwt_client_secret
+        now = datetime.datetime.utcnow()
+        userid = f"acct:{orcid_id}@{client_authority}"
+        logging.debug(f"Going to sign userid {userid} with client_id {client_id} and client secret {client_secret}")
+        payload = {
+            "aud": "localhost",
+            "iss": client_id,
+            "sub": userid,
+            "nbf": now,
+            "exp": now + datetime.timedelta(minutes=10),
+        }
+        return jwt.encode(payload, client_secret, algorithm="HS256")

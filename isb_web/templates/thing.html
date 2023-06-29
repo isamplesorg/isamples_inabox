@@ -23,6 +23,63 @@
   </link>
   <script type="module"
     src="https://cdn.jsdelivr.net/gh/isamplesorg/isamples_webui@develop/record-page/src/js/index.js"></script>
+  <script src="https://hypothes.is/embed.js" async></script>
+  <script>
+async function fetchGrantToken(authority, isamples_jwt_url, hypothesis_api_url, login_url, logout_url) {
+  var grantToken = "";
+  fetch(isamples_jwt_url, {
+    'method': 'POST',
+    credentials: "include",
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+    .then((res) => {
+      // check the POST return status
+      const { status } = res;
+      // console.log("token response status is ", status);
+      if (status === 200) {
+        return res.text();
+      } else {
+        throw new Error(res);
+      }
+    })
+    .then((grantToken) => {
+      // console.log("grant token is ", grantToken)
+      window.grantToken = grantToken.replace(/"/g, '');
+    },
+      (error) => {
+        // console.warn(error);
+        window.grantToken = "";
+      }
+    )
+  // console.log("grant token is ", grantToken);
+
+  // https://h.readthedocs.io/projects/client/en/latest/publishers/config.html?highlight=window.hypothesisConfig
+  window.hypothesisConfig = function () {
+    var serviceConfig = {
+      "apiUrl": hypothesis_api_url,
+      "authority": authority,
+      "onLoginRequest": function () {
+         window.location.assign(login_url);
+      },
+      "onLogoutRequest": function () {
+         window.location.assign(logout_url);
+      }
+    };
+    if (window.grantToken !== undefined && window.grantToken.length > 0) {
+      serviceConfig["grantToken"] = window.grantToken;
+    }
+    var hypothesisConfig = {
+        "services": [serviceConfig]
+    };
+    // console.log("here is the hypothesis config");
+    return hypothesisConfig;
+  };
+}
+// console.log("About to add event listener");
+window.addEventListener('load', fetchGrantToken('{{ authority|safe }}', '{{ isamples_jwt_url|safe }}', '{{ hypothesis_api_url|safe }}', '{{ login_url|safe }}', '{{ logout_url|safe }}'));
+  </script>
 </head>
 
 <body>
