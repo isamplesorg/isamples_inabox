@@ -1,5 +1,6 @@
 import pytest
 import json
+import os
 
 from fastapi.testclient import TestClient
 from sqlmodel import Session, SQLModel, create_engine
