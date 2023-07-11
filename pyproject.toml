@@ -39,7 +39,7 @@ aiohttp = "3.8.1"
 rdflib = "^6.0.0"
 
 # Note that this version has been yanked, and we won't be able to update poetry.lock with it in place.
-torchvision = "^0.12.0"
+torch = "^1.4.0"
 transformers = "^4.20.1"
 
 connegp = "0.2"
