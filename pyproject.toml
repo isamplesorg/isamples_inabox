@@ -10,7 +10,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "3.9.5"
 click = "^7.1.2"
 click-config-file = "^0.6.0"
 fastapi = "^0.65.1"
@@ -39,7 +39,7 @@ aiohttp = "3.8.1"
 rdflib = "^6.0.0"
 
 # Note that this version has been yanked, and we won't be able to update poetry.lock with it in place.
-torch = "^1.4.0"
+torchvision = "0.8.2"
 transformers = "^4.20.1"
 
 connegp = "0.2"
