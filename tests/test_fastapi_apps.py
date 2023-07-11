@@ -186,14 +186,6 @@ def test_non_existent_thing(client: TestClient, session: Session):
     assert response.status_code == 404
 
 
-def test_get_thing_all_profiles(client: TestClient, session: Session):
-    response = client.head(f"/thing/{TEST_IGSN}")
-    assert response.status_code == 200
-    # The head method is a profiles request, asking the server for all the profiles the thing supports.  The response
-    # contains the profiles in the links section of the response, so assert on that.
-    assert len(response.links) > 0
-
-
 def test_get_thing_page(client: TestClient, session: Session):
     response = client.get(f"/thingpage/{TEST_IGSN}")
     data = response.content

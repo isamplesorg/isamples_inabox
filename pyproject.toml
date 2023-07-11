@@ -39,7 +39,8 @@ aiohttp = "3.8.1"
 rdflib = "^6.0.0"
 
 # Note that this version has been yanked, and we won't be able to update poetry.lock with it in place.
-torchvision = "0.8.2"
+# The previous yanked versions are still present in requirements.txt.  Use those for initializing the environment.
+# torchvision = "^0.2.2"
 transformers = "^4.20.1"
 
 connegp = "0.2"
