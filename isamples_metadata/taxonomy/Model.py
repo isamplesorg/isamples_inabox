@@ -17,7 +17,6 @@ class Model:
         self.classifier = classifier.to(self.device)
 
     def predict(self, text):
-        return []
         encoded_text = self.tokenizer.encode_plus(
             text,
             max_length=self.config["MAX_SEQUENCE_LEN"],
@@ -33,10 +32,10 @@ class Model:
         # convert logits into probability
         prob = logits.softmax(dim=-1)[0]
         # get the top 3 high confidence predictions
-        # top_probs, indices = torch.topk(prob, 3)
+        top_probs, indices = torch.topk(prob, 3)
         # convert integer labels to text labels
         indices = [x.item() for x in indices]
         labels = [self.config["CLASS_NAMES"][x] for x in indices]
         # convert torch tensor to float type
-        # probs = [x.item() for x in top_probs]
+        probs = [x.item() for x in top_probs]
         return [(label, prob) for label, prob in zip(labels, probs)]
