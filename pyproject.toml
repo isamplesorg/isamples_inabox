@@ -17,7 +17,7 @@ fastapi = "^0.65.1"
 uvicorn = {extras=["standard"], version="^0.13.4"}
 aiofiles = "^0.6.0"
 igsn-lib = {git = "https://github.com/isamplesorg/igsn_lib.git", rev = "main"}
-isamples_frictionless = { path = "isamples_frictionless", develop = true }
+isamples_frictionless = {git = "https://github.com/isamplesorg/isamples_frictionless.git", rev = "main"}
 accept-types = "^0.4.1"
 shapely = "^1.7.1"
 geojson = "^2.5.0"
@@ -31,7 +31,7 @@ itsdangerous = "^2.1.2"
 starlette-oauth2-api = "^0.2.6"
 httpx = "^0.20.0"
 
-#fasttext = "^0.9.2"  # for window users,  use fasttext-wheel = "^0.9.2"
+fasttext = "^0.9.2"  # for window users,  use fasttext-wheel = "^0.9.2"
 regex = "2022.3.2"
 h3 = {version = "^4.0.0b1", allow-prereleases = true}
 aiodns = "3.0.0"
@@ -39,7 +39,7 @@ aiohttp = "3.8.1"
 rdflib = "^6.0.0"
 
 # Note that this version has been yanked, and we won't be able to update poetry.lock with it in place.
-#torchvision = "^0.2.2"
+torchvision = "^0.12.0"
 transformers = "^4.20.1"
 
 connegp = "0.2"
