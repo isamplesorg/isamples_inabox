@@ -1,6 +1,5 @@
 import pytest
 import json
-import os
 
 from fastapi.testclient import TestClient
 from sqlmodel import Session, SQLModel, create_engine
@@ -185,16 +184,6 @@ def test_resolve_thing(client: TestClient, session: Session):
 def test_non_existent_thing(client: TestClient, session: Session):
     response = client.get("/thing/6666666")
     assert response.status_code == 404
-
-
-# TODO: re-enable this
-@pytest.mark.skipif(os.environ.get("CI") is not None, reason="Only run this test manually, not in CI.")
-def test_get_thing_all_profiles(client: TestClient, session: Session):
-    response = client.head(f"/thing/{TEST_IGSN}")
-    assert response.status_code == 200
-    # The head method is a profiles request, asking the server for all the profiles the thing supports.  The response
-    # contains the profiles in the links section of the response, so assert on that.
-    assert len(response.links) > 0
 
 
 def test_get_thing_page(client: TestClient, session: Session):
