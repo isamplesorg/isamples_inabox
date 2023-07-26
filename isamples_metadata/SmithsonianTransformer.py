@@ -1,7 +1,6 @@
 import typing
 import re
 
-from isamples_metadata.isamplesfasttext import SMITHSONIAN_FEATURE_PREDICTOR
 import isamples_metadata.Transformer
 from isamples_metadata.Transformer import (
     Transformer,
