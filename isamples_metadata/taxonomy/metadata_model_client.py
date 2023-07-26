@@ -1,5 +1,4 @@
 import json
-from functools import lru_cache
 from typing import Any
 
 import requests
@@ -52,21 +51,17 @@ class ModelServerClient:
         url = f"{self.base_url}opencontext"
         return ModelServerClient._convert_to_prediction_result_list(self._make_json_request(url, params, rsession))
 
-    #@lru_cache(maxsize=cache_size)
     def make_opencontext_material_request(self, source_record: dict, rsession: requests.Session = requests.Session()) -> list[PredictionResult]:
         return self._make_opencontext_request(source_record, "material", rsession)
 
-    #@lru_cache(maxsize=cache_size)
     def make_opencontext_sample_request(self, source_record: dict, rsession: requests.Session = requests.Session()) -> list[PredictionResult]:
         return self._make_opencontext_request(source_record, "sample", rsession)
 
-    #@lru_cache(maxsize=cache_size)
     def make_sesar_material_request(self, source_record: dict, rsession: requests.Session = requests.Session()) -> list[PredictionResult]:
         params: dict = {"source_record": source_record, "type": "material"}
         url = f"{self.base_url}sesar"
         return ModelServerClient._convert_to_prediction_result_list(self._make_json_request(url, params, rsession))
 
-    #@lru_cache(maxsize=cache_size)
     def make_smithsonian_sampled_feature_request(self, input_strs: list[str], rsession: requests.Session = requests.Session()) -> Any:
         params: dict = {"input": input_strs, "type": "context"}
         url = f"{self.base_url}smithsonian"
