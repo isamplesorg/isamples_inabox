@@ -8,12 +8,7 @@ from isamples_metadata.Transformer import (
     StringEqualityCategoryMapper,
     AbstractCategoryMapper,
 )
-from isamples_metadata.taxonomy.metadata_models import (
-    MetadataModelLoader,
-    OpenContextMaterialPredictor,
-    OpenContextSamplePredictor,
-    PredictionResult
-)
+from isamples_metadata.taxonomy.metadata_model_client import MODEL_SERVER_CLIENT, PredictionResult
 
 
 class MaterialCategoryMetaMapper(AbstractCategoryMetaMapper):
@@ -221,12 +216,7 @@ class OpenContextTransformer(Transformer):
             # Have already computed, don't predict again
             return self._material_prediction_results
         else:
-            # Need to predict
-            # get the model
-            ocm_model = MetadataModelLoader.get_oc_material_model()
-            # load the model predictor
-            ocmp = OpenContextMaterialPredictor(ocm_model)
-            self._material_prediction_results = ocmp.predict_material_type(self.source_record)
+            self._material_prediction_results = MODEL_SERVER_CLIENT.make_opencontext_material_request(self.source_record)
             return self._material_prediction_results
 
     def has_material_categories(self) -> typing.List[str]:
@@ -257,12 +247,7 @@ class OpenContextTransformer(Transformer):
             # Have already computed, don't predict again
             return self._specimen_prediction_results
         else:
-            # Need to predict
-            # get the model
-            ocs_model = MetadataModelLoader.get_oc_sample_model()
-            # load the model predictor
-            ocsp = OpenContextSamplePredictor(ocs_model)
-            self._specimen_prediction_results = ocsp.predict_sample_type(self.source_record)
+            self._specimen_prediction_results = MODEL_SERVER_CLIENT.make_opencontext_sample_request(self.source_record)
             return self._specimen_prediction_results
 
     def has_specimen_categories(self) -> typing.List[str]:

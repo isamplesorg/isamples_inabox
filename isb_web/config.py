@@ -93,6 +93,9 @@ class Settings(BaseSettings):
     # include credentials in JavaScript requests, and '*' is disallowed when you configure things like this.
     cors_allow_origins: list[str] = []
 
+    modelserver_url = "http://localhost:9000"
+    modelserver_lru_cache_size = 10000
+
     class Config:
         env_file = "isb_web_config.env"
         case_sensitive = False
