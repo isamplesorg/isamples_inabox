@@ -2,6 +2,8 @@ import datetime
 import json
 import csv
 from typing import Optional
+from unittest.mock import patch
+
 
 import pytest
 import typing
@@ -13,6 +15,7 @@ from isamples_metadata.SESARTransformer import SESARTransformer
 from isamples_metadata.GEOMETransformer import GEOMETransformer, GEOMEChildTransformer
 from isamples_metadata.OpenContextTransformer import OpenContextTransformer
 from isamples_metadata.SmithsonianTransformer import SmithsonianTransformer
+from isamples_metadata.taxonomy.metadata_model_client import ModelServerClient
 from isb_lib import geome_adapter, sesar_adapter
 from isb_lib.geome_adapter import GEOMEItem
 from isb_lib.models.thing import Thing
@@ -263,12 +266,13 @@ SMITHSONIAN_test_values = [
 
 @pytest.mark.parametrize("isamples_path", SMITHSONIAN_test_values)
 def test_smithsonian_dicts_equal(isamples_path):
-    id_piece = re.search(r"-([^-]+)-test", isamples_path).group(1)
-    source_dict = _get_record_with_id(id_piece)
-    # create the transformer from the specified row in the source .csv
-    transformer = SmithsonianTransformer(source_dict)
-    transformed_to_isamples_record = transformer.transform()
-    _assert_transformed_dictionary(isamples_path, transformed_to_isamples_record)
+    with patch.object(ModelServerClient, "make_smithsonian_sampled_feature_request", return_value="foo"):
+        id_piece = re.search(r"-([^-]+)-test", isamples_path).group(1)
+        source_dict = _get_record_with_id(id_piece)
+        # create the transformer from the specified row in the source .csv
+        transformer = SmithsonianTransformer(source_dict)
+        transformed_to_isamples_record = transformer.transform()
+        _assert_transformed_dictionary(isamples_path, transformed_to_isamples_record)
 
 
 def test_geo_to_h3():

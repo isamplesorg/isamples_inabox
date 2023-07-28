@@ -1,7 +1,6 @@
 import typing
 import re
 
-from isamples_metadata.isamplesfasttext import SMITHSONIAN_FEATURE_PREDICTOR
 import isamples_metadata.Transformer
 from isamples_metadata.Transformer import (
     Transformer,
@@ -9,6 +8,7 @@ from isamples_metadata.Transformer import (
     StringEqualityCategoryMapper,
     AbstractCategoryMapper, StringConstantCategoryMapper,
 )
+from isamples_metadata.taxonomy.metadata_model_client import MODEL_SERVER_CLIENT
 
 
 class SpecimenCategoryMetaMapper(AbstractCategoryMetaMapper):
@@ -120,7 +120,7 @@ class SmithsonianTransformer(Transformer):
         return Transformer.DESCRIPTION_SEPARATOR.join(description_pieces)
 
     def has_context_categories(self) -> typing.List[str]:
-        categories = SMITHSONIAN_FEATURE_PREDICTOR.predict_sampled_feature(
+        categories = MODEL_SERVER_CLIENT.make_smithsonian_sampled_feature_request(
             [
                 self.source_record.get("collectionCode", ""),
                 self.source_record.get("habitat", ""),
