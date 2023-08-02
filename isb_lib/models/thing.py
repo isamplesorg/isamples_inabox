@@ -65,7 +65,7 @@ class Thing(SQLModel, table=True):
     resolved_content: Optional[dict] = Field(
         # Use the raw SQLAlchemy column in order to get the proper JSON behavior
         sa_column=sqlalchemy.Column(
-            sqlalchemy.JSON,
+            sqlalchemy.dialects.postgresql.JSONB,
             nullable=True,
             default=None,
             doc="Resolved content, {content_type:, content: }",
