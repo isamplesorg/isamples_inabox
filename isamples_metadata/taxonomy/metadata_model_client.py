@@ -1,3 +1,4 @@
+import functools
 import json
 from typing import Any
 
@@ -29,8 +30,8 @@ class ModelServerClient:
         self.base_url = base_url
         self.base_headers = base_headers
 
-    def _make_json_request(self, url: str, data_params: dict, rsession: requests.Session) -> Any:
-        data_params_bytes: bytes = json.dumps(data_params).encode("utf-8")
+    @functools.lru_cache(maxsize=config.Settings().modelserver_lru_cache_size)
+    def _make_json_request_bytes(self, url: str, data_params_bytes: bytes, rsession: requests.Session) -> Any:
         res = rsession.post(url, headers=self.base_headers, data=data_params_bytes)
         if res.status_code == 200:
             response_dict = res.json()
@@ -41,6 +42,10 @@ class ModelServerClient:
             raise MetadataException(response_text)
         else:
             raise Exception(f"Exception calling model server: {res.text}")
+
+    def _make_json_request(self, url: str, data_params: dict, rsession: requests.Session) -> Any:
+        data_params_bytes: bytes = json.dumps(data_params).encode("utf-8")
+        return self._make_json_request_bytes(url, data_params_bytes, rsession)
 
     @staticmethod
     def _convert_to_prediction_result_list(result: Any) -> list[PredictionResult]:
