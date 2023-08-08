@@ -354,6 +354,9 @@ class SiteMap(object):
                     url = action["body"]["url"]
                     if self._url_prefix is not None:
                         url = os.path.join(self._url_prefix, url)
+                    # If the sitemap url doesn't start with an http scheme, prefix it with https
+                    if not (url.startswith("https://") or url.startswith("http://")):
+                        url = f"https://{url}"
                     r = self._session.get(url)
                     for item in self.scanItems(action["body"]["cb"](r)):
                         yield item
