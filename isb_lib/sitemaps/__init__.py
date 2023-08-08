@@ -352,11 +352,7 @@ class SiteMap(object):
                 task = action.get("task", None)
                 if task == "sitemap":
                     url = action["body"]["url"]
-                    if self._url_prefix is not None:
-                        url = os.path.join(self._url_prefix, url)
-                    # If the sitemap url doesn't start with an http scheme, prefix it with https
-                    if not (url.startswith("https://") or url.startswith("http://") or url.startswith("file://")):
-                        url = f"https://{url}"
+                    url = self._prepare_sitemap_url(url)
                     r = self._session.get(url)
                     for item in self.scanItems(action["body"]["cb"](r)):
                         yield item
@@ -368,6 +364,14 @@ class SiteMap(object):
         # otherwise yield it, if it's not None
         elif iter is not None:
             yield iter
+
+    def _prepare_sitemap_url(self, url):
+        if self._url_prefix is not None:
+            url = os.path.join(self._url_prefix, url)
+        # If the sitemap url doesn't start with an http scheme, prefix it with https
+        if not (url.startswith("https://") or url.startswith("http://") or url.startswith("file://")):
+            url = f"https://{url}"
+        return url
 
 
 if __name__ == "__main__":
