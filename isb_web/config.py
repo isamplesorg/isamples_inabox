@@ -88,6 +88,8 @@ class Settings(BaseSettings):
     hypothesis_jwt_client_id: str = ""
     # The client secret to use when signing Hypothesis JWT
     hypothesis_jwt_client_secret: str = ""
+    # The audience to use when signing Hypothesis JWT
+    hypothesis_audience: str = ""
 
     # List of domain names that will be accepted as valid CORS origins.  '*' is unacceptable because we need to
     # include credentials in JavaScript requests, and '*' is disallowed when you configure things like this.
