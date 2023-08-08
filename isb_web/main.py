@@ -172,6 +172,11 @@ async def get_thing_page(request: fastapi.Request, identifier: str, session: Ses
         item_ispartof = "https://igsn.org"
     content = await thing_resolved_content(identifier, item, session)
     content_str = json.dumps(content)
+    base_url = request.url
+    # If we're running in the Docker container, this will be defined as part of docker-compose.yml
+    if "ISB_SITEMAP_PREFIX" in os.environ:
+        base_url = os.environ["ISB_SITEMAP_PREFIX"]
+
     return templates.TemplateResponse(
         "thing.html", {
             "request": request,
@@ -179,10 +184,10 @@ async def get_thing_page(request: fastapi.Request, identifier: str, session: Ses
             "thing_identifier": item.id,
             "thing_ispartof": item_ispartof,
             "authority": config.Settings().hypothesis_authority,
-            "isamples_jwt_url": url_utilities.joined_url(str(request.url), "/manage/hypothesis_jwt"),
+            "isamples_jwt_url": f"{str(base_url)}/manage/hypothesis_jwt",
             "hypothesis_api_url": config.Settings().hypothesis_server_url,
-            "login_url": url_utilities.joined_url(str(request.url), "/manage/login?thing="),
-            "logout_url": url_utilities.joined_url(str(request.url), "/manage/logout?thing="),
+            "login_url": f"{str(base_url)}/manage/login?thing={identifier}",
+            "logout_url": f"{str(base_url)}/manage/logout?thing={identifier}",
         }
     )
 
