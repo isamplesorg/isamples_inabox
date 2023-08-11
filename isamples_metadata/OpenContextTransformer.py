@@ -37,11 +37,14 @@ class MaterialCategoryMetaMapper(AbstractCategoryMetaMapper):
     )
 
     _materialMapper = StringEqualityCategoryMapper(
-        ["Biological subject, Ecofact"],
+        ["Biological record", "Biological subject, Ecofact"],
         "Material",
     )
 
-    _rockMapper = StringEqualityCategoryMapper(["Groundstone"], "Rock")
+    _rockMapper = StringEqualityCategoryMapper(
+        ["Bulk Lithic", "Groundstone"],
+        "Rock"
+    )
 
     _naturalSolidMaterialMapper = StringEqualityCategoryMapper(
         ["Natural solid material"],
@@ -79,6 +82,7 @@ class MaterialCategoryMetaMapper(AbstractCategoryMetaMapper):
 class SpecimenCategoryMetaMapper(AbstractCategoryMetaMapper):
     _organismPartMapper = StringEqualityCategoryMapper(
         [
+            "Animal Bone",
             "Human Bone",
             "Non Diagnostic Bone",
         ],
@@ -88,7 +92,7 @@ class SpecimenCategoryMetaMapper(AbstractCategoryMetaMapper):
         [
             "Architectural Element",
             "Bulk Ceramic",
-            "Biological subject, Ecofact",
+            "Bulk Lithic",
             "Coin",
             "Glass",
             "Groundstone",
@@ -99,7 +103,11 @@ class SpecimenCategoryMetaMapper(AbstractCategoryMetaMapper):
         "Artifact",
     )
     _biologicalSpecimenMapper = StringEqualityCategoryMapper(
-        ["Plant remains"], "Biological specimen"
+        [
+            "Biological record",
+            "Biological subject, Ecofact",
+            "Plant remains",
+        ], "Biological specimen"
     )
     _physicalSpecimenMapper = StringEqualityCategoryMapper(
         [
@@ -187,14 +195,25 @@ class OpenContextTransformer(Transformer):
             )
         return Transformer.DESCRIPTION_SEPARATOR.join(description_pieces)
 
+    def _get_oc_str_or_dict_item_label(self, str_or_dict):
+        """A utility method to get a dictionary label or if a string, return the string"""
+        # This is a bit messy, but it should be a bit forgiving if the OC API returns
+        # dict or string items for certain record attributes.
+        if isinstance(str_or_dict, dict):
+            # this item is a dictionary.
+            return str_or_dict.get("label")
+        elif isinstance(str_or_dict, str):
+            return str_or_dict
+        return str_or_dict
+
     def _material_type(self) -> typing.Optional[str]:
         for consists_of_dict in self.source_record.get("Consists of", []):
-            return consists_of_dict.get("label")
+            return self._get_oc_str_or_dict_item_label(consists_of_dict)
         return None
 
     def _specimen_type(self) -> typing.Optional[str]:
         for has_type_dict in self.source_record.get("Has type", []):
-            return has_type_dict.get("label")
+            return self._get_oc_str_or_dict_item_label(has_type_dict)
         return None
 
     def sample_registrant(self) -> str:
@@ -285,7 +304,7 @@ class OpenContextTransformer(Transformer):
         return self.source_record.get("project label", Transformer.NOT_PROVIDED)
 
     def produced_by_description(self) -> str:
-        return self.source_record.get("project uri", Transformer.NOT_PROVIDED)
+        return self.source_record.get("project href", Transformer.NOT_PROVIDED)
 
     def produced_by_feature_of_interest(self) -> str:
         return Transformer.NOT_PROVIDED
