@@ -174,7 +174,7 @@ async def get_thing_page(request: fastapi.Request, identifier: str, session: Ses
         item_ispartof = "https://igsn.org"
     content = await thing_resolved_content(identifier, item, session)
     content_str = json.dumps(content)
-    base_url = request.url
+    base_url = str(request.url)
 
     jwt_url = full_url_from_suffix(base_url, "/manage/hypothesis_jwt")
     login_url = full_url_from_suffix(base_url, "/manage/login?thing={identifier}")
