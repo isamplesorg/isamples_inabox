@@ -9,9 +9,13 @@ import typing
 import dateparser
 from isamples_metadata import OpenContextTransformer
 
+
 HTTP_TIMEOUT = 10.0  # seconds
-OPENCONTEXT_API = "https://opencontext.org/subjects-search/.json?add-attribute-uris=1&attributes=obo-foodon-00001303%2Coc-zoo-has-anat-id%2Ccidoc-crm-p2-has-type%2Ccidoc-crm-p45-consists-of%2Ccidoc-crm-p49i-is-former-or-current-keeper-of%2Ccidoc-crm-p55-has-current-location%2Cdc-terms-temporal%2Cdc-terms-creator%2Cdc-terms-contributor&prop=oc-gen-cat-sample-col%7C%7Coc-gen-cat-bio-subj-ecofact%7C%7Coc-gen-cat-object&response=metadata%2Curi-meta&sort=updated--desc"
+OPENCONTEXT_PAGE_SIZE = 250 # number of result records per request "page"
+OPENCONTEXT_API = f"https://opencontext.org/query/.json?attributes=ALL-STANDARD-LD&cat=oc-gen-cat-sample-col%7C%7Coc-gen-cat-bio-subj-ecofact%7C%7Coc-gen-cat-object&response=metadata%2Curi-meta&sort=updated--desc&type=subjects&rows={OPENCONTEXT_PAGE_SIZE}"
 MEDIA_JSON = "application/json"
+
+
 
 
 def get_logger():
@@ -68,7 +72,7 @@ class OpenContextRecordIterator(isb_lib.core.IdentifierIterator):
         max_entries: int = -1,
         date_start: Optional[datetime.datetime] = None,
         date_end: Optional[datetime.datetime] = None,
-        page_size: int = 100,
+        page_size: int = OPENCONTEXT_PAGE_SIZE,
     ):
         super().__init__(
             offset=offset,
