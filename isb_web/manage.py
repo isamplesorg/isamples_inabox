@@ -22,6 +22,7 @@ import datetime
 
 from isb_lib.models.namespace import Namespace
 from isb_lib.utilities import url_utilities
+from isb_lib.utilities.url_utilities import full_url_from_suffix
 from isb_web import config, sqlmodel_database
 from isb_web.api_types import MintDataciteIdentifierParams, MintDraftIdentifierParams, ManageOrcidForNamespaceParams, \
     AddNamespaceParams, MintNoidyIdentifierParams
@@ -30,6 +31,9 @@ from isb_web.sqlmodel_database import SQLModelDAO
 # The FastAPI app that mounts as a sub-app to the main FastAPI app
 manage_api = FastAPI()
 dao: Optional[SQLModelDAO] = None
+
+# use this for constructing url paths to the main handler rather than the manage handler
+main_app: Optional[FastAPI] = None
 MANAGE_PREFIX = "/manage"
 
 logging.basicConfig(level=logging.DEBUG)
@@ -230,7 +234,8 @@ async def auth(request: starlette.requests.Request):
         redirect_url += "?access_token=" + token["access_token"]
         return starlette.responses.RedirectResponse(url=redirect_url)
     elif "thing" in request.query_params:
-        return starlette.responses.RedirectResponse(url=f"/thingpage/{request.query_params.get('thing')}")
+        thingpage_url = full_url_from_suffix(str(request.url), f"/thingpage/{request.query_params.get('thing')}")
+        return starlette.responses.RedirectResponse(url=thingpage_url)
     else:
         return starlette.responses.RedirectResponse(url=redirect_url)
 

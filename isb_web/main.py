@@ -22,6 +22,7 @@ import isamples_metadata.GEOMETransformer
 from isb_lib.core import MEDIA_GEO_JSON, MEDIA_JSON, MEDIA_NQUADS, SOLR_TIME_FORMAT
 from isb_lib.models.thing import Thing
 from isb_lib.utilities import h3_utilities, url_utilities
+from isb_lib.utilities.url_utilities import full_url_from_suffix
 from isb_web import sqlmodel_database, analytics, manage, debug, metrics
 from isb_web.analytics import AnalyticsEvent
 from isb_web import schemas
@@ -68,6 +69,7 @@ dao = SQLModelDAO(None)
 manage_app = manage.manage_api
 debug_app = debug.debug_api
 # Avoid a circular dependency but share the db connection by pushing into the various handlers
+manage.main_app = app
 manage.dao = dao
 metrics.dao = dao
 
@@ -173,9 +175,10 @@ async def get_thing_page(request: fastapi.Request, identifier: str, session: Ses
     content = await thing_resolved_content(identifier, item, session)
     content_str = json.dumps(content)
     base_url = request.url
-    # If we're running in the Docker container, this will be defined as part of docker-compose.yml
-    if "ISB_SITEMAP_PREFIX" in os.environ:
-        base_url = os.environ["ISB_SITEMAP_PREFIX"]
+
+    jwt_url = full_url_from_suffix(base_url, "/manage/hypothesis_jwt")
+    login_url = full_url_from_suffix(base_url, "/manage/login?thing={identifier}")
+    logout_url = full_url_from_suffix(base_url, "/manage/logout?thing={identifier}")
 
     return templates.TemplateResponse(
         "thing.html", {
@@ -184,10 +187,10 @@ async def get_thing_page(request: fastapi.Request, identifier: str, session: Ses
             "thing_identifier": item.id,
             "thing_ispartof": item_ispartof,
             "authority": config.Settings().hypothesis_authority,
-            "isamples_jwt_url": f"{str(base_url)}/manage/hypothesis_jwt",
+            "isamples_jwt_url": jwt_url,
             "hypothesis_api_url": config.Settings().hypothesis_server_url,
-            "login_url": f"{str(base_url)}/manage/login?thing={identifier}",
-            "logout_url": f"{str(base_url)}/manage/logout?thing={identifier}",
+            "login_url": login_url,
+            "logout_url": logout_url,
         }
     )
 
