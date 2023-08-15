@@ -133,6 +133,7 @@ class OpenContextRecordIterator(isb_lib.core.IdentifierIterator):
                 yield record
                 num_records += 1
 
+            self.url = next_url
             if (
                 len(data.get("oc-api:has-results", {})) < _page_size
                 or self.url is None
@@ -141,8 +142,6 @@ class OpenContextRecordIterator(isb_lib.core.IdentifierIterator):
                 or self._past_date_start
             ):
                 more_work = False
-            if more_work:
-                self.url = next_url
 
     def loadEntries(self):
         self._cpage = []
