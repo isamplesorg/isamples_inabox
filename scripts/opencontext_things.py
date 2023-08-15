@@ -10,6 +10,7 @@ import sqlalchemy.orm
 import sqlalchemy.exc
 
 from isb_lib import opencontext_adapter
+from isb_lib.opencontext_adapter import OPENCONTEXT_PAGE_SIZE
 from isb_web import sqlmodel_database
 from isb_web.sqlmodel_database import SQLModelDAO, save_thing
 
@@ -32,7 +33,7 @@ def wrap_load_thing(thing_dict, tc):
 async def _load_open_context_entries(session, max_count, start_from):
     L = get_logger()
     records = isb_lib.opencontext_adapter.OpenContextRecordIterator(
-        max_entries=max_count, date_start=start_from, page_size=200
+        max_entries=max_count, date_start=start_from, page_size=OPENCONTEXT_PAGE_SIZE
     )
 
     num_ids = 0
