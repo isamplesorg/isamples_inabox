@@ -2,6 +2,9 @@ import requests
 from urllib.parse import urlparse
 import json
 
+# Wrapper script around the hypothesis API.  Eventually this functionality should be integrated into a user
+# creation flow in the iSamples In a Box UI, but currently this doesn't exist so for now, execute things manually.
+
 
 class HypothesisClient(object):
 
@@ -28,6 +31,21 @@ class HypothesisClient(object):
                 }
         return self._make_request('POST', 'users', data)
 
+    def add_to_organization_group(self, username: str, group_id: str):
+        return self._make_request("POST", f"groups/{group_id}/members/{username}", {})
+
+    def get_group(self, group_id: str):
+        return self._make_request("GET", f"groups/{group_id}", {})
+
+    def get_group_members(self, group_id: str):
+        return self._make_request("GET", f"groups/{group_id}/members", {})
+
+    def get_groups(self):
+        return self._make_request("GET", "groups", {})
+
+    def create_group(self, name: str, description: str):
+        return self._make_request("POST", "groups", {"name": name, "description": description})
+
     def update_account(self, username, email=None, display_name=None):
         data = {}
         if email is not None:
@@ -49,30 +67,24 @@ class HypothesisClient(object):
         rsp.raise_for_status()
         return rsp.json()
 
-    # def grant_token(self, username):
-    #     """
-    #     Create a grant token for the given `user`.
-    #
-    #     This creates a grant token which can be passed to the Hypothesis client
-    #     in order to enable it to view and create annotations as the given
-    #     `username` within the publisher's accounts.
-    #     """
-    #     now = datetime.datetime.utcnow()
-    #     claims = {
-    #         'aud': _extract_domain(self.service),
-    #         'iss': self.jwt_client_id,
-    #         'sub': 'acct:{}@{}'.format(username, self.authority),
-    #         'nbf': now,
-    #         'exp': now + datetime.timedelta(minutes=5),
-    #     }
-    #     return jwt.encode(claims, self.jwt_client_secret, algorithm='HS256')
 
+# THESE ARE NOT TO BE CHECKED IN!!!
+user_client_id = ""
+user_client_secret = ""
+jwt_client_id = ""
+jwt_client_secret = ""
 
-user_client_id = "f19b959c-0587-11ee-9d20-d777691595e8"
-user_client_secret = "_ovdnW1qmPOBbFYFMi5qRxPRW1Vdu_aJMCA9aDDMAkc"
-jwt_client_id = "bfc7d002-04bb-11ee-9adf-ff833263f132"
-jwt_client_secret = "9ItR2-4UlPjrAzkRTn36YFsEb1YgQf3eYtWgdyVF4qQ"
 authority = "isample.xyz"
-service = "http://localhost:5000"
+service = "https://hypothes.is"
 client = HypothesisClient(user_client_id, user_client_secret, jwt_client_id, jwt_client_secret, authority, service)
-client.create_account("0000000321097692", "dannymandel@icloud.com", "Danny Mandel")
+
+# example usage for creating an account -- ORCID must have '-' characters removed:
+# client.create_account("0000000000000000", "email@server", "User full name")
+
+# example of how to query for group members
+# members = client.get_group_members()
+
+# example of how to add a user to a group -- must be executed after account is created
+# add_rsp = client.add_to_organization_group("acct:0000000000000000@isample.xyz", <group id>)
+
+# response = client.get_groups()
