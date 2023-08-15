@@ -11,11 +11,9 @@ from isamples_metadata import OpenContextTransformer
 
 
 HTTP_TIMEOUT = 10.0  # seconds
-OPENCONTEXT_PAGE_SIZE = 250 # number of result records per request "page"
+OPENCONTEXT_PAGE_SIZE = 250  # number of result records per request "page"
 OPENCONTEXT_API = f"https://opencontext.org/query/.json?attributes=ALL-STANDARD-LD&cat=oc-gen-cat-sample-col%7C%7Coc-gen-cat-bio-subj-ecofact%7C%7Coc-gen-cat-object&response=metadata%2Curi-meta&sort=updated--desc&type=subjects&rows={OPENCONTEXT_PAGE_SIZE}"
 MEDIA_JSON = "application/json"
-
-
 
 
 def get_logger():
