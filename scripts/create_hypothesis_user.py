@@ -2,6 +2,9 @@ import requests
 from urllib.parse import urlparse
 import json
 
+# Wrapper script around the hypothesis API.  Eventually this functionality should be integrated into a user
+# creation flow in the iSamples In a Box UI, but currently this doesn't exist so for now, execute things manually.
+
 
 class HypothesisClient(object):
 
@@ -38,10 +41,10 @@ class HypothesisClient(object):
         return self._make_request("GET", f"groups/{group_id}/members", {})
 
     def get_groups(self):
-        return self._make_request("GET", f"groups", {})
+        return self._make_request("GET", "groups", {})
 
     def create_group(self, name: str, description: str):
-        return self._make_request("POST", f"groups", {"name": name, "description": description})
+        return self._make_request("POST", "groups", {"name": name, "description": description})
 
     def update_account(self, username, email=None, display_name=None):
         data = {}
@@ -64,6 +67,7 @@ class HypothesisClient(object):
         rsp.raise_for_status()
         return rsp.json()
 
+
 # THESE ARE NOT TO BE CHECKED IN!!!
 user_client_id = ""
 user_client_secret = ""
@@ -75,7 +79,7 @@ service = "https://hypothes.is"
 client = HypothesisClient(user_client_id, user_client_secret, jwt_client_id, jwt_client_secret, authority, service)
 
 # example usage for creating an account -- ORCID must have '-' characters removed:
-#client.create_account("0000000000000000", "email@server", "User full name")
+# client.create_account("0000000000000000", "email@server", "User full name")
 
 # example of how to query for group members
 # members = client.get_group_members()

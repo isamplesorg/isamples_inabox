@@ -21,7 +21,7 @@ import isb_web
 import isamples_metadata.GEOMETransformer
 from isb_lib.core import MEDIA_GEO_JSON, MEDIA_JSON, MEDIA_NQUADS, SOLR_TIME_FORMAT
 from isb_lib.models.thing import Thing
-from isb_lib.utilities import h3_utilities, url_utilities
+from isb_lib.utilities import h3_utilities
 from isb_lib.utilities.url_utilities import full_url_from_suffix
 from isb_web import sqlmodel_database, analytics, manage, debug, metrics
 from isb_web.analytics import AnalyticsEvent
