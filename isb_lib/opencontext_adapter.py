@@ -137,6 +137,7 @@ class OpenContextRecordIterator(isb_lib.core.IdentifierIterator):
                 len(data.get("oc-api:has-results", {})) < _page_size
                 or self.url is None
                 or 0 < self._max_entries <= num_records
+                or num_records == self._page_size
                 or self._past_date_start
             ):
                 more_work = False
