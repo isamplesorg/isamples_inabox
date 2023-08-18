@@ -318,11 +318,11 @@ class OpenContextTransformer(Transformer):
         creators = self.source_record.get("Creator")
         if creators is not None:
             for creator in creators:
-                responsibilities.append(f"creator: {creator.get('label')}")
+                responsibilities.append(f"creator: {creator}")
         contributors = self.source_record.get("Contributor")
         if contributors is not None:
             for contributor in contributors:
-                responsibilities.append(f"collector: {contributor.get('label')}")
+                responsibilities.append(f"collector: {contributor}")
         return responsibilities
 
     def produced_by_result_time(self) -> str:
