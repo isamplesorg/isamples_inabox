@@ -347,7 +347,7 @@ class OpenContextTransformer(Transformer):
     def informal_classification(self) -> typing.List[str]:
         classifications = []
         for consists_of_dict in self.source_record.get("Has taxonomic identifier", []):
-            classifications.append(consists_of_dict.get("label"))
+            classifications.append(self._get_oc_str_or_dict_item_label(consists_of_dict))
         return classifications
 
     def last_updated_time(self) -> Optional[str]:
