@@ -169,27 +169,25 @@ class OpenContextTransformer(Transformer):
             "late bce/ce", self.source_record, description_pieces
         )
         self._transform_key_to_label("updated", self.source_record, description_pieces)
-        for consists_of_dict in self.source_record.get("Consists of", []):
-            self._transform_key_to_label(
-                "label", consists_of_dict, description_pieces, "Consists of"
+        for consists_of_str in self.source_record.get("Consists of", []):
+            self._transform_key_to_label_str(
+                self._get_oc_str_or_dict_item_label(consists_of_str), description_pieces, "Consists of"
             )
-        for has_type_dict in self.source_record.get("Has type", []):
-            self._transform_key_to_label(
-                "label", has_type_dict, description_pieces, "Has type"
+        for has_type_str in self.source_record.get("Has type", []):
+                self._transform_key_to_label_str(
+                self._get_oc_str_or_dict_item_label(has_type_str), description_pieces, "Has type"
             )
-        for has_anatomical_dict in self.source_record.get(
+        for has_anatomical_str in self.source_record.get(
             "Has anatomical identification", []
         ):
-            self._transform_key_to_label(
-                "label",
-                has_anatomical_dict,
+            self._transform_key_to_label_str(
+                self._get_oc_str_or_dict_item_label(has_anatomical_str),
                 description_pieces,
                 "Has anatomical identification",
             )
-        for temporal_coverage_dict in self.source_record.get("Temporal Coverage", []):
-            self._transform_key_to_label(
-                "label",
-                temporal_coverage_dict,
+        for temporal_coverage_str in self.source_record.get("Temporal Coverage", []):
+            self._transform_key_to_label_str(
+                self._get_oc_str_or_dict_item_label(temporal_coverage_str),
                 description_pieces,
                 "Temporal coverage",
             )
