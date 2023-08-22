@@ -174,7 +174,7 @@ class OpenContextTransformer(Transformer):
                 self._get_oc_str_or_dict_item_label(consists_of_str), description_pieces, "Consists of"
             )
         for has_type_str in self.source_record.get("Has type", []):
-                self._transform_key_to_label_str(
+            self._transform_key_to_label_str(
                 self._get_oc_str_or_dict_item_label(has_type_str), description_pieces, "Has type"
             )
         for has_anatomical_str in self.source_record.get(
