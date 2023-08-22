@@ -1,6 +1,8 @@
 import datetime
 from typing import Optional
 
+import pytz
+
 import isb_lib.core
 import logging
 import requests
@@ -9,8 +11,10 @@ import typing
 import dateparser
 from isamples_metadata import OpenContextTransformer
 
-HTTP_TIMEOUT = 10.0  # seconds
-OPENCONTEXT_API = "https://opencontext.org/subjects-search/.json?add-attribute-uris=1&attributes=obo-foodon-00001303%2Coc-zoo-has-anat-id%2Ccidoc-crm-p2-has-type%2Ccidoc-crm-p45-consists-of%2Ccidoc-crm-p49i-is-former-or-current-keeper-of%2Ccidoc-crm-p55-has-current-location%2Cdc-terms-temporal%2Cdc-terms-creator%2Cdc-terms-contributor&prop=oc-gen-cat-sample-col%7C%7Coc-gen-cat-bio-subj-ecofact%7C%7Coc-gen-cat-object&response=metadata%2Curi-meta&sort=updated--desc"
+
+HTTP_TIMEOUT = 60.0  # seconds
+OPENCONTEXT_PAGE_SIZE = 100       # number of result records per request "page"
+OPENCONTEXT_API = f"https://opencontext.org/query/.json?attributes=ALL-STANDARD-LD&cat=oc-gen-cat-sample-col%7C%7Coc-gen-cat-bio-subj-ecofact%7C%7Coc-gen-cat-object&response=metadata%2Curi-meta&sort=updated--desc&type=subjects&rows={OPENCONTEXT_PAGE_SIZE}"
 MEDIA_JSON = "application/json"
 
 
@@ -68,7 +72,7 @@ class OpenContextRecordIterator(isb_lib.core.IdentifierIterator):
         max_entries: int = -1,
         date_start: Optional[datetime.datetime] = None,
         date_end: Optional[datetime.datetime] = None,
-        page_size: int = 100,
+        page_size: int = OPENCONTEXT_PAGE_SIZE,
     ):
         super().__init__(
             offset=offset,
@@ -79,6 +83,11 @@ class OpenContextRecordIterator(isb_lib.core.IdentifierIterator):
         )
         self._past_date_start = False
         self.url = OPENCONTEXT_API
+        # force the updated date to be considered UTC as that is what the OC dates are
+        if self._date_start is not None:
+            self._date_start = self._date_start.replace(tzinfo=pytz.utc)
+        if self._date_end is not None:
+            self._date_end = self._date_end.replace(tzinfo=pytz.utc)
 
     def records_in_page(self):
         L = get_logger()
@@ -108,7 +117,8 @@ class OpenContextRecordIterator(isb_lib.core.IdentifierIterator):
             next_url = data.get("next-json")
             for record in data.get("oc-api:has-results", {}):
                 L.info("records_in_page Record id: %s", record.get("uri", None))
-                record_updated = dateparser.parse(record["updated"])
+                # force the updated date to be considered UTC as that is what the OC dates are
+                record_updated = dateparser.parse(record["updated"]).replace(tzinfo=pytz.utc)
                 if self._date_start is not None and record_updated is not None and record_updated < self._date_start:
                     L.info(
                         "Iterated record with updated date %s earlier than previous max %s. Update is complete.",
@@ -123,6 +133,7 @@ class OpenContextRecordIterator(isb_lib.core.IdentifierIterator):
                 yield record
                 num_records += 1
 
+            self.url = next_url
             if (
                 len(data.get("oc-api:has-results", {})) < _page_size
                 or self.url is None
@@ -131,8 +142,6 @@ class OpenContextRecordIterator(isb_lib.core.IdentifierIterator):
                 or self._past_date_start
             ):
                 more_work = False
-            if more_work:
-                self.url = next_url
 
     def loadEntries(self):
         self._cpage = []

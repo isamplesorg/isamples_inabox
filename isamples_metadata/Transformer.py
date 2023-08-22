@@ -44,6 +44,15 @@ class Transformer(ABC):
             dest_list.append(f"{label}: {value}")
 
     @staticmethod
+    def _transform_key_to_label_str(
+        value: str,
+        dest_list: typing.List[str],
+        label: Optional[str] = None,
+    ):
+        if value is not None and len(str(value)) > 0:
+            dest_list.append(f"{label}: {value}")
+
+    @staticmethod
     def _formatted_date(
         year: Optional[str], month: Optional[str], day: Optional[str]
     ) -> str:
