@@ -9,3 +9,7 @@ class TestRecordException(MetadataException):
 class SESARSampleTypeException(MetadataException):
     """Exception subclass used to indicate a record is excluded from indexing due to it being a SESAR record that
     doesn't represent a valid sample in the iSamples universe"""
+
+
+class MissingIdentifierException(MetadataException):
+    """Exception subclass used to indicate a record is excluded from indexing due to it lacking an identifier"""
