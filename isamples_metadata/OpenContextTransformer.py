@@ -8,6 +8,7 @@ from isamples_metadata.Transformer import (
     StringEqualityCategoryMapper,
     AbstractCategoryMapper,
 )
+from isamples_metadata.metadata_exceptions import MissingIdentifierException
 from isamples_metadata.taxonomy.metadata_model_client import MODEL_SERVER_CLIENT, PredictionResult
 
 
@@ -148,7 +149,10 @@ class OpenContextTransformer(Transformer):
         self._specimen_prediction_results: typing.Optional[list] = None
 
     def _citation_uri(self) -> str:
-        return self.source_record.get("citation uri") or ""
+        citation_uri = self.source_record.get("citation uri")
+        if citation_uri is None:
+            raise MissingIdentifierException("OpenContext record is missing a citation uri")
+        return citation_uri
 
     def id_string(self) -> str:
         citation_uri = self._citation_uri()
