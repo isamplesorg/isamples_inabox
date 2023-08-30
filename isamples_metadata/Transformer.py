@@ -4,13 +4,15 @@ from typing import Optional
 
 import h3
 
+from isamples_metadata.metadata_constants import SAMPLE_IDENTIFIER, SCHEMA, AT_ID, LABEL, DESCRIPTION
+
 NOT_PROVIDED = "Not Provided"
 
 
 class Transformer(ABC):
     """Abstract base class for various iSamples provider transformers"""
 
-    NOT_PROVIDED = "Not Provided"
+    NOT_PROVIDED = ""
 
     FEET_PER_METER = 3.28084
 
@@ -80,13 +82,13 @@ class Transformer(ABC):
         material_categories = self.has_material_categories()
         specimen_categories = self.has_specimen_categories()
         transformed_record = {
-            "$schema": "../../iSamplesSchemaBasic0.2.json",
-            "@id": self.id_string(),
-            "label": self.sample_label(),
-            "sampleidentifier": self.sample_identifier_string(),
-            "description": self.sample_description(),
-            "hasContextCategory": context_categories,
-            "hasContextCategoryConfidence": self.has_context_category_confidences(context_categories),
+            SCHEMA: "iSamplesSchemaCore1.0.json",
+            AT_ID: self.id_string(),
+            LABEL: self.sample_label(),
+            SAMPLE_IDENTIFIER: self.sample_identifier_string(),
+            DESCRIPTION: self.sample_description(),
+            "has_context_category": context_categories,
+            "has_context_category_confidence": self.has_context_category_confidences(context_categories),
             "hasMaterialCategory": material_categories,
             "hasMaterialCategoryConfidence": self.has_material_category_confidences(material_categories),
             "hasSpecimenCategory": specimen_categories,
@@ -95,14 +97,14 @@ class Transformer(ABC):
             "keywords": self.keywords(),
             "producedBy": {
                 "@id": self.produced_by_id_string(),
-                "label": self.produced_by_label(),
-                "description": self.produced_by_description(),
+                LABEL: self.produced_by_label(),
+                DESCRIPTION: self.produced_by_description(),
                 "hasFeatureOfInterest": self.produced_by_feature_of_interest(),
                 "responsibility": self.produced_by_responsibilities(),
                 "resultTime": self.produced_by_result_time(),
                 "samplingSite": {
-                    "description": self.sampling_site_description(),
-                    "label": self.sampling_site_label(),
+                    DESCRIPTION: self.sampling_site_description(),
+                    LABEL: self.sampling_site_label(),
                     "location": {
                         "elevation": self.sampling_site_elevation(),
                         "latitude": self.sampling_site_latitude(),
@@ -114,8 +116,8 @@ class Transformer(ABC):
             "registrant": self.sample_registrant(),
             "samplingPurpose": self.sample_sampling_purpose(),
             "curation": {
-                "label": self.curation_label(),
-                "description": self.curation_description(),
+                LABEL: self.curation_label(),
+                DESCRIPTION: self.curation_description(),
                 "accessConstraints": self.curation_access_constraints(),
                 "curationLocation": self.curation_location(),
                 "responsibility": self.curation_responsibility(),

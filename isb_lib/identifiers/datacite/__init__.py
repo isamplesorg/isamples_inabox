@@ -11,6 +11,7 @@ from aiohttp import ClientResponse
 from requests import Response
 from requests.auth import HTTPBasicAuth
 
+from isamples_metadata.metadata_constants import LABEL
 from isb_lib.core import parsed_date
 from isb_lib.identifiers.identifier import DataciteIdentifier, IGSNIdentifier
 
@@ -91,7 +92,7 @@ def datacite_metadata_from_core_record(
         raise ValueError("Registrant is a required field in order to register a DOI")
     # creators -- mapped from registrant?
     # title -- mapped from label?
-    label = core_record.get("label")
+    label = core_record.get(LABEL)
     if label is None:
         raise ValueError("Label is a required field in order to register a DOI")
     # publisher -- mapped from authority -- where does the authority come from?

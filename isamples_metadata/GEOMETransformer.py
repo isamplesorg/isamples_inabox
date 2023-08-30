@@ -11,6 +11,7 @@ import isamples_metadata
 from isamples_metadata.Transformer import (
     Transformer,
 )
+from isamples_metadata.metadata_constants import LABEL
 from isb_web.sqlmodel_database import kingdom_for_taxonomy_name
 
 PERMIT_STRINGS_TO_IGNORE = ['nan', 'na', 'no data', 'unknown', 'none_required']
@@ -434,7 +435,7 @@ class GEOMETransformer(Transformer):
             child_resource = {}
             entity = child["entity"]
             if entity == TISSUE_ENTITY:
-                child_resource["label"] = "subsample tissue"
+                child_resource[LABEL] = "subsample tissue"
                 child_resource["relationship"] = "subsample"
                 child_resource["target"] = child["bcid"]
                 related_resources.append(child_resource)
@@ -616,7 +617,7 @@ class GEOMEChildTransformer(GEOMETransformer):
     def related_resources(self) -> typing.List[typing.Dict]:
         parent_dict = {}
         main_record = self._source_record_main_record()
-        parent_dict["label"] = f"parent sample {main_record.get('materialSampleID')}"
+        parent_dict[LABEL] = f"parent sample {main_record.get('materialSampleID')}"
         parent_dict["target"] = main_record.get("bcid", "")
         parent_dict["relationshipType"] = "derived_from"
         return [parent_dict]

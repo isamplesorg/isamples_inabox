@@ -162,24 +162,28 @@ class OpenContextTransformer(Transformer):
         return self._citation_uri().removeprefix(Transformer.N2T_PREFIX)
 
     def sample_label(self) -> str:
-        return self.source_record.get("label", Transformer.NOT_PROVIDED)
+        label = self.source_record.get("label", Transformer.NOT_PROVIDED)
+        item_category = self._item_category()
+        if len(item_category) > 0:
+            label = f"{item_category} {label}"
+        return label
 
     def sample_description(self) -> str:
         description_pieces: list[str] = []
         self._transform_key_to_label(
-            "early bce/ce", self.source_record, description_pieces
+            "early bce/ce", self.source_record, description_pieces, "'early bce/ce'"
         )
         self._transform_key_to_label(
-            "late bce/ce", self.source_record, description_pieces
+            "late bce/ce", self.source_record, description_pieces, "'late bce/ce'"
         )
-        self._transform_key_to_label("updated", self.source_record, description_pieces)
+        self._transform_key_to_label("updated", self.source_record, description_pieces, "'updated'")
         for consists_of_str in self.source_record.get("Consists of", []):
             self._transform_key_to_label_str(
-                self._get_oc_str_or_dict_item_label(consists_of_str), description_pieces, "Consists of"
+                self._get_oc_str_or_dict_item_label(consists_of_str), description_pieces, "'Consists of'"
             )
         for has_type_str in self.source_record.get("Has type", []):
             self._transform_key_to_label_str(
-                self._get_oc_str_or_dict_item_label(has_type_str), description_pieces, "Has type"
+                self._get_oc_str_or_dict_item_label(has_type_str), description_pieces, "'Has type'"
             )
         for has_anatomical_str in self.source_record.get(
             "Has anatomical identification", []
@@ -187,13 +191,13 @@ class OpenContextTransformer(Transformer):
             self._transform_key_to_label_str(
                 self._get_oc_str_or_dict_item_label(has_anatomical_str),
                 description_pieces,
-                "Has anatomical identification",
+                "'Has anatomical identification'",
             )
         for temporal_coverage_str in self.source_record.get("Temporal Coverage", []):
             self._transform_key_to_label_str(
                 self._get_oc_str_or_dict_item_label(temporal_coverage_str),
                 description_pieces,
-                "Temporal coverage",
+                "'Temporal coverage'",
             )
         return Transformer.DESCRIPTION_SEPARATOR.join(description_pieces)
 
@@ -228,7 +232,7 @@ class OpenContextTransformer(Transformer):
         return ["Site of past human activities"]
 
     def _compute_material_prediction_results(self) -> typing.Optional[typing.List[PredictionResult]]:
-        item_category = self.source_record.get("item category", "")
+        item_category = self._item_category()
         to_classify_items = ["Object", "Pottery", "Sample", "Sculpture"]
         if item_category not in to_classify_items:
             # Have specified mapping, won't predict
@@ -240,8 +244,11 @@ class OpenContextTransformer(Transformer):
             self._material_prediction_results = MODEL_SERVER_CLIENT.make_opencontext_material_request(self.source_record)
             return self._material_prediction_results
 
+    def _item_category(self):
+        return self.source_record.get("item category", "")
+
     def has_material_categories(self) -> typing.List[str]:
-        item_category = self.source_record.get("item category", "")
+        item_category = self._item_category()
         to_classify_items = ["Object", "Pottery", "Sample", "Sculpture"]
         if item_category in to_classify_items:
             prediction_results = self._compute_material_prediction_results()
@@ -259,7 +266,7 @@ class OpenContextTransformer(Transformer):
             return [prediction.confidence for prediction in prediction_results]
 
     def _compute_specimen_prediction_results(self) -> typing.Optional[typing.List[PredictionResult]]:
-        item_category = self.source_record.get("item category", "")
+        item_category = self._item_category()
         to_classify_items = ["Animal Bone"]
         if item_category not in to_classify_items:
             # Have specified mapping, won't predict
@@ -272,7 +279,7 @@ class OpenContextTransformer(Transformer):
             return self._specimen_prediction_results
 
     def has_specimen_categories(self) -> typing.List[str]:
-        item_category = self.source_record.get("item category", "")
+        item_category = self._item_category()
         to_classify_items = ["Animal Bone"]
         if item_category in to_classify_items:
             prediction_results = self._compute_specimen_prediction_results()

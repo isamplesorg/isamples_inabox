@@ -11,6 +11,8 @@ from signal import SIGINT
 
 import igsn_lib.time
 
+from isamples_metadata.metadata_constants import SAMPLE_IDENTIFIER, AT_ID, LABEL, HAS_CONTEXT_CATEGORY, \
+    HAS_CONTEXT_CATEGORY_CONFIDENCE
 from isamples_metadata.metadata_exceptions import MetadataException
 from isb_lib.models.thing import Thing
 from isamples_metadata.Transformer import Transformer, geo_to_h3
@@ -153,20 +155,20 @@ def _coreRecordAsSolrDoc(coreMetadata: typing.Dict) -> typing.Dict:  # noqa: C90
             coreMetadata[k] = v.strip()
 
     doc = {
-        "id": coreMetadata["sampleidentifier"],
-        "isb_core_id": coreMetadata["@id"],
+        "id": coreMetadata[SAMPLE_IDENTIFIER],
+        "isb_core_id": coreMetadata[AT_ID],
         "indexUpdatedTime": datetimeToSolrStr(igsn_lib.time.dtnow())
     }
     if _shouldAddMetadataValueToSolrDoc(coreMetadata, "sourceUpdatedTime"):
         doc["sourceUpdatedTime"] = coreMetadata["sourceUpdatedTime"]
-    if _shouldAddMetadataValueToSolrDoc(coreMetadata, "label"):
-        doc["label"] = coreMetadata["label"]
-    if _shouldAddMetadataValueToSolrDoc(coreMetadata, "description"):
-        doc["description"] = coreMetadata["description"]
-    if _shouldAddMetadataValueToSolrDoc(coreMetadata, "hasContextCategory"):
-        doc["hasContextCategory"] = coreMetadata["hasContextCategory"]
-    if _shouldAddMetadataValueToSolrDoc(coreMetadata, "hasContextCategoryConfidence"):
-        doc["hasContextCategoryConfidence"] = coreMetadata["hasContextCategoryConfidence"]
+    if _shouldAddMetadataValueToSolrDoc(coreMetadata, LABEL):
+        doc[LABEL] = coreMetadata[LABEL]
+    if _shouldAddMetadataValueToSolrDoc(coreMetadata, DESCRIPTION):
+        doc[DESCRIPTION] = coreMetadata[DESCRIPTION]
+    if _shouldAddMetadataValueToSolrDoc(coreMetadata, HAS_CONTEXT_CATEGORY):
+        doc[HAS_CONTEXT_CATEGORY] = coreMetadata[HAS_CONTEXT_CATEGORY]
+    if _shouldAddMetadataValueToSolrDoc(coreMetadata, HAS_CONTEXT_CATEGORY_CONFIDENCE):
+        doc[HAS_CONTEXT_CATEGORY_CONFIDENCE] = coreMetadata[HAS_CONTEXT_CATEGORY_CONFIDENCE]
     if _shouldAddMetadataValueToSolrDoc(coreMetadata, "hasMaterialCategory"):
         doc["hasMaterialCategory"] = coreMetadata["hasMaterialCategory"]
     if _shouldAddMetadataValueToSolrDoc(coreMetadata, "hasMaterialCategoryConfidence"):
@@ -213,10 +215,10 @@ def coreRecordAsSolrDoc(transformer: Transformer) -> typing.Dict:
 
 def handle_curation_fields(coreMetadata: typing.Dict, doc: typing.Dict):
     curation = coreMetadata["curation"]
-    if _shouldAddMetadataValueToSolrDoc(curation, "label"):
-        doc["curation_label"] = curation["label"]
-    if _shouldAddMetadataValueToSolrDoc(curation, "description"):
-        doc["curation_description"] = curation["description"]
+    if _shouldAddMetadataValueToSolrDoc(curation, LABEL):
+        doc["curation_label"] = curation[LABEL]
+    if _shouldAddMetadataValueToSolrDoc(curation, DESCRIPTION):
+        doc["curation_description"] = curation[DESCRIPTION]
     if _shouldAddMetadataValueToSolrDoc(curation, "accessConstraints"):
         doc["curation_accessConstraints"] = curation["accessConstraints"]
     if _shouldAddMetadataValueToSolrDoc(curation, "location"):
@@ -253,10 +255,10 @@ def lat_lon_to_solr(coreMetadata: typing.Dict, latitude: typing.SupportsFloat, l
 def handle_produced_by_fields(coreMetadata: typing.Dict, doc: typing.Dict):  # noqa: C901 -- need to examine computational complexity
     # The solr index flattens subdictionaries, so check the keys explicitly in the subdictionary to see if they should be added to the index
     producedBy = coreMetadata["producedBy"]
-    if _shouldAddMetadataValueToSolrDoc(producedBy, "label"):
-        doc["producedBy_label"] = producedBy["label"]
-    if _shouldAddMetadataValueToSolrDoc(producedBy, "description"):
-        doc["producedBy_description"] = producedBy["description"]
+    if _shouldAddMetadataValueToSolrDoc(producedBy, LABEL):
+        doc["producedBy_label"] = producedBy[LABEL]
+    if _shouldAddMetadataValueToSolrDoc(producedBy, DESCRIPTION):
+        doc["producedBy_description"] = producedBy[DESCRIPTION]
     if _shouldAddMetadataValueToSolrDoc(producedBy, "responsibility"):
         doc["producedBy_responsibility"] = producedBy["responsibility"]
     if _shouldAddMetadataValueToSolrDoc(producedBy, "hasFeatureOfInterest"):
@@ -280,10 +282,10 @@ def handle_produced_by_fields(coreMetadata: typing.Dict, doc: typing.Dict):  # n
         ]
     if "samplingSite" in producedBy:
         samplingSite = producedBy["samplingSite"]
-        if _shouldAddMetadataValueToSolrDoc(samplingSite, "description"):
-            doc["producedBy_samplingSite_description"] = samplingSite["description"]
-        if _shouldAddMetadataValueToSolrDoc(samplingSite, "label"):
-            doc["producedBy_samplingSite_label"] = samplingSite["label"]
+        if _shouldAddMetadataValueToSolrDoc(samplingSite, DESCRIPTION):
+            doc["producedBy_samplingSite_description"] = samplingSite[DESCRIPTION]
+        if _shouldAddMetadataValueToSolrDoc(samplingSite, LABEL):
+            doc["producedBy_samplingSite_label"] = samplingSite[LABEL]
         if _shouldAddMetadataValueToSolrDoc(samplingSite, "placeName"):
             doc["producedBy_samplingSite_placeName"] = samplingSite["placeName"]
 
@@ -691,7 +693,9 @@ class CoreSolrImporter:
                     # Step 3 in this sequence of events is both slow and API rate-limited by Cesium, so we take great
                     # pain to ensure that we're only querying the absolute minimum
                     core_record["producedBy_samplingSite_location_h3_15"] = thing.h3
-                    core_record["producedBy_samplingSite_location_cesium_height"] = h3_to_height.get(thing.h3)
+                    #core_record["producedBy_samplingSite_location_cesium_height"] = h3_to_height.get(thing.h3)
+                    if ("producedBy_samplingSite_location_cesium_height" in core_record):
+                        core_record.pop("producedBy_samplingSite_location_cesium_height")
                     core_records.append(core_record)
                 for r in core_records:
                     allkeys.add(r["id"])
