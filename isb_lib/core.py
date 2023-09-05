@@ -12,7 +12,8 @@ from signal import SIGINT
 import igsn_lib.time
 
 from isamples_metadata.metadata_constants import SAMPLE_IDENTIFIER, AT_ID, LABEL, HAS_CONTEXT_CATEGORY, \
-    HAS_CONTEXT_CATEGORY_CONFIDENCE, HAS_MATERIAL_CATEGORY, HAS_MATERIAL_CATEGORY_CONFIDENCE, HAS_SPECIMEN_CATEGORY
+    HAS_CONTEXT_CATEGORY_CONFIDENCE, HAS_MATERIAL_CATEGORY, HAS_MATERIAL_CATEGORY_CONFIDENCE, HAS_SPECIMEN_CATEGORY, \
+    KEYWORDS
 from isamples_metadata.metadata_exceptions import MetadataException
 from isb_lib.models.thing import Thing
 from isamples_metadata.Transformer import Transformer, geo_to_h3
@@ -177,8 +178,8 @@ def _coreRecordAsSolrDoc(coreMetadata: typing.Dict) -> typing.Dict:  # noqa: C90
         doc["hasSpecimenCategory"] = coreMetadata[HAS_SPECIMEN_CATEGORY]
     if _shouldAddMetadataValueToSolrDoc(coreMetadata, HAS_SPECIMEN_CATEGORY_CONFIDENCE):
         doc["hasSpecimenCategoryConfidence"] = coreMetadata[HAS_SPECIMEN_CATEGORY_CONFIDENCE]
-    if _shouldAddMetadataValueToSolrDoc(coreMetadata, "keywords"):
-        doc["keywords"] = coreMetadata["keywords"]
+    if _shouldAddMetadataValueToSolrDoc(coreMetadata, KEYWORDS):
+        doc["keywords"] = coreMetadata[KEYWORDS]
     if _shouldAddMetadataValueToSolrDoc(coreMetadata, "informalClassification"):
         doc["informalClassification"] = coreMetadata["informalClassification"]
     if _shouldAddMetadataValueToSolrDoc(coreMetadata, "registrant"):

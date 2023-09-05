@@ -291,3 +291,15 @@ def test_geome_geo_to_h3():
         source_record = json.load(source_file)
         h3 = GEOMETransformer.geo_to_h3(source_record)
         assert "8f65534b37a2c0d" == h3
+
+
+def test_open_context_extract_getty():
+    test_file_path = "./test_data/OpenContext/raw/ark-28722-k26h4xk1f.json"
+    with open(test_file_path) as source_file:
+        source_record = json.load(source_file)
+        transformer = OpenContextTransformer(source_record)
+        keywords = transformer._extract_getty_keywords()
+        assert 1 == len(keywords)
+        glass_keyword = keywords[0]
+        assert "glass (material)" == glass_keyword.value
+        assert "https://vocab.getty.edu/aat/300010797" == glass_keyword.uri

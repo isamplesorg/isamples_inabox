@@ -3,6 +3,8 @@ import csv
 from pathlib import Path
 from typing import Optional
 
+from isamples_metadata.metadata_constants import LABEL, IDENTIFIER
+
 """
 Note that this module operates on a CSV-derived form of the vocabulary sourced at 
 https://github.com/isamplesorg/vocabularies/tree/develop/src
@@ -16,8 +18,8 @@ class VocabularyTerm:
 
     def metadata_dict(self) -> dict[str, str]:
         return {
-            "label": self.label,
-            "identifier": self.uri
+            LABEL: self.label,
+            IDENTIFIER: self.uri
         }
 
 
@@ -39,7 +41,6 @@ class ControlledVocabulary:
                 term = VocabularyTerm(key, label, uri)
                 self.vocabulary_terms_by_key[key] = term
                 self.vocabulary_terms_by_label[label] = term
-                print(f"metadata dict is {term.metadata_dict()}")
 
     def term_for_key(self, key: str) -> Optional[VocabularyTerm]:
         return self.vocabulary_terms_by_key.get(key, None)

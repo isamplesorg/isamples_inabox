@@ -1,18 +1,20 @@
 import typing
 from typing import Optional
+import re
 
 import isamples_metadata.Transformer
 from isamples_metadata.Transformer import (
     Transformer,
     AbstractCategoryMetaMapper,
     StringEqualityCategoryMapper,
-    AbstractCategoryMapper,
+    AbstractCategoryMapper, Keyword,
 )
-from isamples_metadata.controlled_vocabularies import CONTEXT_PAST_HUMAN_ACTIVITIES
 from isamples_metadata.metadata_exceptions import MissingIdentifierException
 from isamples_metadata.taxonomy.metadata_model_client import MODEL_SERVER_CLIENT, PredictionResult
 from isamples_metadata.vocabularies import vocabulary_mapper
 
+AAT_NAME = "Getty Art & Architecture Thesaurus"
+GETTY_AAT_REGEX = re.compile("\[([^\]]+)\]")
 
 class MaterialCategoryMetaMapper(AbstractCategoryMetaMapper):
     _anthropogenicMaterialMapper = StringEqualityCategoryMapper(
@@ -230,7 +232,7 @@ class OpenContextTransformer(Transformer):
     def sample_sampling_purpose(self) -> str:
         return ""
 
-    def has_context_categories(self) -> typing.List[str]:
+    def has_context_categories(self) -> typing.List[dict[str, str]]:
         return [vocabulary_mapper.SAMPLED_FEATURE.term_for_key("pasthumanoccupationsite").metadata_dict()]
 
     def _compute_material_prediction_results(self) -> typing.Optional[typing.List[PredictionResult]]:
@@ -305,8 +307,35 @@ class OpenContextTransformer(Transformer):
         else:
             return []
 
-    def keywords(self) -> typing.List[str]:
-        return self._context_label_pieces()
+    def _extract_getty_keywords(self) -> list[Keyword]:
+        # For the getty terms, we have pairs of keys that look like this:
+        #
+        #  "inorganic material [getty-aat-300010360]": ["glass (material)"],
+        #  "inorganic material [getty-aat-300010360] [URI]": ["https://vocab.getty.edu/aat/300010797"]
+        # We don't know all the terms beforehand, so we'll iterate the dictionary keys, and look for things that have
+        # the getty-aat key format in them, check to see if it has URI in the key, and build a Keyword that glues
+        # them together.
+        keywords_by_getty_id = {}
+        for k, v in self.source_record.items():
+            if "getty-aat" in k:
+                # extract out the piece of the key that is the getty specific piece
+                match = GETTY_AAT_REGEX.search(k)
+                if match is not None:
+                    getty_key = match.group(1)
+                    keyword = keywords_by_getty_id.get(getty_key)
+                    if keyword is None:
+                        keyword = Keyword("", "", AAT_NAME)
+                        keywords_by_getty_id[getty_key] = keyword
+                    if "URI" in k:
+                        keyword.uri = v[0]
+                    else:
+                        keyword.value = v[0]
+        return list(keywords_by_getty_id.values())
+
+    def keywords(self) -> typing.List[dict[str, str]]:
+        getty_keywords = self._extract_getty_keywords()
+        getty_keyword_dicts = [keyword.metadata_dict() for keyword in getty_keywords]
+        return getty_keyword_dicts
 
     def produced_by_id_string(self) -> str:
         return Transformer.NOT_PROVIDED

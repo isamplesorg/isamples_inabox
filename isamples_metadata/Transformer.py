@@ -6,7 +6,7 @@ import h3
 
 from isamples_metadata.metadata_constants import SAMPLE_IDENTIFIER, SCHEMA, AT_ID, LABEL, DESCRIPTION, \
     HAS_CONTEXT_CATEGORY, HAS_CONTEXT_CATEGORY_CONFIDENCE, HAS_MATERIAL_CATEGORY, HAS_MATERIAL_CATEGORY_CONFIDENCE, \
-    HAS_SPECIMEN_CATEGORY, HAS_SPECIMEN_CATEGORY_CONFIDENCE
+    HAS_SPECIMEN_CATEGORY, HAS_SPECIMEN_CATEGORY_CONFIDENCE, KEYWORDS, KEYWORD, KEYWORD_URI, SCHEME_NAME
 
 NOT_PROVIDED = "Not Provided"
 
@@ -95,10 +95,10 @@ class Transformer(ABC):
             HAS_MATERIAL_CATEGORY_CONFIDENCE: self.has_material_category_confidences(material_categories),
             HAS_SPECIMEN_CATEGORY: specimen_categories,
             HAS_SPECIMEN_CATEGORY_CONFIDENCE: self.has_specimen_category_confidences(specimen_categories),
-            "informalClassification": self.informal_classification(),
-            "keywords": self.keywords(),
+            INFORMAL_CLASSIFICATION: self.informal_classification(),
+            KEYWORDS: self.keywords(),
             "producedBy": {
-                "@id": self.produced_by_id_string(),
+                AT_ID: self.produced_by_id_string(),
                 LABEL: self.produced_by_label(),
                 DESCRIPTION: self.produced_by_description(),
                 "hasFeatureOfInterest": self.produced_by_feature_of_interest(),
@@ -173,7 +173,7 @@ class Transformer(ABC):
         return confidences
 
     @abstractmethod
-    def has_context_categories(self) -> typing.List[str]:
+    def has_context_categories(self) -> typing.List[dict[str, str]]:
         """Map from the source record into an iSamples context category"""
         pass
 
@@ -182,7 +182,7 @@ class Transformer(ABC):
         return Transformer._rule_based_confidence_list_for_categories_list(context_categories)
 
     @abstractmethod
-    def has_material_categories(self) -> typing.List[str]:
+    def has_material_categories(self) -> typing.List[dict[str, str]]:
         """Map from the source record into an iSamples material category"""
         pass
 
@@ -191,7 +191,7 @@ class Transformer(ABC):
         return Transformer._rule_based_confidence_list_for_categories_list(material_categories)
 
     @abstractmethod
-    def has_specimen_categories(self) -> typing.List[str]:
+    def has_specimen_categories(self) -> typing.List[dict[str, str]]:
         """Map from the source record into an iSamples specimen category"""
         pass
 
@@ -205,7 +205,7 @@ class Transformer(ABC):
         pass
 
     @abstractmethod
-    def keywords(self) -> typing.List[str]:
+    def keywords(self) -> typing.List[dict[str, str]]:
         """The keywords for the sample in source record"""
         pass
 
@@ -466,6 +466,21 @@ class StringPairedCategoryMapper(AbstractCategoryMapper):
             and potential_match.lower().strip() == self._primaryMatch
             and auxiliary_match.lower().strip() == self._auxiliaryMatch
         )
+
+class Keyword:
+    """Keyword for inclusion in the iSamples keywords metadata key"""
+
+    def __init__(self, value: str, uri: str, scheme: str):
+        self.value = value
+        self.uri = uri
+        self.scheme = scheme
+
+    def metadata_dict(self) -> dict[str, str]:
+        return {
+            KEYWORD: self.value,
+            KEYWORD_URI: self.uri,
+            SCHEME_NAME: self.scheme
+        }
 
 
 def geo_to_h3(latitude: typing.Optional[float], longitude: typing.Optional[float], resolution: int = Transformer.DEFAULT_H3_RESOLUTION) -> typing.Optional[str]:
