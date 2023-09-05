@@ -24,7 +24,8 @@ class VocabularyTerm:
 class ControlledVocabulary:
     def __init__(self, file_path: str, uri_prefix: str):
         self.uri_prefix = uri_prefix
-        self.vocabulary_terms = {}
+        self.vocabulary_terms_by_key = {}
+        self.vocabulary_terms_by_label = {}
         with open(file_path, newline="") as csvfile:
             csvreader = csv.reader(csvfile, delimiter="\t", quoting=csv.QUOTE_NONE)
             # skip header
@@ -36,11 +37,15 @@ class ControlledVocabulary:
                 label = row[1]
                 uri = os.path.join(uri_prefix, key)
                 term = VocabularyTerm(key, label, uri)
-                self.vocabulary_terms[key] = term
+                self.vocabulary_terms_by_key[key] = term
+                self.vocabulary_terms_by_label[label] = term
                 print(f"metadata dict is {term.metadata_dict()}")
 
     def term_for_key(self, key: str) -> Optional[VocabularyTerm]:
-        return self.vocabulary_terms.get(key, None)
+        return self.vocabulary_terms_by_key.get(key, None)
+
+    def term_for_label(self, label: str) -> Optional[VocabularyTerm]:
+        return self.vocabulary_terms_by_label.get(label, None)
 
 
 parent_dir = Path(__file__).parent

@@ -12,7 +12,7 @@ from signal import SIGINT
 import igsn_lib.time
 
 from isamples_metadata.metadata_constants import SAMPLE_IDENTIFIER, AT_ID, LABEL, HAS_CONTEXT_CATEGORY, \
-    HAS_CONTEXT_CATEGORY_CONFIDENCE
+    HAS_CONTEXT_CATEGORY_CONFIDENCE, HAS_MATERIAL_CATEGORY, HAS_MATERIAL_CATEGORY_CONFIDENCE, HAS_SPECIMEN_CATEGORY
 from isamples_metadata.metadata_exceptions import MetadataException
 from isb_lib.models.thing import Thing
 from isamples_metadata.Transformer import Transformer, geo_to_h3
@@ -162,21 +162,21 @@ def _coreRecordAsSolrDoc(coreMetadata: typing.Dict) -> typing.Dict:  # noqa: C90
     if _shouldAddMetadataValueToSolrDoc(coreMetadata, "sourceUpdatedTime"):
         doc["sourceUpdatedTime"] = coreMetadata["sourceUpdatedTime"]
     if _shouldAddMetadataValueToSolrDoc(coreMetadata, LABEL):
-        doc[LABEL] = coreMetadata[LABEL]
+        doc["label"] = coreMetadata[LABEL]
     if _shouldAddMetadataValueToSolrDoc(coreMetadata, DESCRIPTION):
-        doc[DESCRIPTION] = coreMetadata[DESCRIPTION]
+        doc["description"] = coreMetadata[DESCRIPTION]
     if _shouldAddMetadataValueToSolrDoc(coreMetadata, HAS_CONTEXT_CATEGORY):
-        doc[HAS_CONTEXT_CATEGORY] = coreMetadata[HAS_CONTEXT_CATEGORY]
+        doc["hasContextCategory"] = coreMetadata[HAS_CONTEXT_CATEGORY]
     if _shouldAddMetadataValueToSolrDoc(coreMetadata, HAS_CONTEXT_CATEGORY_CONFIDENCE):
-        doc[HAS_CONTEXT_CATEGORY_CONFIDENCE] = coreMetadata[HAS_CONTEXT_CATEGORY_CONFIDENCE]
-    if _shouldAddMetadataValueToSolrDoc(coreMetadata, "hasMaterialCategory"):
-        doc["hasMaterialCategory"] = coreMetadata["hasMaterialCategory"]
-    if _shouldAddMetadataValueToSolrDoc(coreMetadata, "hasMaterialCategoryConfidence"):
-        doc["hasMaterialCategoryConfidence"] = coreMetadata["hasMaterialCategoryConfidence"]
-    if _shouldAddMetadataValueToSolrDoc(coreMetadata, "hasSpecimenCategory"):
-        doc["hasSpecimenCategory"] = coreMetadata["hasSpecimenCategory"]
-    if _shouldAddMetadataValueToSolrDoc(coreMetadata, "hasSpecimenCategoryConfidence"):
-        doc["hasSpecimenCategoryConfidence"] = coreMetadata["hasSpecimenCategoryConfidence"]
+        doc["hasContextCategoryConfidence"] = coreMetadata[HAS_CONTEXT_CATEGORY_CONFIDENCE]
+    if _shouldAddMetadataValueToSolrDoc(coreMetadata, HAS_MATERIAL_CATEGORY):
+        doc["hasMaterialCategory"] = coreMetadata[HAS_MATERIAL_CATEGORY]
+    if _shouldAddMetadataValueToSolrDoc(coreMetadata, HAS_MATERIAL_CATEGORY_CONFIDENCE):
+        doc["hasMaterialCategoryConfidence"] = coreMetadata[HAS_MATERIAL_CATEGORY_CONFIDENCE]
+    if _shouldAddMetadataValueToSolrDoc(coreMetadata, HAS_SPECIMEN_CATEGORY):
+        doc["hasSpecimenCategory"] = coreMetadata[HAS_SPECIMEN_CATEGORY]
+    if _shouldAddMetadataValueToSolrDoc(coreMetadata, HAS_SPECIMEN_CATEGORY_CONFIDENCE):
+        doc["hasSpecimenCategoryConfidence"] = coreMetadata[HAS_SPECIMEN_CATEGORY_CONFIDENCE]
     if _shouldAddMetadataValueToSolrDoc(coreMetadata, "keywords"):
         doc["keywords"] = coreMetadata["keywords"]
     if _shouldAddMetadataValueToSolrDoc(coreMetadata, "informalClassification"):

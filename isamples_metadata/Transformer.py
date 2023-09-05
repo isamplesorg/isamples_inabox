@@ -5,7 +5,8 @@ from typing import Optional
 import h3
 
 from isamples_metadata.metadata_constants import SAMPLE_IDENTIFIER, SCHEMA, AT_ID, LABEL, DESCRIPTION, \
-    HAS_CONTEXT_CATEGORY, HAS_CONTEXT_CATEGORY_CONFIDENCE, HAS_MATERIAL_CATEGORY
+    HAS_CONTEXT_CATEGORY, HAS_CONTEXT_CATEGORY_CONFIDENCE, HAS_MATERIAL_CATEGORY, HAS_MATERIAL_CATEGORY_CONFIDENCE, \
+    HAS_SPECIMEN_CATEGORY, HAS_SPECIMEN_CATEGORY_CONFIDENCE
 
 NOT_PROVIDED = "Not Provided"
 
@@ -91,9 +92,9 @@ class Transformer(ABC):
             HAS_CONTEXT_CATEGORY: context_categories,
             HAS_CONTEXT_CATEGORY_CONFIDENCE: self.has_context_category_confidences(context_categories),
             HAS_MATERIAL_CATEGORY: material_categories,
-            "hasMaterialCategoryConfidence": self.has_material_category_confidences(material_categories),
-            "hasSpecimenCategory": specimen_categories,
-            "hasSpecimenCategoryConfidence": self.has_specimen_category_confidences(specimen_categories),
+            HAS_MATERIAL_CATEGORY_CONFIDENCE: self.has_material_category_confidences(material_categories),
+            HAS_SPECIMEN_CATEGORY: specimen_categories,
+            HAS_SPECIMEN_CATEGORY_CONFIDENCE: self.has_specimen_category_confidences(specimen_categories),
             "informalClassification": self.informal_classification(),
             "keywords": self.keywords(),
             "producedBy": {
