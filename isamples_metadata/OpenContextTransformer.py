@@ -8,8 +8,10 @@ from isamples_metadata.Transformer import (
     StringEqualityCategoryMapper,
     AbstractCategoryMapper,
 )
+from isamples_metadata.controlled_vocabularies import CONTEXT_PAST_HUMAN_ACTIVITIES
 from isamples_metadata.metadata_exceptions import MissingIdentifierException
 from isamples_metadata.taxonomy.metadata_model_client import MODEL_SERVER_CLIENT, PredictionResult
+from isamples_metadata.vocabularies import vocabulary_mapper
 
 
 class MaterialCategoryMetaMapper(AbstractCategoryMetaMapper):
@@ -229,7 +231,7 @@ class OpenContextTransformer(Transformer):
         return ""
 
     def has_context_categories(self) -> typing.List[str]:
-        return ["Site of past human activities"]
+        return [vocabulary_mapper.SAMPLED_FEATURE.term_for_key("pasthumanoccupationsite").metadata_dict()]
 
     def _compute_material_prediction_results(self) -> typing.Optional[typing.List[PredictionResult]]:
         item_category = self._item_category()

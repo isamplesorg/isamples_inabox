@@ -1,0 +1,21 @@
+[s]	lab	def
+sf:activehumanoccupationsite	Active human occupation site	Specimen samples materials or objects produced by current or ongoing human activity
+sf:anthropogenicenvironment	Anthropogenic environment	Sampled feature is produced by or related to human activity past or present.
+sf:anysampledfeature	Any sampled feature	Top concept in sampled feature type vocabulary.
+sf:atmosphere	Atmosphere	specimen samples the Earth's atmosphere
+sf:biologicalentity	Biological entity	Sampled feature is an organism. Use for samples that represent some species of organism as the proximate sampled feature for which the focus is not the environment that the organism inhabits.
+sf:earthenvironment	Earth environment	specimen samples the natural earth environment
+sf:earthinterior	Earth interior	Specimen samples solid material within the earth (fluids in pore space in earth interior sample 'subsurface fluid reservoir'
+sf:earthsurface	Earth surface	Specimen samples the interface between solid earth and hydrosphere or atmosphere. Includes samples representing things collected on the surface, or in the uppermost part of the material below the surface. Not including recently deposited sediment that has not been modified by interaction with the surface environment.
+sf:experimentsetting	Experiment setting	Sampled feature is the expermental set up that produced the sample.
+sf:extraterrestrialenvironment	Extraterrestrial environment	specimen samples environment outside of solid earth, hydrosphere, or atmosphere.
+sf:glacierenvironment	Glacier environment	Sample of ice, water, or other thing from a glacier, ice sheet, ice shelf, iceberg. Does not include various environments adjacent to glacier.
+sf:laboratorycuratorialenvironment	Laboratory or curatorial environment	specimen samples environment in a laboratory; e.g. lab blank measurements.
+sf:lakeriverstreambottom	Lake river or stream bottom	Specimen samples the solid Earth interface with a lake or flowing water body
+sf:marinewaterbody	Marine environment	specimen samples marine hydrosphere
+sf:marinewaterbodybottom	Marine water body bottom	Specimen samples the solid Earth interface with marine or brackish water body. Includes�benthic boundary layer:  the bottom layer of water and the uppermost layer of sediment directly influenced by the overlying water
+sf:pasthumanoccupationsite	Site of past human activities	specimen samples a place where humans have been and left evidence of their activity. Includes prehistoric and paleo hominid sites
+sf:subaerialsurfaceenvironment	Subaerial surface environment	Specimen samples the  interface between solid Earth and atmosphere.  Sample is collected on the surface, or immediately below surface (zone of bioturbation). Include soil and recently deposited subaerial sediment at the surface.
+sf:subsurfacefluidreservoir	Subsurface fluid reservoir	Specimen samples fluid that resides in fractures or intergranular porosity in the solid earth.
+sf:terrestrialwaterbody	Terrestrial water body	specimen samples terrestrial hydrosphere-- lake, other standing water, or a flowing water body (river, stream..) Include saline water in terrestrial evaporite environments.
+sf:waterbody	Water body	specimen samples the hydrosphere

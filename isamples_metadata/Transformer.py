@@ -4,7 +4,8 @@ from typing import Optional
 
 import h3
 
-from isamples_metadata.metadata_constants import SAMPLE_IDENTIFIER, SCHEMA, AT_ID, LABEL, DESCRIPTION
+from isamples_metadata.metadata_constants import SAMPLE_IDENTIFIER, SCHEMA, AT_ID, LABEL, DESCRIPTION, \
+    HAS_CONTEXT_CATEGORY, HAS_CONTEXT_CATEGORY_CONFIDENCE, HAS_MATERIAL_CATEGORY
 
 NOT_PROVIDED = "Not Provided"
 
@@ -87,9 +88,9 @@ class Transformer(ABC):
             LABEL: self.sample_label(),
             SAMPLE_IDENTIFIER: self.sample_identifier_string(),
             DESCRIPTION: self.sample_description(),
-            "has_context_category": context_categories,
-            "has_context_category_confidence": self.has_context_category_confidences(context_categories),
-            "hasMaterialCategory": material_categories,
+            HAS_CONTEXT_CATEGORY: context_categories,
+            HAS_CONTEXT_CATEGORY_CONFIDENCE: self.has_context_category_confidences(context_categories),
+            HAS_MATERIAL_CATEGORY: material_categories,
             "hasMaterialCategoryConfidence": self.has_material_category_confidences(material_categories),
             "hasSpecimenCategory": specimen_categories,
             "hasSpecimenCategoryConfidence": self.has_specimen_category_confidences(specimen_categories),
