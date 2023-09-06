@@ -8,7 +8,8 @@ from isamples_metadata.metadata_constants import SAMPLE_IDENTIFIER, SCHEMA, AT_I
     HAS_CONTEXT_CATEGORY, HAS_CONTEXT_CATEGORY_CONFIDENCE, HAS_MATERIAL_CATEGORY, HAS_MATERIAL_CATEGORY_CONFIDENCE, \
     HAS_SPECIMEN_CATEGORY, HAS_SPECIMEN_CATEGORY_CONFIDENCE, KEYWORDS, KEYWORD, KEYWORD_URI, SCHEME_NAME, PRODUCED_BY, \
     RESPONSIBILITY, HAS_FEATURE_OF_INTEREST, RESULT_TIME, SAMPLING_SITE, LOCATION, ELEVATION, LATITUDE, LONGITUDE, \
-    REGISTRANT, SAMPLING_PURPOSE, CURATION, ACCESS_CONSTRAINTS, CURATION_LOCATION, RELATED_RESOURCE
+    REGISTRANT, SAMPLING_PURPOSE, CURATION, ACCESS_CONSTRAINTS, CURATION_LOCATION, RELATED_RESOURCE, AUTHORIZED_BY, \
+    COMPLIES_WITH
 
 NOT_PROVIDED = "Not Provided"
 
@@ -127,8 +128,8 @@ class Transformer(ABC):
                 RESPONSIBILITY: self.curation_responsibility(),
             },
             RELATED_RESOURCE: self.related_resources(),
-            "authorizedBy": self.authorized_by(),
-            "compliesWith": self.complies_with(),
+            AUTHORIZED_BY: self.authorized_by(),
+            COMPLIES_WITH: self.complies_with(),
         }
         for index in range(0, 15):
             h3_at_resolution = self.h3_function()(self.source_record, index)

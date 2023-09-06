@@ -11,7 +11,7 @@ import isamples_metadata
 from isamples_metadata.Transformer import (
     Transformer,
 )
-from isamples_metadata.metadata_constants import LABEL
+from isamples_metadata.metadata_constants import LABEL, AUTHORIZED_BY, COMPLIES_WITH
 from isb_web.sqlmodel_database import kingdom_for_taxonomy_name
 
 PERMIT_STRINGS_TO_IGNORE = ['nan', 'na', 'no data', 'unknown', 'none_required']
@@ -460,7 +460,7 @@ class GEOMETransformer(Transformer):
         permit_information = self._parent_permit_information()
         if permit_information is not None:
             parsed_permit_information = GEOMETransformer.parse_permit_freetext(permit_information)
-            return parsed_permit_information["authorizedBy"]
+            return parsed_permit_information[AUTHORIZED_BY]
         return []
 
     def complies_with(self) -> typing.List[str]:
@@ -469,7 +469,7 @@ class GEOMETransformer(Transformer):
 
     @staticmethod
     def _format_result_object(authorized_by: list[str]) -> dict[str, list[str]]:
-        return {"authorizedBy": authorized_by, "compliesWith": []}
+        return {AUTHORIZED_BY: authorized_by, COMPLIES_WITH: []}
 
     @staticmethod
     def parse_permit_text(text: str) -> dict[str, list[str]]:
@@ -499,10 +499,10 @@ class GEOMETransformer(Transformer):
                 authorized_by_str = match.group(3)
         if authorized_by_str is not None:
             authorized_by_list = GEOMETransformer._split_delimited_text(authorized_by_str)
-            result["authorizedBy"] = authorized_by_list
+            result[AUTHORIZED_BY] = authorized_by_list
         if complies_with_str is not None:
             complies_with_list = GEOMETransformer._split_delimited_text(complies_with_str)
-            result["compliesWith"] = complies_with_list
+            result[COMPLIES_WITH] = complies_with_list
         return result
 
     @staticmethod
