@@ -9,6 +9,7 @@ from isamples_metadata.Transformer import (
     StringEqualityCategoryMapper,
     AbstractCategoryMapper, Keyword,
 )
+from isamples_metadata.metadata_constants import ROLE, NAME
 from isamples_metadata.metadata_exceptions import MissingIdentifierException
 from isamples_metadata.taxonomy.metadata_model_client import MODEL_SERVER_CLIENT, PredictionResult
 from isamples_metadata.vocabularies import vocabulary_mapper
@@ -265,7 +266,8 @@ class OpenContextTransformer(Transformer):
     def has_material_category_confidences(self, material_categories: typing.List[str]) -> typing.Optional[typing.List[float]]:
         prediction_results = self._compute_material_prediction_results()
         if prediction_results is None:
-            return None
+            material_categories = self.has_material_categories()
+            return Transformer._rule_based_confidence_list_for_categories_list(material_categories)
         else:
             return [prediction.confidence for prediction in prediction_results]
 
@@ -296,7 +298,9 @@ class OpenContextTransformer(Transformer):
     def has_specimen_category_confidences(self, specimen_categories: typing.List[str]) -> typing.Optional[typing.List[float]]:
         prediction_results = self._compute_specimen_prediction_results()
         if prediction_results is None:
-            return None
+            # Not computed, so default to human entered confidence
+            specimen_categories = self.has_specimen_categories()
+            return Transformer._rule_based_confidence_list_for_categories_list(specimen_categories)
         else:
             return [prediction.confidence for prediction in prediction_results]
 
@@ -351,7 +355,7 @@ class OpenContextTransformer(Transformer):
     def produced_by_feature_of_interest(self) -> str:
         return Transformer.NOT_PROVIDED
 
-    def produced_by_responsibilities(self) -> typing.List[str]:
+    def produced_by_responsibilities(self) -> typing.List[dict[str, str]]:
         # from ekansa:
         # "Creator" is typically a project PI (Principle Investigator). They may or may not be the person that
         # collected the sample. If given, a "Contributor" is the person that originally collected or first
@@ -360,11 +364,11 @@ class OpenContextTransformer(Transformer):
         creators = self.source_record.get("Creator")
         if creators is not None:
             for creator in creators:
-                responsibilities.append(f"creator: {creator}")
+                responsibilities.append(Transformer._responsibility_dict("creator", creator))
         contributors = self.source_record.get("Contributor")
         if contributors is not None:
             for contributor in contributors:
-                responsibilities.append(f"collector: {contributor}")
+                responsibilities.append(Transformer._responsibility_dict("collector", contributor))
         return responsibilities
 
     def produced_by_result_time(self) -> str:

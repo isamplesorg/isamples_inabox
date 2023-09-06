@@ -15,7 +15,7 @@ from isamples_metadata.SESARTransformer import SESARTransformer
 from isamples_metadata.GEOMETransformer import GEOMETransformer, GEOMEChildTransformer
 from isamples_metadata.OpenContextTransformer import OpenContextTransformer
 from isamples_metadata.SmithsonianTransformer import SmithsonianTransformer
-from isamples_metadata.taxonomy.metadata_model_client import ModelServerClient
+from isamples_metadata.taxonomy.metadata_model_client import ModelServerClient, PredictionResult
 from isb_lib import geome_adapter, sesar_adapter
 from isb_lib.geome_adapter import GEOMEItem
 from isb_lib.models.thing import Thing
@@ -219,6 +219,11 @@ OPENCONTEXT_test_values = [
         "./test_data/OpenContext/test/ark-28722-k2vq31x46-test.json",
         "2017-02-09T02:42:21Z",
     ),
+    (
+        "./test_data/OpenContext/raw/ark-28722-k26h4xk1f.json",
+        "./test_data/OpenContext/test/ark-28722-k26h4xk1f-test.json",
+        "2022-10-23T07:15:31Z",
+    )
 ]
 
 
@@ -226,9 +231,13 @@ OPENCONTEXT_test_values = [
     "open_context_source_path,isamples_path,timestamp", OPENCONTEXT_test_values
 )
 def test_open_context_dicts_equal(open_context_source_path, isamples_path, timestamp):
-    _run_transformer(
-        isamples_path, open_context_source_path, OpenContextTransformer, None, timestamp
-    )
+    fake_prediction = [PredictionResult("value", 1.0)]
+    with patch.object(ModelServerClient, "make_opencontext_material_request", return_value=fake_prediction):
+        _run_transformer(
+            isamples_path, open_context_source_path, OpenContextTransformer, None, timestamp
+        )
+
+
 
 
 def _get_record_with_id(record_id: str) -> typing.Dict:

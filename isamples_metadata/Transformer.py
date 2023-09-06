@@ -9,7 +9,7 @@ from isamples_metadata.metadata_constants import SAMPLE_IDENTIFIER, SCHEMA, AT_I
     HAS_SPECIMEN_CATEGORY, HAS_SPECIMEN_CATEGORY_CONFIDENCE, KEYWORDS, KEYWORD, KEYWORD_URI, SCHEME_NAME, PRODUCED_BY, \
     RESPONSIBILITY, HAS_FEATURE_OF_INTEREST, RESULT_TIME, SAMPLING_SITE, LOCATION, ELEVATION, LATITUDE, LONGITUDE, \
     REGISTRANT, SAMPLING_PURPOSE, CURATION, ACCESS_CONSTRAINTS, CURATION_LOCATION, RELATED_RESOURCE, AUTHORIZED_BY, \
-    COMPLIES_WITH, INFORMAL_CLASSIFICATION, PLACE_NAME
+    COMPLIES_WITH, INFORMAL_CLASSIFICATION, PLACE_NAME, ROLE, NAME
 
 NOT_PROVIDED = "Not Provided"
 
@@ -71,6 +71,12 @@ class Transformer(ABC):
         if day is not None and len(day) > 0:
             result_time_pieces.append(day.zfill(2))
         return "-".join(result_time_pieces)
+
+    @staticmethod
+    def _responsibility_dict(
+        role: str, name:str
+    ):
+        return {ROLE: role, NAME: name}
 
     def __init__(self, source_record: typing.Dict):
         self.source_record = source_record
@@ -233,7 +239,7 @@ class Transformer(ABC):
         pass
 
     @abstractmethod
-    def produced_by_responsibilities(self) -> typing.List[str]:
+    def produced_by_responsibilities(self) -> typing.List[dict[str, str]]:
         """The responsibility list for the producedBy dictionary"""
         pass
 
