@@ -13,7 +13,9 @@ import igsn_lib.time
 
 from isamples_metadata.metadata_constants import SAMPLE_IDENTIFIER, AT_ID, LABEL, HAS_CONTEXT_CATEGORY, \
     HAS_CONTEXT_CATEGORY_CONFIDENCE, HAS_MATERIAL_CATEGORY, HAS_MATERIAL_CATEGORY_CONFIDENCE, HAS_SPECIMEN_CATEGORY, \
-    KEYWORDS
+    KEYWORDS, PRODUCED_BY, HAS_FEATURE_OF_INTEREST, RESULT_TIME, SAMPLING_SITE, LOCATION, ELEVATION, LATITUDE, \
+    LONGITUDE, PLACE_NAME, SUBSAMPLE, REGISTRANT, SAMPLING_PURPOSE, CURATION, ACCESS_CONSTRAINTS, RESPONSIBILITY, \
+    RELATED_RESOURCE
 from isamples_metadata.metadata_exceptions import MetadataException
 from isb_lib.models.thing import Thing
 from isamples_metadata.Transformer import Transformer, geo_to_h3
@@ -182,15 +184,15 @@ def _coreRecordAsSolrDoc(coreMetadata: typing.Dict) -> typing.Dict:  # noqa: C90
         doc["keywords"] = coreMetadata[KEYWORDS]
     if _shouldAddMetadataValueToSolrDoc(coreMetadata, "informalClassification"):
         doc["informalClassification"] = coreMetadata["informalClassification"]
-    if _shouldAddMetadataValueToSolrDoc(coreMetadata, "registrant"):
-        doc["registrant"] = coreMetadata["registrant"]
-    if _shouldAddMetadataValueToSolrDoc(coreMetadata, "samplingPurpose"):
-        doc["samplingPurpose"] = coreMetadata["samplingPurpose"]
-    if "producedBy" in coreMetadata:
+    if _shouldAddMetadataValueToSolrDoc(coreMetadata, REGISTRANT):
+        doc["registrant"] = coreMetadata[REGISTRANT]
+    if _shouldAddMetadataValueToSolrDoc(coreMetadata, SAMPLING_PURPOSE):
+        doc["samplingPurpose"] = coreMetadata[SAMPLING_PURPOSE]
+    if PRODUCED_BY in coreMetadata:
         handle_produced_by_fields(coreMetadata, doc)
-    if "curation" in coreMetadata:
+    if CURATION in coreMetadata:
         handle_curation_fields(coreMetadata, doc)
-    if "relatedResource" in coreMetadata:
+    if RELATED_RESOURCE in coreMetadata:
         handle_related_resources(coreMetadata, doc)
 
     return doc
@@ -215,17 +217,17 @@ def coreRecordAsSolrDoc(transformer: Transformer) -> typing.Dict:
 
 
 def handle_curation_fields(coreMetadata: typing.Dict, doc: typing.Dict):
-    curation = coreMetadata["curation"]
+    curation = coreMetadata[CURATION]
     if _shouldAddMetadataValueToSolrDoc(curation, LABEL):
         doc["curation_label"] = curation[LABEL]
     if _shouldAddMetadataValueToSolrDoc(curation, DESCRIPTION):
         doc["curation_description"] = curation[DESCRIPTION]
-    if _shouldAddMetadataValueToSolrDoc(curation, "accessConstraints"):
-        doc["curation_accessConstraints"] = curation["accessConstraints"]
-    if _shouldAddMetadataValueToSolrDoc(curation, "location"):
-        doc["curation_location"] = curation["location"]
-    if _shouldAddMetadataValueToSolrDoc(curation, "responsibility"):
-        doc["curation_responsibility"] = curation["responsibility"]
+    if _shouldAddMetadataValueToSolrDoc(curation, ACCESS_CONSTRAINTS):
+        doc["curation_accessConstraints"] = curation[ACCESS_CONSTRAINTS]
+    if _shouldAddMetadataValueToSolrDoc(curation, CURATION_LOCATION):
+        doc["curation_location"] = curation[CURATION_LOCATION]
+    if _shouldAddMetadataValueToSolrDoc(curation, RESPONSIBILITY):
+        doc["curation_responsibility"] = curation[RESPONSIBILITY]
 
 
 def shapely_to_solr(shape: shapely.geometry.shape):
@@ -255,58 +257,58 @@ def lat_lon_to_solr(coreMetadata: typing.Dict, latitude: typing.SupportsFloat, l
 
 def handle_produced_by_fields(coreMetadata: typing.Dict, doc: typing.Dict):  # noqa: C901 -- need to examine computational complexity
     # The solr index flattens subdictionaries, so check the keys explicitly in the subdictionary to see if they should be added to the index
-    producedBy = coreMetadata["producedBy"]
+    producedBy = coreMetadata[PRODUCED_BY]
     if _shouldAddMetadataValueToSolrDoc(producedBy, LABEL):
         doc["producedBy_label"] = producedBy[LABEL]
     if _shouldAddMetadataValueToSolrDoc(producedBy, DESCRIPTION):
         doc["producedBy_description"] = producedBy[DESCRIPTION]
-    if _shouldAddMetadataValueToSolrDoc(producedBy, "responsibility"):
-        doc["producedBy_responsibility"] = producedBy["responsibility"]
-    if _shouldAddMetadataValueToSolrDoc(producedBy, "hasFeatureOfInterest"):
-        doc["producedBy_hasFeatureOfInterest"] = producedBy["hasFeatureOfInterest"]
-    if _shouldAddMetadataValueToSolrDoc(producedBy, "resultTime"):
-        raw_date_str = producedBy["resultTime"]
+    if _shouldAddMetadataValueToSolrDoc(producedBy, RESPONSIBILITY):
+        doc["producedBy_responsibility"] = producedBy[RESPONSIBILITY]
+    if _shouldAddMetadataValueToSolrDoc(producedBy, HAS_FEATURE_OF_INTEREST):
+        doc["producedBy_hasFeatureOfInterest"] = producedBy[HAS_FEATURE_OF_INTEREST]
+    if _shouldAddMetadataValueToSolrDoc(producedBy, RESULT_TIME):
+        raw_date_str = producedBy[RESULT_TIME]
         date_time = parsed_date(raw_date_str)
         if date_time is not None:
             solr_date_str = datetimeToSolrStr(date_time)
             doc["producedBy_resultTime"] = solr_date_str
             doc["producedBy_resultTimeRange"] = solr_date_str
-    if _shouldAddMetadataValueToSolrDoc(producedBy, "@id"):
-        produced_by_id = producedBy["@id"]
+    if _shouldAddMetadataValueToSolrDoc(producedBy, AT_ID):
+        produced_by_id = producedBy[AT_ID]
         doc["producedBy_isb_core_id"] = produced_by_id
         doc["relations"] = [
             {
                 "relation_target": produced_by_id,
-                "relation_type": "subsample",
-                "id": f"{doc['id']}_subsample_{produced_by_id}"
+                "relation_type": SUBSAMPLE,
+                "id": f"{doc['id']}_{SUBSAMPLE}_{produced_by_id}"
             }
         ]
-    if "samplingSite" in producedBy:
-        samplingSite = producedBy["samplingSite"]
+    if SAMPLING_SITE in producedBy:
+        samplingSite = producedBy[SAMPLING_SITE]
         if _shouldAddMetadataValueToSolrDoc(samplingSite, DESCRIPTION):
             doc["producedBy_samplingSite_description"] = samplingSite[DESCRIPTION]
         if _shouldAddMetadataValueToSolrDoc(samplingSite, LABEL):
             doc["producedBy_samplingSite_label"] = samplingSite[LABEL]
-        if _shouldAddMetadataValueToSolrDoc(samplingSite, "placeName"):
-            doc["producedBy_samplingSite_placeName"] = samplingSite["placeName"]
+        if _shouldAddMetadataValueToSolrDoc(samplingSite, PLACE_NAME):
+            doc["producedBy_samplingSite_placeName"] = samplingSite[PLACE_NAME]
 
-        if "location" in samplingSite:
-            location = samplingSite["location"]
-            if _shouldAddMetadataValueToSolrDoc(location, "elevation"):
-                location_str = location["elevation"]
+        if LOCATION in samplingSite:
+            location = samplingSite[LOCATION]
+            if _shouldAddMetadataValueToSolrDoc(location, ELEVATION):
+                location_str = location[ELEVATION]
                 match = ELEVATION_PATTERN.match(location_str)
                 if match is not None:
                     doc["producedBy_samplingSite_location_elevationInMeters"] = float(
                         match.group(1)
                     )
             if _shouldAddMetadataValueToSolrDoc(
-                location, "latitude"
-            ) and _shouldAddMetadataValueToSolrDoc(location, "longitude"):
-                lat_lon_to_solr(doc, location['latitude'], location['longitude'])
+                location, LATITUDE
+            ) and _shouldAddMetadataValueToSolrDoc(location, LONGITUDE):
+                lat_lon_to_solr(doc, location[LATITUDE], location[LONGITUDE])
 
 
 def handle_related_resources(coreMetadata: typing.Dict, doc: typing.Dict):
-    related_resources = coreMetadata["relatedResource"]
+    related_resources = coreMetadata[RELATED_RESOURCE]
     related_resource_ids = []
     for related_resource in related_resources:
         related_resource_ids.append(related_resource["target"])

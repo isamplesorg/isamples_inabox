@@ -335,6 +335,8 @@ class OpenContextTransformer(Transformer):
     def keywords(self) -> typing.List[dict[str, str]]:
         getty_keywords = self._extract_getty_keywords()
         getty_keyword_dicts = [keyword.metadata_dict() for keyword in getty_keywords]
+
+        # Also need to grab the context label, context href, and make a keyword object from them
         return getty_keyword_dicts
 
     def produced_by_id_string(self) -> str:

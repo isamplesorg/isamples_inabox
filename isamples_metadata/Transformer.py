@@ -6,7 +6,9 @@ import h3
 
 from isamples_metadata.metadata_constants import SAMPLE_IDENTIFIER, SCHEMA, AT_ID, LABEL, DESCRIPTION, \
     HAS_CONTEXT_CATEGORY, HAS_CONTEXT_CATEGORY_CONFIDENCE, HAS_MATERIAL_CATEGORY, HAS_MATERIAL_CATEGORY_CONFIDENCE, \
-    HAS_SPECIMEN_CATEGORY, HAS_SPECIMEN_CATEGORY_CONFIDENCE, KEYWORDS, KEYWORD, KEYWORD_URI, SCHEME_NAME
+    HAS_SPECIMEN_CATEGORY, HAS_SPECIMEN_CATEGORY_CONFIDENCE, KEYWORDS, KEYWORD, KEYWORD_URI, SCHEME_NAME, PRODUCED_BY, \
+    RESPONSIBILITY, HAS_FEATURE_OF_INTEREST, RESULT_TIME, SAMPLING_SITE, LOCATION, ELEVATION, LATITUDE, LONGITUDE, \
+    REGISTRANT, SAMPLING_PURPOSE, CURATION, ACCESS_CONSTRAINTS, CURATION_LOCATION, RELATED_RESOURCE
 
 NOT_PROVIDED = "Not Provided"
 
@@ -97,34 +99,34 @@ class Transformer(ABC):
             HAS_SPECIMEN_CATEGORY_CONFIDENCE: self.has_specimen_category_confidences(specimen_categories),
             INFORMAL_CLASSIFICATION: self.informal_classification(),
             KEYWORDS: self.keywords(),
-            "producedBy": {
+            PRODUCED_BY: {
                 AT_ID: self.produced_by_id_string(),
                 LABEL: self.produced_by_label(),
                 DESCRIPTION: self.produced_by_description(),
-                "hasFeatureOfInterest": self.produced_by_feature_of_interest(),
-                "responsibility": self.produced_by_responsibilities(),
-                "resultTime": self.produced_by_result_time(),
-                "samplingSite": {
+                HAS_FEATURE_OF_INTEREST: self.produced_by_feature_of_interest(),
+                RESPONSIBILITY: self.produced_by_responsibilities(),
+                RESULT_TIME: self.produced_by_result_time(),
+                SAMPLING_SITE: {
                     DESCRIPTION: self.sampling_site_description(),
                     LABEL: self.sampling_site_label(),
-                    "location": {
-                        "elevation": self.sampling_site_elevation(),
-                        "latitude": self.sampling_site_latitude(),
-                        "longitude": self.sampling_site_longitude(),
+                    LOCATION: {
+                        ELEVATION: self.sampling_site_elevation(),
+                        LATITUDE: self.sampling_site_latitude(),
+                        LONGITUDE: self.sampling_site_longitude(),
                     },
-                    "placeName": self.sampling_site_place_names(),
+                    PLACE_NAME: self.sampling_site_place_names(),
                 },
             },
-            "registrant": self.sample_registrant(),
-            "samplingPurpose": self.sample_sampling_purpose(),
-            "curation": {
+            REGISTRANT: self.sample_registrant(),
+            SAMPLING_PURPOSE: self.sample_sampling_purpose(),
+            CURATION: {
                 LABEL: self.curation_label(),
                 DESCRIPTION: self.curation_description(),
-                "accessConstraints": self.curation_access_constraints(),
-                "curationLocation": self.curation_location(),
-                "responsibility": self.curation_responsibility(),
+                ACCESS_CONSTRAINTS: self.curation_access_constraints(),
+                CURATION_LOCATION: self.curation_location(),
+                RESPONSIBILITY: self.curation_responsibility(),
             },
-            "relatedResource": self.related_resources(),
+            RELATED_RESOURCE: self.related_resources(),
             "authorizedBy": self.authorized_by(),
             "compliesWith": self.complies_with(),
         }

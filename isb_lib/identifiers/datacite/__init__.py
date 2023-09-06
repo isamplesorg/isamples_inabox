@@ -11,7 +11,7 @@ from aiohttp import ClientResponse
 from requests import Response
 from requests.auth import HTTPBasicAuth
 
-from isamples_metadata.metadata_constants import LABEL
+from isamples_metadata.metadata_constants import LABEL, REGISTRANT
 from isb_lib.core import parsed_date
 from isb_lib.identifiers.identifier import DataciteIdentifier, IGSNIdentifier
 
@@ -87,7 +87,7 @@ def datacite_metadata_from_core_record(
 ) -> dict:
     # Datacite requires the following fields:
     # DOI or prefix -- handled via params
-    registrant = core_record.get("registrant")
+    registrant = core_record.get(REGISTRANT)
     if registrant is None:
         raise ValueError("Registrant is a required field in order to register a DOI")
     # creators -- mapped from registrant?

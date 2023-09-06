@@ -303,3 +303,5 @@ def test_open_context_extract_getty():
         glass_keyword = keywords[0]
         assert "glass (material)" == glass_keyword.value
         assert "https://vocab.getty.edu/aat/300010797" == glass_keyword.uri
+        keyword_dict = glass_keyword.metadata_dict()
+        assert keyword_dict is not None
