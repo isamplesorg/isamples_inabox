@@ -12,6 +12,7 @@ from isamples_metadata.Transformer import (
     Transformer,
 )
 from isamples_metadata.metadata_constants import LABEL, AUTHORIZED_BY, COMPLIES_WITH
+from isamples_metadata.vocabularies import vocabulary_mapper
 from isb_web.sqlmodel_database import kingdom_for_taxonomy_name
 
 PERMIT_STRINGS_TO_IGNORE = ['nan', 'na', 'no data', 'unknown', 'none_required']
@@ -161,10 +162,10 @@ class GEOMETransformer(Transformer):
     def has_material_categories(self) -> typing.List[str]:
         # TODO: implement
         # ["'Organic material' unless record/entity, record/basisOfRecord, or record/collectionCode indicate otherwise"]
-        return ["Organic material"]
+        return vocabulary_mapper.MATERIAL_TYPE.term_for_key("organicmaterial")
 
     def has_specimen_categories(self) -> typing.List[str]:
-        return ["Whole organism"]
+        return vocabulary_mapper.SPECIMEN_TYPE.term_for_key("wholeorganism")
 
     def informal_classification(self) -> typing.List[str]:
         main_record = self._source_record_main_record()
@@ -278,7 +279,7 @@ class GEOMETransformer(Transformer):
                 return f"microhabitat: {microhabitat}"
         return Transformer.NOT_PROVIDED
 
-    def produced_by_responsibilities(self) -> typing.List[str]:
+    def produced_by_responsibilities(self) -> typing.List[dict[str, str]]:
         parent_record = self._source_record_parent_record()
         if parent_record is not None:
             responsibilities_pieces = []

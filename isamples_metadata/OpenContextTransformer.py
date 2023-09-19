@@ -9,7 +9,6 @@ from isamples_metadata.Transformer import (
     StringEqualityCategoryMapper,
     AbstractCategoryMapper, Keyword,
 )
-from isamples_metadata.metadata_constants import ROLE, NAME
 from isamples_metadata.metadata_exceptions import MissingIdentifierException
 from isamples_metadata.taxonomy.metadata_model_client import MODEL_SERVER_CLIENT, PredictionResult
 from isamples_metadata.vocabularies import vocabulary_mapper
@@ -24,42 +23,50 @@ class MaterialCategoryMetaMapper(AbstractCategoryMetaMapper):
             "Bulk Ceramic",
             "Glass",
         ],
-        "Anthropogenic material",
+        "anyanthropogenicmaterial",
+        vocabulary_mapper.MATERIAL_TYPE
     )
 
     _anthropogenicMetalMapper = StringEqualityCategoryMapper(
         ["Coin"],
-        "Anthropogenic metal",
+        "anthropogenicmetal",
+        vocabulary_mapper.MATERIAL_TYPE
     )
 
     _biogenicMapper = StringEqualityCategoryMapper(
         ["Animal Bone", "Human Bone", "Non Diagnostic Bone", "Shell"],
-        "Biogenic non organic material",
+        "biogenicnonorganicmaterial",
+        vocabulary_mapper.MATERIAL_TYPE
     )
 
     _organicMapper = StringEqualityCategoryMapper(
         ["Plant remains"],
-        "Organic material",
+        "organicmaterial",
+        vocabulary_mapper.MATERIAL_TYPE
     )
 
     _materialMapper = StringEqualityCategoryMapper(
         ["Biological record", "Biological subject, Ecofact"],
-        "Material",
+        "material",
+        vocabulary_mapper.MATERIAL_TYPE
     )
 
     _rockMapper = StringEqualityCategoryMapper(
         ["Bulk Lithic", "Groundstone"],
-        "Rock"
+        "rock",
+        vocabulary_mapper.MATERIAL_TYPE
     )
 
     _naturalSolidMaterialMapper = StringEqualityCategoryMapper(
         ["Natural solid material"],
-        "Natural solid material"
+        "earthmaterial",
+        vocabulary_mapper.MATERIAL_TYPE
     )
 
     _mineralMapper = StringEqualityCategoryMapper(
         ["Mineral"],
-        "Mineral"
+        "mineral",
+        vocabulary_mapper.MATERIAL_TYPE
     )
 
     _notSampleMapper = StringEqualityCategoryMapper(
@@ -68,7 +75,8 @@ class MaterialCategoryMetaMapper(AbstractCategoryMetaMapper):
             "Human Subject",
             "Reference Collection",
         ],
-        Transformer.NOT_PROVIDED
+        Transformer.NOT_PROVIDED,
+        vocabulary_mapper.MATERIAL_TYPE
     )
 
     @classmethod
@@ -92,7 +100,8 @@ class SpecimenCategoryMetaMapper(AbstractCategoryMetaMapper):
             "Human Bone",
             "Non Diagnostic Bone",
         ],
-        "Organism part",
+        "organismpart",
+        vocabulary_mapper.SPECIMEN_TYPE
     )
     _artifactMapper = StringEqualityCategoryMapper(
         [
@@ -106,24 +115,26 @@ class SpecimenCategoryMetaMapper(AbstractCategoryMetaMapper):
             "Sculpture",
             "Sample",
         ],
-        "Artifact",
+        "artifact",
+        vocabulary_mapper.SPECIMEN_TYPE
     )
     _biologicalSpecimenMapper = StringEqualityCategoryMapper(
         [
             "Biological record",
             "Biological subject, Ecofact",
             "Plant remains",
-        ], "Biological specimen"
+        ], "biologicalspecimen", vocabulary_mapper.SPECIMEN_TYPE
     )
     _physicalSpecimenMapper = StringEqualityCategoryMapper(
         [
             "Sample, Collection, or Aggregation",
             "Object"
         ],
-        "Physical specimen"
+        "physicalspecimen",
+        vocabulary_mapper.SPECIMEN_TYPE
     )
     _organismProductMapper = StringEqualityCategoryMapper(
-        ["Shell"], "Organism product"
+        ["Shell"], "organismproduct", vocabulary_mapper.SPECIMEN_TYPE
     )
     _notSampleMapper = StringEqualityCategoryMapper(
         [
@@ -131,7 +142,8 @@ class SpecimenCategoryMetaMapper(AbstractCategoryMetaMapper):
             "Human Subject",
             "Reference Collection",
         ],
-        Transformer.NOT_PROVIDED
+        Transformer.NOT_PROVIDED,
+        vocabulary_mapper.SPECIMEN_TYPE
     )
 
     @classmethod

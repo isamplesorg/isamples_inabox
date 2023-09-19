@@ -10,6 +10,7 @@ from isamples_metadata.metadata_constants import SAMPLE_IDENTIFIER, SCHEMA, AT_I
     RESPONSIBILITY, HAS_FEATURE_OF_INTEREST, RESULT_TIME, SAMPLING_SITE, LOCATION, ELEVATION, LATITUDE, LONGITUDE, \
     REGISTRANT, SAMPLING_PURPOSE, CURATION, ACCESS_CONSTRAINTS, CURATION_LOCATION, RELATED_RESOURCE, AUTHORIZED_BY, \
     COMPLIES_WITH, INFORMAL_CLASSIFICATION, PLACE_NAME, ROLE, NAME
+from isamples_metadata.vocabularies.vocabulary_mapper import ControlledVocabulary
 
 NOT_PROVIDED = "Not Provided"
 
@@ -324,6 +325,7 @@ class Transformer(ABC):
 
 class AbstractCategoryMapper(ABC):
     _destination: str
+    _controlled_vocabulary: ControlledVocabulary
 
     @abstractmethod
     def matches(
@@ -338,10 +340,11 @@ class AbstractCategoryMapper(ABC):
         self,
         potential_match: str,
         auxiliary_match: typing.Optional[str] = None,
-        categories_list: typing.List[str] = list(),
+        categories_list: typing.List[dict] = list(),
     ):
         if self.matches(potential_match, auxiliary_match):
-            categories_list.append(self._destination)
+            if self._destination != NOT_PROVIDED:
+                categories_list.append(self._controlled_vocabulary.term_for_label(self._destination))
 
     @property
     def destination(self):
@@ -350,6 +353,16 @@ class AbstractCategoryMapper(ABC):
     @destination.setter
     def destination(self, destination):
         self._destination = destination
+
+    @property
+    def controlled_vocabulary(self):
+        return self._controlled_vocabulary
+
+    @controlled_vocabulary.setter
+    def controlled_vocabulary(self, controlled_vocabulary):
+        self._controlled_vocabulary = controlled_vocabulary
+
+
 
 
 class AbstractCategoryMetaMapper(ABC):
@@ -360,8 +373,8 @@ class AbstractCategoryMetaMapper(ABC):
         cls,
         source_category: str,
         auxiliary_source_category: typing.Optional[str] = None,
-    ):
-        categories: list[str] = []
+    ) -> list[dict]:
+        categories: list[dict] = []
         if source_category is not None:
             for mapper in cls._categoriesMappers:
                 mapper.append_if_matched(
@@ -385,8 +398,10 @@ class StringConstantCategoryMapper(AbstractCategoryMapper):
     def __init__(
         self,
         destination_category: str,
+        controlled_vocabulary: ControlledVocabulary
     ):
         self._destination = destination_category
+        self._controlled_vocabulary = controlled_vocabulary
 
     def matches(
         self,
@@ -403,11 +418,13 @@ class StringEqualityCategoryMapper(AbstractCategoryMapper):
         self,
         categories: list[str],
         destination_category: str,
+        controlled_vocabulary: ControlledVocabulary
     ):
         categories = [keyword.lower() for keyword in categories]
         categories = [keyword.strip() for keyword in categories]
         self._categories = categories
         self._destination = destination_category
+        self._controlled_vocabulary = controlled_vocabulary
 
     def matches(
         self,
@@ -420,9 +437,10 @@ class StringEqualityCategoryMapper(AbstractCategoryMapper):
 class StringEndsWithCategoryMapper(AbstractCategoryMapper):
     """A mapper that matches if the potentialMatch ends with the specified string"""
 
-    def __init__(self, ends_with: str, destination_category: str):
+    def __init__(self, ends_with: str, destination_category: str, controlled_vocabulary: ControlledVocabulary):
         self._endsWith = ends_with.lower().strip()
         self._destination = destination_category
+        self._controlled_vocabulary = controlled_vocabulary
 
     def matches(
         self,
@@ -447,6 +465,7 @@ class StringOrderedCategoryMapper(AbstractCategoryMapper):
             if mapper.matches(potential_match, auxiliary_match):
                 # Note that this isn't thread-safe -- we expect one of these objects per thread
                 self.destination = mapper.destination
+                self.controlled_vocabulary = mapper.controlled_vocabulary
                 return True
         return False
 
@@ -459,10 +478,12 @@ class StringPairedCategoryMapper(AbstractCategoryMapper):
         primary_match: str,
         auxiliary_match: str,
         destination_category: str,
+        controlled_vocabulary: ControlledVocabulary
     ):
         self._primaryMatch = primary_match.lower().strip()
         self._auxiliaryMatch = auxiliary_match.lower().strip()
         self._destination = destination_category
+        self._controlled_vocabulary = controlled_vocabulary
 
     def matches(
         self,

@@ -9,6 +9,7 @@ from isamples_metadata.Transformer import (
     AbstractCategoryMapper, StringConstantCategoryMapper,
 )
 from isamples_metadata.taxonomy.metadata_model_client import MODEL_SERVER_CLIENT
+from isamples_metadata.vocabularies import vocabulary_mapper
 
 
 class SpecimenCategoryMetaMapper(AbstractCategoryMetaMapper):
@@ -23,7 +24,8 @@ class SpecimenCategoryMetaMapper(AbstractCategoryMetaMapper):
             "DNA, RNA, Proteins; Whole genomic DNA",
             "DNA, RNA, Proteins; Unknown DNA, RNA, or Protein"
         ],
-        "Organism part",
+        "organismpart",
+        vocabulary_mapper.SPECIMEN_TYPE
     )
 
     _biome_aggregation_mapper = StringEqualityCategoryMapper(
@@ -31,17 +33,19 @@ class SpecimenCategoryMetaMapper(AbstractCategoryMetaMapper):
             "Tissue & Parts; Mixed tissue sample; MH",
             "Environmental Sample; Host-Associated; Small Intestine RNA",
         ],
-        "Biome aggregation",
+        "biomeaggregation",
+        vocabulary_mapper.SPECIMEN_TYPE
     )
 
     _whole_organism_mapper = StringEqualityCategoryMapper(
         [
             "Tissue & Parts; Egg; Multiple eggs",
         ],
-        "Whole organism",
+        "wholeorganism",
+        vocabulary_mapper.SPECIMEN_TYPE
     )
 
-    _default_organism_part_mapper = StringConstantCategoryMapper("Organism part")
+    _default_organism_part_mapper = StringConstantCategoryMapper("Organism part", vocabulary_mapper.SPECIMEN_TYPE)
 
     @classmethod
     def categories_mappers(cls) -> typing.List[AbstractCategoryMapper]:
