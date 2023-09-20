@@ -11,7 +11,7 @@ import isamples_metadata
 from isamples_metadata.Transformer import (
     Transformer,
 )
-from isamples_metadata.metadata_constants import LABEL, AUTHORIZED_BY, COMPLIES_WITH
+from isamples_metadata.metadata_constants import LABEL, AUTHORIZED_BY, COMPLIES_WITH, RELATIONSHIP, TARGET
 from isamples_metadata.vocabularies import vocabulary_mapper
 from isb_web.sqlmodel_database import kingdom_for_taxonomy_name
 
@@ -145,26 +145,27 @@ class GEOMETransformer(Transformer):
         return Transformer.DESCRIPTION_SEPARATOR.join(description_pieces)
 
     def has_context_categories(self) -> typing.List[str]:
-        if self._session is not None:
-            ranks = ["kingdom", "phylum", "genus"]
-            ranks_to_check = []
-            for rank in ranks:
-                value = self._source_record_main_record().get(rank)
-                if value is not None and value != "unidentified":
-                    ranks_to_check.append(value)
-            for rank in ranks_to_check:
-                kingdom = kingdom_for_taxonomy_name(self._session, rank)
-                if kingdom is not None:
-                    return [kingdom]
-        # Didn't find one, return empty
-        return []
+        # if self._session is not None:
+        #     ranks = ["kingdom", "phylum", "genus"]
+        #     ranks_to_check = []
+        #     for rank in ranks:
+        #         value = self._source_record_main_record().get(rank)
+        #         if value is not None and value != "unidentified":
+        #             ranks_to_check.append(value)
+        #     for rank in ranks_to_check:
+        #         kingdom = kingdom_for_taxonomy_name(self._session, rank)
+        #         if kingdom is not None:
+        #             return [kingdom]
+        # # Didn't find one, return empty
+        # return []
+        return vocabulary_mapper.SAMPLED_FEATURE.term_for_key("marinewaterbody")
 
-    def has_material_categories(self) -> typing.List[str]:
+    def has_material_categories(self) -> typing.List[dict]:
         # TODO: implement
         # ["'Organic material' unless record/entity, record/basisOfRecord, or record/collectionCode indicate otherwise"]
         return vocabulary_mapper.MATERIAL_TYPE.term_for_key("organicmaterial")
 
-    def has_specimen_categories(self) -> typing.List[str]:
+    def has_specimen_categories(self) -> typing.List[dict]:
         return vocabulary_mapper.SPECIMEN_TYPE.term_for_key("wholeorganism")
 
     def informal_classification(self) -> typing.List[str]:
@@ -437,8 +438,8 @@ class GEOMETransformer(Transformer):
             entity = child["entity"]
             if entity == TISSUE_ENTITY:
                 child_resource[LABEL] = "subsample tissue"
-                child_resource["relationship"] = "subsample"
-                child_resource["target"] = child["bcid"]
+                child_resource[RELATIONSHIP] = "subsample"
+                child_resource[TARGET] = child["bcid"]
                 related_resources.append(child_resource)
         return related_resources
 

@@ -9,7 +9,7 @@ from isamples_metadata.metadata_constants import SAMPLE_IDENTIFIER, SCHEMA, AT_I
     HAS_SPECIMEN_CATEGORY, HAS_SPECIMEN_CATEGORY_CONFIDENCE, KEYWORDS, KEYWORD, KEYWORD_URI, SCHEME_NAME, PRODUCED_BY, \
     RESPONSIBILITY, HAS_FEATURE_OF_INTEREST, RESULT_TIME, SAMPLING_SITE, LOCATION, ELEVATION, LATITUDE, LONGITUDE, \
     REGISTRANT, SAMPLING_PURPOSE, CURATION, ACCESS_CONSTRAINTS, CURATION_LOCATION, RELATED_RESOURCE, AUTHORIZED_BY, \
-    COMPLIES_WITH, INFORMAL_CLASSIFICATION, PLACE_NAME, ROLE, NAME
+    COMPLIES_WITH, INFORMAL_CLASSIFICATION, PLACE_NAME, ROLE, NAME, SAMPLE_LOCATION
 from isamples_metadata.vocabularies.vocabulary_mapper import ControlledVocabulary
 
 NOT_PROVIDED = "Not Provided"
@@ -117,7 +117,7 @@ class Transformer(ABC):
                 SAMPLING_SITE: {
                     DESCRIPTION: self.sampling_site_description(),
                     LABEL: self.sampling_site_label(),
-                    LOCATION: {
+                    SAMPLE_LOCATION: {
                         ELEVATION: self.sampling_site_elevation(),
                         LATITUDE: self.sampling_site_latitude(),
                         LONGITUDE: self.sampling_site_longitude(),
