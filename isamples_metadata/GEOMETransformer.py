@@ -9,7 +9,7 @@ from sqlmodel import Session
 
 import isamples_metadata
 from isamples_metadata.Transformer import (
-    Transformer,
+    Transformer, Keyword,
 )
 from isamples_metadata.metadata_constants import LABEL, AUTHORIZED_BY, COMPLIES_WITH, RELATIONSHIP, TARGET
 from isamples_metadata.vocabularies import vocabulary_mapper
@@ -158,15 +158,15 @@ class GEOMETransformer(Transformer):
         #             return [kingdom]
         # # Didn't find one, return empty
         # return []
-        return vocabulary_mapper.SAMPLED_FEATURE.term_for_key("marinewaterbody")
+        return [vocabulary_mapper.SAMPLED_FEATURE.term_for_key("marinewaterbody").metadata_dict()]
 
     def has_material_categories(self) -> typing.List[dict]:
         # TODO: implement
         # ["'Organic material' unless record/entity, record/basisOfRecord, or record/collectionCode indicate otherwise"]
-        return vocabulary_mapper.MATERIAL_TYPE.term_for_key("organicmaterial")
+        return [vocabulary_mapper.MATERIAL_TYPE.term_for_key("organicmaterial").metadata_dict()]
 
     def has_specimen_categories(self) -> typing.List[dict]:
-        return vocabulary_mapper.SPECIMEN_TYPE.term_for_key("wholeorganism")
+        return [vocabulary_mapper.SPECIMEN_TYPE.term_for_key("wholeorganism").metadata_dict()]
 
     def informal_classification(self) -> typing.List[str]:
         main_record = self._source_record_main_record()
@@ -205,7 +205,15 @@ class GEOMETransformer(Transformer):
             return place_names
         return []
 
-    def keywords(self) -> typing.List[str]:
+    def _append_taxon_keyword_dict(self, keywords: list, rank_key: str):
+        keyword_value = self._source_record_main_record().get(rank_key)
+        if keyword_value is not None:
+            scheme_name = f"Taxon: {rank_key}"
+            keyword = Keyword(keyword_value, None, scheme_name)
+            keywords.append(keyword.metadata_dict())
+
+
+    def keywords(self) -> typing.List[dict]:
         # "JSON array of values from record/ -order, -phylum, -family, -class, and parent/ -country, -county,
         # -stateProvince, -continentOcean... (place names more general that the locality or most specific
         # rank place name) "
@@ -213,19 +221,11 @@ class GEOMETransformer(Transformer):
         parent_record = self._source_record_parent_record()
         microhabitat = parent_record.get("microHabitat")
         if microhabitat is not None:
-            keywords.append(microhabitat)
-        order = self._source_record_main_record().get("order")
-        if order is not None:
-            keywords.append(order)
-        phylum = self._source_record_main_record().get("phylum")
-        if phylum is not None:
-            keywords.append(phylum)
-        family = self._source_record_main_record().get("family")
-        if family is not None:
-            keywords.append(family)
-        classname = self._source_record_main_record().get("class")
-        if classname is not None:
-            keywords.append(classname)
+            keywords.append(Keyword(microhabitat).metadata_dict())
+        self._append_taxon_keyword_dict(keywords, "order")
+        self._append_taxon_keyword_dict(keywords, "phylum")
+        self._append_taxon_keyword_dict(keywords, "family")
+        self._append_taxon_keyword_dict(keywords, "class")
         return keywords
 
     def produced_by_id_string(self) -> str:
@@ -237,14 +237,9 @@ class GEOMETransformer(Transformer):
     def produced_by_label(self) -> str:
         parent_record = self._source_record_parent_record()
         if parent_record is not None:
-            label_pieces = []
             event_id = parent_record.get("eventID")
             if event_id is not None:
-                label_pieces.append(event_id)
-            expedition_code = parent_record.get("expeditionCode")
-            if expedition_code is not None:
-                label_pieces.append(expedition_code)
-            return " ".join(label_pieces)
+                return f"event {event_id}"
         return Transformer.NOT_PROVIDED
 
     def produced_by_description(self) -> str:
@@ -266,7 +261,9 @@ class GEOMETransformer(Transformer):
             self._transform_key_to_label(
                 "taxTeam", parent_record, description_pieces, "taxonomy team"
             )
-            self._transform_key_to_label("projectId", parent_record, description_pieces)
+            self._transform_key_to_label(
+                "projectId", parent_record, description_pieces
+            )
             return Transformer.DESCRIPTION_SEPARATOR.join(description_pieces)
         return Transformer.NOT_PROVIDED
 
@@ -280,38 +277,52 @@ class GEOMETransformer(Transformer):
                 return f"microhabitat: {microhabitat}"
         return Transformer.NOT_PROVIDED
 
+    @staticmethod
+    def _transform_key_to_responsibility_dict(
+        key: str,
+        source_dict: typing.Dict,
+        dest_list: typing.List[str],
+        label: Optional[str] = None,
+    ):
+        if label is None:
+            label = key
+        value = source_dict.get(key)
+        if value is not None and len(str(value)) > 0:
+            dest_list.append(Transformer._responsibility_dict(label, value))
+
+
     def produced_by_responsibilities(self) -> typing.List[dict[str, str]]:
         parent_record = self._source_record_parent_record()
         if parent_record is not None:
-            responsibilities_pieces = []
+            responsibilities = []
             collector_list = parent_record.get("collectorList")
             if collector_list is not None:
                 # Have to do some goofy checking here because this string-delimited field can either be a singleton
                 # or have different delimiters
                 if "," in collector_list:
                     for collector in collector_list.split(", "):
-                        responsibilities_pieces.append(f"collector: {collector}")
+                        responsibilities.append(Transformer._responsibility_dict("Collector", collector))
                 elif "|" in collector_list:
                     for collector in collector_list.split("|"):
-                        responsibilities_pieces.append(f"collector: {collector}")
+                        responsibilities.append(Transformer._responsibility_dict("Collector", collector))
                 else:
-                    responsibilities_pieces.append(f"collector :{collector_list}")
-            self._transform_key_to_label(
-                "principalInvestigator", parent_record, responsibilities_pieces
+                    responsibilities.append(Transformer._responsibility_dict("Collector", collector_list))
+            self._transform_key_to_responsibility_dict(
+                "principalInvestigator", parent_record, responsibilities, "Principal investigator"
             )
-            self._transform_key_to_label(
-                "identifiedBy", parent_record, responsibilities_pieces
+            self._transform_key_to_responsibility_dict(
+                "identifiedBy", parent_record, responsibilities, "Identified by"
             )
-            self._transform_key_to_label(
-                "taxTeam", parent_record, responsibilities_pieces, "taxonomy team"
+            self._transform_key_to_responsibility_dict(
+                "taxTeam", parent_record, responsibilities, "Taxonomy team"
             )
-            self._transform_key_to_label(
+            self._transform_key_to_responsibility_dict(
                 "eventEnteredBy",
                 parent_record,
-                responsibilities_pieces,
-                "event registrant",
+                responsibilities,
+                "Event registrant",
             )
-            return responsibilities_pieces
+            return responsibilities
         return []
 
     def produced_by_result_time(self) -> str:
@@ -417,11 +428,11 @@ class GEOMETransformer(Transformer):
             "institutionCode", Transformer.NOT_PROVIDED
         )
 
-    def curation_responsibility(self) -> str:
+    def curation_responsibility(self) -> list[dict[str, str]]:
         if "institutionCode" in self._source_record_main_record():
             institution_code = self._source_record_main_record()["institutionCode"]
-            return f"curator:{institution_code}"
-        return Transformer.NOT_PROVIDED
+            return [Transformer._responsibility_dict("curator", institution_code)]
+        return []
 
     # endregion
 
@@ -437,8 +448,8 @@ class GEOMETransformer(Transformer):
             child_resource = {}
             entity = child["entity"]
             if entity == TISSUE_ENTITY:
-                child_resource[LABEL] = "subsample tissue"
-                child_resource[RELATIONSHIP] = "subsample"
+                child_resource[LABEL] = "Tissue"
+                child_resource[RELATIONSHIP] = "tissue extract"
                 child_resource[TARGET] = child["bcid"]
                 related_resources.append(child_resource)
         return related_resources

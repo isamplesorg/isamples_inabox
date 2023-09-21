@@ -125,7 +125,9 @@ class Transformer(ABC):
                     PLACE_NAME: self.sampling_site_place_names(),
                 },
             },
-            REGISTRANT: self.sample_registrant(),
+            REGISTRANT: {
+                NAME: self.sample_registrant()
+            },
             SAMPLING_PURPOSE: self.sample_sampling_purpose(),
             CURATION: {
                 LABEL: self.curation_label(),
@@ -294,8 +296,8 @@ class Transformer(ABC):
     def curation_location(self) -> str:
         return Transformer.NOT_PROVIDED
 
-    def curation_responsibility(self) -> str:
-        return Transformer.NOT_PROVIDED
+    def curation_responsibility(self) -> list[dict[str, str]]:
+        return []
 
     # endregion
 
@@ -500,17 +502,20 @@ class StringPairedCategoryMapper(AbstractCategoryMapper):
 class Keyword:
     """Keyword for inclusion in the iSamples keywords metadata key"""
 
-    def __init__(self, value: str, uri: str, scheme: str):
+    def __init__(self, value: str, uri: Optional[str] = None, scheme: Optional[str] = None):
         self.value = value
         self.uri = uri
         self.scheme = scheme
 
     def metadata_dict(self) -> dict[str, str]:
-        return {
+        metadata_dict =  {
             KEYWORD: self.value,
-            KEYWORD_URI: self.uri,
-            SCHEME_NAME: self.scheme
         }
+        if self.uri is not None:
+            metadata_dict[KEYWORD_URI] = self.uri
+        if self.scheme is not None:
+            metadata_dict[SCHEME_NAME] = self.scheme
+        return metadata_dict
 
 
 def geo_to_h3(latitude: typing.Optional[float], longitude: typing.Optional[float], resolution: int = Transformer.DEFAULT_H3_RESOLUTION) -> typing.Optional[str]:
