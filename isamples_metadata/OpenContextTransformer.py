@@ -173,7 +173,11 @@ class OpenContextTransformer(Transformer):
 
     def id_string(self) -> str:
         citation_uri = self._citation_uri()
-        return f"metadata/{citation_uri.removeprefix(Transformer.N2T_ARK_PREFIX)}"
+        if citation_uri.startswith("https"):
+            metadata_payload = citation_uri.removeprefix(Transformer.N2T_ARK_PREFIX)
+        else:
+            metadata_payload = citation_uri.removeprefix(Transformer.N2T_ARK_NO_HTTPS_PREFIX)
+        return f"metadata/{metadata_payload}"
 
     def sample_identifier_string(self) -> str:
         return self._citation_uri().removeprefix(Transformer.N2T_PREFIX)
