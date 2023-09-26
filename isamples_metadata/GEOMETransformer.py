@@ -145,19 +145,7 @@ class GEOMETransformer(Transformer):
         return Transformer.DESCRIPTION_SEPARATOR.join(description_pieces)
 
     def has_context_categories(self) -> typing.List[str]:
-        # if self._session is not None:
-        #     ranks = ["kingdom", "phylum", "genus"]
-        #     ranks_to_check = []
-        #     for rank in ranks:
-        #         value = self._source_record_main_record().get(rank)
-        #         if value is not None and value != "unidentified":
-        #             ranks_to_check.append(value)
-        #     for rank in ranks_to_check:
-        #         kingdom = kingdom_for_taxonomy_name(self._session, rank)
-        #         if kingdom is not None:
-        #             return [kingdom]
-        # # Didn't find one, return empty
-        # return []
+        # TODO: resolve https://github.com/isamplesorg/isamples_inabox/issues/312
         return [vocabulary_mapper.SAMPLED_FEATURE.term_for_key("marinewaterbody").metadata_dict()]
 
     def has_material_categories(self) -> typing.List[dict]:
