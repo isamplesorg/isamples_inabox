@@ -1,0 +1,137 @@
+{
+	"$schema": "iSamplesSchemaCore1.0.json",
+	"@id": "metadata/28722/k2ft8jj6n",
+	"label": "Object PC 19810027",
+	"sample_identifier": "ark:/28722/k2ft8jj6n",
+	"description": "'early bce/ce': -700.0 | 'late bce/ce': -535.0 | 'updated': 2023-07-31T11:45:05Z | 'Consists of': ivory (material) | 'Temporal coverage': Orientalizing (750 BCE - 582 BCE) | 'Temporal coverage': Roman Imperial (31 CE - 399 CE) | 'Temporal coverage': Archaic (580 BCE - 482 BCE)",
+	"has_context_category": [
+		{
+			"label": "Site of past human activities",
+			"identifier": "https://w3id.org/isample/vocabulary/sampledfeature/0.9/pasthumanoccupationsite"
+		}
+	],
+	"has_context_category_confidence": [
+		1.0
+	],
+	"has_material_category": [
+		{
+			"label": "Any anthropogenic material",
+			"identifier": "https://w3id.org/isample/vocabulary/material/0.9/anyanthropogenicmaterial"
+		}
+	],
+	"has_material_category_confidence": [
+		1.0
+	],
+	"has_specimen_category": [
+		null
+	],
+	"has_specimen_category_confidence": [
+		1.0
+	],
+	"informal_classification": [
+
+	],
+	"keywords": [
+		{
+			"keyword": "Architecture",
+			"keyword_uri": "https://id.loc.gov/authorities/subjects/sh85006611"
+		},
+		{
+			"keyword": "Human settlements",
+			"keyword_uri": "https://id.loc.gov/authorities/subjects/sh85062894"
+		},
+		{
+			"keyword": "Subsistence economy",
+			"keyword_uri": "https://id.loc.gov/authorities/subjects/sh85129537"
+		},
+		{
+			"keyword": "Archaeology",
+			"keyword_uri": "https://id.loc.gov/authorities/subjects/sh85006507"
+		},
+		{
+			"keyword": "Civilization, Etruscan",
+			"keyword_uri": "https://id.loc.gov/authorities/subjects/sh85045470"
+		},
+		{
+			"keyword": "Iron age",
+			"keyword_uri": "https://id.loc.gov/authorities/subjects/sh85068153"
+		},
+		{
+			"keyword": "Orientalizing (750 BCE - 582 BCE)",
+			"keyword_uri": "https://n2t.net/ark:/99152/p06v8w45852"
+		},
+		{
+			"keyword": "Roman Imperial (31 CE - 399 CE)",
+			"keyword_uri": "https://n2t.net/ark:/99152/p06v8w43gnx"
+		},
+		{
+			"keyword": "Archaic (580 BCE - 482 BCE)",
+			"keyword_uri": "https://n2t.net/ark:/99152/p06v8w4g9dz"
+		}
+	],
+	"produced_by": {
+		"@id": "",
+		"label": "",
+		"description": "",
+		"has_feature_of_interest": "",
+		"responsibility": [
+			{
+				"role": "creator",
+				"name": {
+					"label": "Anthony Tuck",
+					"id": "http://opencontext.org/persons/61d87033-881e-48b9-ff27-27337bbcdaa0"
+				}
+			}
+		],
+		"result_time": "2012-12-28T00:00:00Z",
+		"sampling_site": {
+			"description": "https://opencontext.org/subjects/871b9ef8-bc68-4190-5f8a-00882c0040a4",
+			"label": "Poggio Civitate",
+			"sample_location": {
+				"elevation": "",
+				"latitude": 43.1527393592106,
+				"longitude": 11.402138021311842
+			},
+			"place_name": [
+
+			]
+		}
+	},
+	"registrant": {
+		"name": ""
+	},
+	"sampling_purpose": "",
+	"curation": {
+		"label": "",
+		"description": "",
+		"access_constraints": "",
+		"curation_location": "",
+		"responsibility": [
+
+		]
+	},
+	"related_resource": [
+
+	],
+	"authorized_by": [
+
+	],
+	"complies_with": [
+
+	],
+	"producedBy_samplingSite_location_h3_0": "801ffffffffffff",
+	"producedBy_samplingSite_location_h3_1": "811ebffffffffff",
+	"producedBy_samplingSite_location_h3_2": "821e87fffffffff",
+	"producedBy_samplingSite_location_h3_3": "831e84fffffffff",
+	"producedBy_samplingSite_location_h3_4": "841e84dffffffff",
+	"producedBy_samplingSite_location_h3_5": "851e84d3fffffff",
+	"producedBy_samplingSite_location_h3_6": "861e84d17ffffff",
+	"producedBy_samplingSite_location_h3_7": "871e84d14ffffff",
+	"producedBy_samplingSite_location_h3_8": "881e84d149fffff",
+	"producedBy_samplingSite_location_h3_9": "891e84d148bffff",
+	"producedBy_samplingSite_location_h3_10": "8a1e84d1488ffff",
+	"producedBy_samplingSite_location_h3_11": "8b1e84d1488cfff",
+	"producedBy_samplingSite_location_h3_12": "8c1e84d1488cbff",
+	"producedBy_samplingSite_location_h3_13": "8d1e84d1488caff",
+	"producedBy_samplingSite_location_h3_14": "8e1e84d1488ddb7"
+}

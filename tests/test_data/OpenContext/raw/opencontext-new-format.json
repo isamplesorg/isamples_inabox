@@ -1,0 +1,89 @@
+        {
+            "label": "PC 19810027",
+            "uri": "http://opencontext.org/subjects/7ac025c5-ce8b-454c-6f89-7f0afb1f6ea3",
+            "href": "https://staging.opencontext.org/subjects/7ac025c5-ce8b-454c-6f89-7f0afb1f6ea3",
+            "citation uri": "https://n2t.net/ark:/28722/k2ft8jj6n",
+            "id": "http://opencontext.org/subjects/7ac025c5-ce8b-454c-6f89-7f0afb1f6ea3",
+            "project": {
+                "label": "Murlo",
+                "id": "http://opencontext.org/projects/df043419-f23b-41da-7e4d-ee52af22f92f"
+            },
+            "context": {
+                "label": "Europe/Italy/Poggio Civitate/Tesoro/Tesoro 23/1981, ID:419",
+                "id": "http://opencontext.org/subjects/171aa8d2-bc5f-4d17-f3b0-5a49dd4e3db2"
+            },
+            "latitude": 43.1527393592106,
+            "longitude": 11.402138021311842,
+            "early bce/ce": -700.0,
+            "late bce/ce": -535.0,
+            "item category": "Object",
+            "icon": "https://staging.opencontext.org/static/oc/icons-v2/object-icon-draft-2.svg",
+            "thumbnail": "https://iiif.archivelab.org/iiif/opencontext-24-19810024jpg/full/150,/0/default.jpg",
+            "published": "2012-12-28T00:00:00Z",
+            "updated": "2023-07-31T11:45:05Z",
+            "isam:SamplingSite": {
+                "label": "Poggio Civitate",
+                "identifier": "https://opencontext.org/subjects/871b9ef8-bc68-4190-5f8a-00882c0040a4",
+                "id": "https://opencontext.org/subjects/871b9ef8-bc68-4190-5f8a-00882c0040a4"
+            },
+            "Consists of": [
+                {
+                    "label": "ivory (material)",
+                    "id": "https://vocab.getty.edu/aat/300011857"
+                }
+            ],
+            "Subject": [
+                {
+                    "label": "Architecture",
+                    "id": "https://id.loc.gov/authorities/subjects/sh85006611"
+                },
+                {
+                    "label": "Human settlements",
+                    "id": "https://id.loc.gov/authorities/subjects/sh85062894"
+                },
+                {
+                    "label": "Subsistence economy",
+                    "id": "https://id.loc.gov/authorities/subjects/sh85129537"
+                },
+                {
+                    "label": "Archaeology",
+                    "id": "https://id.loc.gov/authorities/subjects/sh85006507"
+                },
+                {
+                    "label": "Civilization, Etruscan",
+                    "id": "https://id.loc.gov/authorities/subjects/sh85045470"
+                }
+            ],
+            "Coverage": [
+                {
+                    "label": "Iron age",
+                    "id": "https://id.loc.gov/authorities/subjects/sh85068153"
+                }
+            ],
+            "Temporal Coverage": [
+                {
+                    "label": "Orientalizing (750 BCE - 582 BCE)",
+                    "id": "https://n2t.net/ark:/99152/p06v8w45852"
+                },
+                {
+                    "label": "Roman Imperial (31 CE - 399 CE)",
+                    "id": "https://n2t.net/ark:/99152/p06v8w43gnx"
+                },
+                {
+                    "label": "Archaic (580 BCE - 482 BCE)",
+                    "id": "https://n2t.net/ark:/99152/p06v8w4g9dz"
+                }
+            ],
+            "Creator": [
+                {
+                    "label": "Anthony Tuck",
+                    "id": "http://opencontext.org/persons/61d87033-881e-48b9-ff27-27337bbcdaa0"
+                }
+            ],
+            "License": [
+                {
+                    "label": "Attribution 4.0 International (CC BY 4.0)",
+                    "id": "https://creativecommons.org/licenses/by/4.0"
+                }
+            ]
+        }

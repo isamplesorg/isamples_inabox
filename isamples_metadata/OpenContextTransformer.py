@@ -352,12 +352,24 @@ class OpenContextTransformer(Transformer):
                         keyword.value = v[0]
         return list(keywords_by_getty_id.values())
 
+
+    def _convert_subject_to_keywords(self, subject_key: str) -> list[dict[str, str]]:
+        subjects = self.source_record.get(subject_key)
+        if subjects is not None:
+            metadata_dicts = [Keyword(subject.get("label"), subject.get("id")).metadata_dict() for subject in subjects]
+            return metadata_dicts
+        else:
+            return []
+
+
     def keywords(self) -> typing.List[dict[str, str]]:
         getty_keywords = self._extract_getty_keywords()
-        getty_keyword_dicts = [keyword.metadata_dict() for keyword in getty_keywords]
-
+        keyword_dicts = [keyword.metadata_dict() for keyword in getty_keywords]
+        keyword_dicts.extend(self._convert_subject_to_keywords("Subject"))
+        keyword_dicts.extend(self._convert_subject_to_keywords("Coverage"))
+        keyword_dicts.extend(self._convert_subject_to_keywords("Temporal Coverage"))
         # Also need to grab the context label, context href, and make a keyword object from them
-        return getty_keyword_dicts
+        return keyword_dicts
 
     def produced_by_id_string(self) -> str:
         return Transformer.NOT_PROVIDED
@@ -391,10 +403,19 @@ class OpenContextTransformer(Transformer):
         return self.source_record.get("published", Transformer.NOT_PROVIDED)
 
     def sampling_site_description(self) -> str:
+        explicit_sampling_site = self._explicit_sampling_site()
+        if explicit_sampling_site is not None:
+            return explicit_sampling_site.get("identifier")
         return Transformer.NOT_PROVIDED
 
     def sampling_site_label(self) -> str:
+        explicit_sampling_site = self._explicit_sampling_site()
+        if explicit_sampling_site is not None:
+            return explicit_sampling_site.get("label")
         return self.source_record.get("context label", Transformer.NOT_PROVIDED)
+
+    def _explicit_sampling_site(self):
+        return self.source_record.get("isam:SamplingSite")
 
     def sampling_site_elevation(self) -> str:
         return Transformer.NOT_PROVIDED
