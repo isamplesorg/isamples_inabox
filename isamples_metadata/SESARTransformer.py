@@ -192,7 +192,7 @@ class ContextCategoryMetaMapper(AbstractCategoryMetaMapper):
     _endsWithSoilMapper = StringEndsWithCategoryMapper(
         "Soil", "subaerialsurfaceenvironment", vocabulary_mapper.SAMPLED_FEATURE
     )
-    # TODO: "Subaerial terrestrial biome" has gone missing
+    # TODO: "Subaerial terrestrial biome" has gone missing https://github.com/isamplesorg/isamples_inabox/issues/310
     _soilFloodplainMapper = StringPairedCategoryMapper(
         "Microbiology>Soil", "floodplain", "Subaerial terrestrial biome", vocabulary_mapper.SAMPLED_FEATURE
     )
@@ -216,7 +216,7 @@ class ContextCategoryMetaMapper(AbstractCategoryMetaMapper):
     _seaMapper = StringPairedCategoryMapper(
         "Liquid>aqueous", "Sea", "marinewaterbody", vocabulary_mapper.SAMPLED_FEATURE
     )
-    # TODO: "Marine biome" has gone missing
+    # TODO: "Marine biome" has gone missing https://github.com/isamplesorg/isamples_inabox/issues/310
     _ventBiologyMapper = StringPairedCategoryMapper("Biology", "Vent", "Marine biome", vocabulary_mapper.SAMPLED_FEATURE)
     _ventLiquidMapper = StringPairedCategoryMapper(
         "Liquid>aqueous", "Vent", "subsurfacefluidreservoir", vocabulary_mapper.SAMPLED_FEATURE

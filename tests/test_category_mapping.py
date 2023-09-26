@@ -12,6 +12,7 @@ def soil_mapper():
     endsWithSoilMapper = StringEndsWithCategoryMapper(
         "Soil", "Subaerial surface environment"
     )
+    # TODO: Subaerial terrestrial biome is missing https://github.com/isamplesorg/isamples_inabox/issues/310
     soilFloodplainMapper = StringPairedCategoryMapper(
         "Microbiology>Soil", "floodplain", "Subaerial terrestrial biome"
     )
