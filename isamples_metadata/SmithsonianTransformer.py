@@ -6,7 +6,7 @@ from isamples_metadata.Transformer import (
     Transformer,
     AbstractCategoryMetaMapper,
     StringEqualityCategoryMapper,
-    AbstractCategoryMapper, StringConstantCategoryMapper,
+    AbstractCategoryMapper, StringConstantCategoryMapper, Keyword,
 )
 from isamples_metadata.taxonomy.metadata_model_client import MODEL_SERVER_CLIENT
 from isamples_metadata.vocabularies import vocabulary_mapper
@@ -133,14 +133,14 @@ class SmithsonianTransformer(Transformer):
                 self.source_record.get("higherClassification", ""),
             ]
         )
-        return [categories]
+        return [vocabulary_mapper.SAMPLED_FEATURE.term_for_label(category).metadata_dict() for category in categories]
 
-    def has_material_categories(self) -> typing.List[str]:
+    def has_material_categories(self) -> typing.List[dict]:
         material_sample_type = self.source_record.get("materialSampleType")
         if material_sample_type == "Environmental sample":
-            return ["Biogenic non organic material"]
+            return [vocabulary_mapper.MATERIAL_TYPE.term_for_key("biogenicnonorganicmaterial").metadata_dict()]
         else:
-            return ["Organic material"]
+            return [vocabulary_mapper.MATERIAL_TYPE.term_for_key("organicmaterial").metadata_dict()]
 
     def has_specimen_categories(self) -> typing.List[str]:
         preparation_type = self.source_record.get("preparationType", "")
@@ -149,18 +149,18 @@ class SmithsonianTransformer(Transformer):
     def informal_classification(self) -> typing.List[str]:
         return [self.source_record.get("scientificName", "")]
 
-    def keywords(self) -> typing.List[str]:
-        keywords = [self.source_record.get("collectionCode", "")]
+    def keywords(self) -> typing.List[dict[str, str]]:
+        keywords = [Keyword(self.source_record.get("collectionCode", ""))]
         water_body = self.source_record.get("waterBody", "")
         if len(water_body) > 0:
-            keywords.append(water_body)
+            keywords.append(Keyword(water_body))
         higher_classification = self.source_record.get("higherClassification", "")
         if len(higher_classification) > 0:
-            keywords.extend(higher_classification.split(", "))
-        keywords.append(self.source_record.get("scientificName"))
+            keywords.extend([Keyword(scientific_name) for scientific_name in higher_classification.split(", ")])
+        keywords.append(Keyword(self.source_record.get("scientificName")))
         # TODO: do we want to include the locations in keywords?  Some of the other collections did.
         # If so, which ones?
-        return keywords
+        return [keyword.metadata_dict() for keyword in keywords]
 
     def sample_registrant(self) -> str:
         return Transformer.NOT_PROVIDED
