@@ -231,7 +231,7 @@ OPENCONTEXT_test_values = [
     "open_context_source_path,isamples_path,timestamp", OPENCONTEXT_test_values
 )
 def test_open_context_dicts_equal(open_context_source_path, isamples_path, timestamp):
-    fake_prediction = [PredictionResult("value", 1.0)]
+    fake_prediction = [PredictionResult("Any anthropogenic material", 1.0)]
     with patch.object(ModelServerClient, "make_opencontext_material_request", return_value=fake_prediction):
         _run_transformer(
             isamples_path, open_context_source_path, OpenContextTransformer, None, timestamp

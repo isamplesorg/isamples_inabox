@@ -589,7 +589,7 @@ class GEOMEChildTransformer(GEOMETransformer):
         return ""
 
     def has_specimen_categories(self) -> typing.List[str]:
-        return ["Organism part"]
+        return [vocabulary_mapper.SPECIMEN_TYPE.term_for_key("organismpart").metadata_dict()]
 
     def produced_by_label(self) -> str:
         return f"tissue subsample from {self._source_record_main_record()['materialSampleID']}"

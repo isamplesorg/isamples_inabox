@@ -144,7 +144,7 @@ class SmithsonianTransformer(Transformer):
 
     def has_specimen_categories(self) -> typing.List[str]:
         preparation_type = self.source_record.get("preparationType", "")
-        return SpecimenCategoryMetaMapper.categories(preparation_type)
+        return [term.metadata_dict() for term in SpecimenCategoryMetaMapper.categories(preparation_type)]
 
     def informal_classification(self) -> typing.List[str]:
         return [self.source_record.get("scientificName", "")]
@@ -182,22 +182,22 @@ class SmithsonianTransformer(Transformer):
     def produced_by_feature_of_interest(self) -> str:
         return Transformer.NOT_PROVIDED
 
-    def _add_to_responsibilities(self, label: str, responsibilities: typing.List[str]):
-        value = self.source_record[label]
+    def _add_to_responsibilities(self, source_label: str, dict_label: str, responsibilities: typing.List[str]):
+        value = self.source_record[source_label]
         if len(value) > 0:
             for current in self.RESPONSIBILITIES_SPLIT_RE.split(value):
-                responsibilities.append(f"{label}: {current.strip()}")
+                responsibilities.append({"role": dict_label, "name": current.strip()})
 
     def produced_by_responsibilities(self) -> typing.List[str]:
         responsibilities: list[str] = []
-        self._add_to_responsibilities("recordedBy", responsibilities)
-        self._add_to_responsibilities("scientificNameAuthorship", responsibilities)
+        self._add_to_responsibilities("recordedBy", "recorded by", responsibilities)
+        self._add_to_responsibilities("scientificNameAuthorship", "scientific name authorship", responsibilities)
 
         # unfortunately it looks like this field uses a ; separator for multiple people
         identified_by = self.source_record["identifiedBy"]
         if len(identified_by) > 0:
             for current in identified_by.split(";"):
-                responsibilities.append(f"identifiedBy: {current}")
+                responsibilities.append({"role": "identified by", "name": current.strip()})
         return responsibilities
 
     def produced_by_result_time(self) -> str:
