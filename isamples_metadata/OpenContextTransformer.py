@@ -274,7 +274,7 @@ class OpenContextTransformer(Transformer):
         if item_category in to_classify_items:
             prediction_results = self._compute_material_prediction_results()
             if prediction_results is not None:
-                return [prediction.value for prediction in prediction_results]
+                return [vocabulary_mapper.MATERIAL_TYPE.term_for_label(prediction.value).metadata_dict() for prediction in prediction_results]
             else:
                 return []
         return MaterialCategoryMetaMapper.categories(item_category)
@@ -306,7 +306,7 @@ class OpenContextTransformer(Transformer):
         if item_category in to_classify_items:
             prediction_results = self._compute_specimen_prediction_results()
             if prediction_results is not None:
-                return [prediction.value for prediction in prediction_results]
+                return [vocabulary_mapper.SPECIMEN_TYPE.term_for_label(prediction.value).metadata_dict() for prediction in prediction_results]
             else:
                 return []
         return SpecimenCategoryMetaMapper.categories(item_category)
