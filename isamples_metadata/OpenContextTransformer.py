@@ -309,7 +309,7 @@ class OpenContextTransformer(Transformer):
                 return [vocabulary_mapper.SPECIMEN_TYPE.term_for_label(prediction.value).metadata_dict() for prediction in prediction_results]
             else:
                 return []
-        return SpecimenCategoryMetaMapper.categories(item_category)
+        return [term.metadata_dict() for term in SpecimenCategoryMetaMapper.categories(item_category)]
 
     def has_specimen_category_confidences(self, specimen_categories: typing.List[str]) -> typing.Optional[typing.List[float]]:
         prediction_results = self._compute_specimen_prediction_results()
@@ -356,7 +356,13 @@ class OpenContextTransformer(Transformer):
     def _convert_subject_to_keywords(self, subject_key: str) -> list[dict[str, str]]:
         subjects = self.source_record.get(subject_key)
         if subjects is not None:
-            metadata_dicts = [Keyword(subject.get("label"), subject.get("id")).metadata_dict() for subject in subjects]
+            metadata_dicts = []
+            for subject in subjects:
+                if type(subject) is dict:
+                    keyword = Keyword(subject.get("label", subject.get("id")))
+                elif type(subject) is str:
+                    keyword = Keyword(subject)
+                metadata_dicts.append(keyword.metadata_dict())
             return metadata_dicts
         else:
             return []

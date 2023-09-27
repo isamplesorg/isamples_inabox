@@ -10,17 +10,21 @@ Note that this module operates on a CSV-derived form of the vocabulary sourced a
 https://github.com/isamplesorg/vocabularies/tree/develop/src
 """
 
-class VocabularyTerm:
+# Inherit from dict in order to make this class JSON serializable
+class VocabularyTerm(dict):
     def __init__(self, key: str, label: str, uri: str):
         self.key = key
         self.label = label
         self.uri = uri
+        super().__init__(self.metadata_dict())
 
     def metadata_dict(self) -> dict[str, str]:
-        return {
-            LABEL: self.label,
-            IDENTIFIER: self.uri
+        metadata_dict = {
+            LABEL: self.label
         }
+        if self.uri is not None:
+            metadata_dict[IDENTIFIER] = self.uri
+        return metadata_dict
 
 
 class ControlledVocabulary:
@@ -43,10 +47,10 @@ class ControlledVocabulary:
                 self.vocabulary_terms_by_label[label] = term
 
     def term_for_key(self, key: str) -> Optional[VocabularyTerm]:
-        return self.vocabulary_terms_by_key.get(key, None)
+        return self.vocabulary_terms_by_key.get(key, VocabularyTerm(None, key, None))
 
     def term_for_label(self, label: str) -> Optional[VocabularyTerm]:
-        return self.vocabulary_terms_by_label.get(label, None)
+        return self.vocabulary_terms_by_label.get(label, VocabularyTerm(None, label, None))
 
 
 parent_dir = Path(__file__).parent

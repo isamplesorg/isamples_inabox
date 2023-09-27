@@ -15,7 +15,7 @@ from isamples_metadata.metadata_constants import SAMPLE_IDENTIFIER, AT_ID, LABEL
     HAS_CONTEXT_CATEGORY_CONFIDENCE, HAS_MATERIAL_CATEGORY, HAS_MATERIAL_CATEGORY_CONFIDENCE, HAS_SPECIMEN_CATEGORY, \
     KEYWORDS, PRODUCED_BY, HAS_FEATURE_OF_INTEREST, RESULT_TIME, SAMPLING_SITE, LOCATION, ELEVATION, LATITUDE, \
     LONGITUDE, PLACE_NAME, SUBSAMPLE, REGISTRANT, SAMPLING_PURPOSE, CURATION, ACCESS_CONSTRAINTS, RESPONSIBILITY, \
-    RELATED_RESOURCE, DESCRIPTION, HAS_SPECIMEN_CATEGORY_CONFIDENCE, CURATION_LOCATION
+    RELATED_RESOURCE, DESCRIPTION, HAS_SPECIMEN_CATEGORY_CONFIDENCE, CURATION_LOCATION, SAMPLE_LOCATION
 from isamples_metadata.metadata_exceptions import MetadataException
 from isb_lib.models.thing import Thing
 from isamples_metadata.Transformer import Transformer, geo_to_h3
@@ -292,8 +292,8 @@ def handle_produced_by_fields(coreMetadata: typing.Dict, doc: typing.Dict):  # n
         if _shouldAddMetadataValueToSolrDoc(samplingSite, PLACE_NAME):
             doc["producedBy_samplingSite_placeName"] = samplingSite[PLACE_NAME]
 
-        if LOCATION in samplingSite:
-            location = samplingSite[LOCATION]
+        if SAMPLE_LOCATION in samplingSite:
+            location = samplingSite[SAMPLE_LOCATION]
             if _shouldAddMetadataValueToSolrDoc(location, ELEVATION):
                 location_str = location[ELEVATION]
                 match = ELEVATION_PATTERN.match(location_str)

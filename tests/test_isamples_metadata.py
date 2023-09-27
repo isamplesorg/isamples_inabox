@@ -223,6 +223,11 @@ OPENCONTEXT_test_values = [
         "./test_data/OpenContext/raw/ark-28722-k26h4xk1f.json",
         "./test_data/OpenContext/test/ark-28722-k26h4xk1f-test.json",
         "2022-10-23T07:15:31Z",
+    ),
+    (
+        "./test_data/OpenContext/raw/opencontext-new-format.json",
+        "./test_data/OpenContext/test/opencontext-new-format-test.json",
+        "2023-07-31T11:45:05Z"
     )
 ]
 
