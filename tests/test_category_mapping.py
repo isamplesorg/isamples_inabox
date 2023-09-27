@@ -12,9 +12,8 @@ def soil_mapper():
     endsWithSoilMapper = StringEndsWithCategoryMapper(
         "Soil", "Subaerial surface environment"
     )
-    # TODO: Subaerial terrestrial biome is missing https://github.com/isamplesorg/isamples_inabox/issues/310
     soilFloodplainMapper = StringPairedCategoryMapper(
-        "Microbiology>Soil", "floodplain", "Subaerial terrestrial biome"
+        "Microbiology>Soil", "floodplain", "Subaerial surface environment"
     )
     soilMapper = StringOrderedCategoryMapper(
         # Order matters here, the generic one needs to be last
@@ -27,7 +26,7 @@ def test_compound_categories(soil_mapper):
     # For the case of the specific pair, we should get the specific match
     categories = []
     soil_mapper.append_if_matched("Microbiology>Soil", "floodplain", categories)
-    assert categories[0] == "Subaerial terrestrial biome"
+    assert categories[0] == "Subaerial surface environment"
 
 
 def test_plain_soil(soil_mapper):
