@@ -7,7 +7,7 @@ import h3
 from isamples_metadata.metadata_constants import SAMPLE_IDENTIFIER, SCHEMA, AT_ID, LABEL, DESCRIPTION, \
     HAS_CONTEXT_CATEGORY, HAS_CONTEXT_CATEGORY_CONFIDENCE, HAS_MATERIAL_CATEGORY, HAS_MATERIAL_CATEGORY_CONFIDENCE, \
     HAS_SPECIMEN_CATEGORY, HAS_SPECIMEN_CATEGORY_CONFIDENCE, KEYWORDS, KEYWORD, KEYWORD_URI, SCHEME_NAME, PRODUCED_BY, \
-    RESPONSIBILITY, HAS_FEATURE_OF_INTEREST, RESULT_TIME, SAMPLING_SITE, LOCATION, ELEVATION, LATITUDE, LONGITUDE, \
+    RESPONSIBILITY, HAS_FEATURE_OF_INTEREST, RESULT_TIME, SAMPLING_SITE, ELEVATION, LATITUDE, LONGITUDE, \
     REGISTRANT, SAMPLING_PURPOSE, CURATION, ACCESS_CONSTRAINTS, CURATION_LOCATION, RELATED_RESOURCE, AUTHORIZED_BY, \
     COMPLIES_WITH, INFORMAL_CLASSIFICATION, PLACE_NAME, ROLE, NAME, SAMPLE_LOCATION
 from isamples_metadata.vocabularies.vocabulary_mapper import ControlledVocabulary
@@ -75,7 +75,7 @@ class Transformer(ABC):
 
     @staticmethod
     def _responsibility_dict(
-        role: str, name:str
+        role: str, name: str
     ):
         return {ROLE: role, NAME: name}
 
@@ -365,8 +365,6 @@ class AbstractCategoryMapper(ABC):
         self._controlled_vocabulary = controlled_vocabulary
 
 
-
-
 class AbstractCategoryMetaMapper(ABC):
     _categoriesMappers: list[AbstractCategoryMapper] = []
 
@@ -499,17 +497,17 @@ class StringPairedCategoryMapper(AbstractCategoryMapper):
             and auxiliary_match.lower().strip() == self._auxiliaryMatch
         )
 
+
 class Keyword:
     """Keyword for inclusion in the iSamples keywords metadata key"""
-
     def __init__(self, value: str, uri: Optional[str] = None, scheme: Optional[str] = None):
         self.value = value
         self.uri = uri
         self.scheme = scheme
 
     def metadata_dict(self) -> dict[str, str]:
-        metadata_dict =  {
-            KEYWORD: self.value,
+        metadata_dict = {
+            KEYWORD: self.value
         }
         if self.uri is not None:
             metadata_dict[KEYWORD_URI] = self.uri

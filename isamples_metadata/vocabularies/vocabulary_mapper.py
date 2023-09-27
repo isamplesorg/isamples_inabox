@@ -6,9 +6,10 @@ from typing import Optional
 from isamples_metadata.metadata_constants import LABEL, IDENTIFIER
 
 """
-Note that this module operates on a CSV-derived form of the vocabulary sourced at 
+Note that this module operates on a CSV-derived form of the vocabulary sourced at
 https://github.com/isamplesorg/vocabularies/tree/develop/src
 """
+
 
 # Inherit from dict in order to make this class JSON serializable
 class VocabularyTerm(dict):

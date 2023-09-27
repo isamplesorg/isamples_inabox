@@ -14,7 +14,8 @@ from isamples_metadata.taxonomy.metadata_model_client import MODEL_SERVER_CLIENT
 from isamples_metadata.vocabularies import vocabulary_mapper
 
 AAT_NAME = "Getty Art & Architecture Thesaurus"
-GETTY_AAT_REGEX = re.compile("\[([^\]]+)\]")
+GETTY_AAT_REGEX = re.compile("\[([^\]]+)\]")  # noqa: W605
+
 
 class MaterialCategoryMetaMapper(AbstractCategoryMetaMapper):
     _anthropogenicMaterialMapper = StringEqualityCategoryMapper(
@@ -352,7 +353,6 @@ class OpenContextTransformer(Transformer):
                         keyword.value = v[0]
         return list(keywords_by_getty_id.values())
 
-
     def _convert_subject_to_keywords(self, subject_key: str) -> list[dict[str, str]]:
         subjects = self.source_record.get(subject_key)
         if subjects is not None:
@@ -366,7 +366,6 @@ class OpenContextTransformer(Transformer):
             return metadata_dicts
         else:
             return []
-
 
     def keywords(self) -> typing.List[dict[str, str]]:
         getty_keywords = self._extract_getty_keywords()

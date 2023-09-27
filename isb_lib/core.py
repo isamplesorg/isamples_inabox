@@ -13,7 +13,7 @@ import igsn_lib.time
 
 from isamples_metadata.metadata_constants import SAMPLE_IDENTIFIER, AT_ID, LABEL, HAS_CONTEXT_CATEGORY, \
     HAS_CONTEXT_CATEGORY_CONFIDENCE, HAS_MATERIAL_CATEGORY, HAS_MATERIAL_CATEGORY_CONFIDENCE, HAS_SPECIMEN_CATEGORY, \
-    KEYWORDS, PRODUCED_BY, HAS_FEATURE_OF_INTEREST, RESULT_TIME, SAMPLING_SITE, LOCATION, ELEVATION, LATITUDE, \
+    KEYWORDS, PRODUCED_BY, HAS_FEATURE_OF_INTEREST, RESULT_TIME, SAMPLING_SITE, ELEVATION, LATITUDE, \
     LONGITUDE, PLACE_NAME, SUBSAMPLE, REGISTRANT, SAMPLING_PURPOSE, CURATION, ACCESS_CONSTRAINTS, RESPONSIBILITY, \
     RELATED_RESOURCE, DESCRIPTION, HAS_SPECIMEN_CATEGORY_CONFIDENCE, CURATION_LOCATION, SAMPLE_LOCATION
 from isamples_metadata.metadata_exceptions import MetadataException
@@ -657,7 +657,7 @@ class CoreSolrImporter:
         self._solr_batch_size = solr_batch_size
         self._solr_url = solr_url
 
-    def run_solr_import(
+    def run_solr_import(  # noqa: C901
         self, core_record_function: typing.Callable
     ) -> typing.Set[str]:
         getLogger().info(
@@ -669,7 +669,7 @@ class CoreSolrImporter:
         faulthandler.register(SIGINT)
         allkeys = set()
         rsession = requests.session()
-        h3_to_height = sqlmodel_database.h3_to_height(self._db_session)
+        # h3_to_height = sqlmodel_database.h3_to_height(self._db_session)
         try:
             core_records = []
             for thing in self._thing_iterator.yieldRecordsByPage():
@@ -696,7 +696,7 @@ class CoreSolrImporter:
                     # Step 3 in this sequence of events is both slow and API rate-limited by Cesium, so we take great
                     # pain to ensure that we're only querying the absolute minimum
                     core_record["producedBy_samplingSite_location_h3_15"] = thing.h3
-                    #core_record["producedBy_samplingSite_location_cesium_height"] = h3_to_height.get(thing.h3)
+                    # core_record["producedBy_samplingSite_location_cesium_height"] = h3_to_height.get(thing.h3)
                     if ("producedBy_samplingSite_location_cesium_height" in core_record):
                         core_record.pop("producedBy_samplingSite_location_cesium_height")
                     core_records.append(core_record)

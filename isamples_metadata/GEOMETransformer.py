@@ -13,7 +13,6 @@ from isamples_metadata.Transformer import (
 )
 from isamples_metadata.metadata_constants import LABEL, AUTHORIZED_BY, COMPLIES_WITH, RELATIONSHIP, TARGET
 from isamples_metadata.vocabularies import vocabulary_mapper
-from isb_web.sqlmodel_database import kingdom_for_taxonomy_name
 
 PERMIT_STRINGS_TO_IGNORE = ['nan', 'na', 'no data', 'unknown', 'none_required']
 
@@ -200,7 +199,6 @@ class GEOMETransformer(Transformer):
             keyword = Keyword(keyword_value, None, scheme_name)
             keywords.append(keyword.metadata_dict())
 
-
     def keywords(self) -> typing.List[dict]:
         # "JSON array of values from record/ -order, -phylum, -family, -class, and parent/ -country, -county,
         # -stateProvince, -continentOcean... (place names more general that the locality or most specific
@@ -277,7 +275,6 @@ class GEOMETransformer(Transformer):
         value = source_dict.get(key)
         if value is not None and len(str(value)) > 0:
             dest_list.append(Transformer._responsibility_dict(label, value))
-
 
     def produced_by_responsibilities(self) -> typing.List[dict[str, str]]:
         parent_record = self._source_record_parent_record()

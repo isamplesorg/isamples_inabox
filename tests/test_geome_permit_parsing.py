@@ -12,7 +12,7 @@ iterator_testcases = [
         "Fisheries "
         "Management Authority, Thursday Island",
         {"authorized_by": ["Commonwealth of Australia Torres Strait Fisheries Act 1984 Permit for Scientific purposes",
-                          "Australian Fisheries Management Authority, Thursday Island"], "complies_with": []}),
+                           "Australian Fisheries Management Authority, Thursday Island"], "complies_with": []}),
     ("nan", {"authorized_by": [], "complies_with": []}),
     ("NA", {"authorized_by": [], "complies_with": []}),
     ("na", {"authorized_by": [], "complies_with": []}),
