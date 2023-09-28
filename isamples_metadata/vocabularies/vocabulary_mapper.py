@@ -13,7 +13,7 @@ https://github.com/isamplesorg/vocabularies/tree/develop/src
 
 # Inherit from dict in order to make this class JSON serializable
 class VocabularyTerm(dict):
-    def __init__(self, key: str, label: str, uri: str):
+    def __init__(self, key: Optional[str], label: str, uri: Optional[str]):
         self.key = key
         self.label = label
         self.uri = uri
@@ -47,10 +47,10 @@ class ControlledVocabulary:
                 self.vocabulary_terms_by_key[key] = term
                 self.vocabulary_terms_by_label[label] = term
 
-    def term_for_key(self, key: str) -> Optional[VocabularyTerm]:
+    def term_for_key(self, key: str) -> VocabularyTerm:
         return self.vocabulary_terms_by_key.get(key, VocabularyTerm(None, key, None))
 
-    def term_for_label(self, label: str) -> Optional[VocabularyTerm]:
+    def term_for_label(self, label: str) -> VocabularyTerm:
         return self.vocabulary_terms_by_label.get(label, VocabularyTerm(None, label, None))
 
 

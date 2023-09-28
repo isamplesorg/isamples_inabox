@@ -123,7 +123,7 @@ class SmithsonianTransformer(Transformer):
         )
         return Transformer.DESCRIPTION_SEPARATOR.join(description_pieces)
 
-    def has_context_categories(self) -> typing.List[str]:
+    def has_context_categories(self) -> typing.List[dict[str, str]]:
         categories = MODEL_SERVER_CLIENT.make_smithsonian_sampled_feature_request(
             [
                 self.source_record.get("collectionCode", ""),
@@ -135,14 +135,14 @@ class SmithsonianTransformer(Transformer):
         )
         return [vocabulary_mapper.SAMPLED_FEATURE.term_for_label(category).metadata_dict() for category in categories]
 
-    def has_material_categories(self) -> typing.List[dict]:
+    def has_material_categories(self) -> typing.List[dict[str, str]]:
         material_sample_type = self.source_record.get("materialSampleType")
         if material_sample_type == "Environmental sample":
             return [vocabulary_mapper.MATERIAL_TYPE.term_for_key("biogenicnonorganicmaterial").metadata_dict()]
         else:
             return [vocabulary_mapper.MATERIAL_TYPE.term_for_key("organicmaterial").metadata_dict()]
 
-    def has_specimen_categories(self) -> typing.List[str]:
+    def has_specimen_categories(self) -> typing.List[dict[str, str]]:
         preparation_type = self.source_record.get("preparationType", "")
         return [term.metadata_dict() for term in SpecimenCategoryMetaMapper.categories(preparation_type)]
 
@@ -150,14 +150,16 @@ class SmithsonianTransformer(Transformer):
         return [self.source_record.get("scientificName", "")]
 
     def keywords(self) -> typing.List[dict[str, str]]:
-        keywords = [Keyword(self.source_record.get("collectionCode", ""))]
+        keywords: list[Keyword] = [Keyword(self.source_record.get("collectionCode", ""))]
         water_body = self.source_record.get("waterBody", "")
         if len(water_body) > 0:
             keywords.append(Keyword(water_body))
         higher_classification = self.source_record.get("higherClassification", "")
         if len(higher_classification) > 0:
             keywords.extend([Keyword(scientific_name) for scientific_name in higher_classification.split(", ")])
-        keywords.append(Keyword(self.source_record.get("scientificName")))
+        scientific_name = self.source_record.get("scientificName")
+        if scientific_name is not None:
+            keywords.append(Keyword(scientific_name))
         # TODO: do we want to include the locations in keywords?  Some of the other collections did.
         # If so, which ones?
         return [keyword.metadata_dict() for keyword in keywords]
@@ -182,14 +184,14 @@ class SmithsonianTransformer(Transformer):
     def produced_by_feature_of_interest(self) -> str:
         return Transformer.NOT_PROVIDED
 
-    def _add_to_responsibilities(self, source_label: str, dict_label: str, responsibilities: typing.List[str]):
+    def _add_to_responsibilities(self, source_label: str, dict_label: str, responsibilities: list[dict[str, str]]):
         value = self.source_record[source_label]
         if len(value) > 0:
             for current in self.RESPONSIBILITIES_SPLIT_RE.split(value):
                 responsibilities.append({"role": dict_label, "name": current.strip()})
 
-    def produced_by_responsibilities(self) -> typing.List[str]:
-        responsibilities: list[str] = []
+    def produced_by_responsibilities(self) -> list[dict[str, str]]:
+        responsibilities: list[dict[str, str]] = []
         self._add_to_responsibilities("recordedBy", "recorded by", responsibilities)
         self._add_to_responsibilities("scientificNameAuthorship", "scientific name authorship", responsibilities)
 
@@ -286,8 +288,9 @@ class SmithsonianTransformer(Transformer):
             place_names.append(higher_geography)
         return place_names
 
-    def curation_responsibility(self) -> str:
-        return f"{self.source_record.get('institutionCode')} {self.source_record.get('institutionID')}"
+    def curation_responsibility(self) -> list[dict[str, str]]:
+        curation_str = f"{self.source_record.get('institutionCode')} {self.source_record.get('institutionID')}"
+        return [Transformer._responsibility_dict("curator", curation_str)]
 
     def last_updated_time(self) -> typing.Optional[str]:
         # This doesn't appear to be available in the Smithsonian DwC

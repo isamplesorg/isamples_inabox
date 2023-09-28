@@ -143,16 +143,16 @@ class GEOMETransformer(Transformer):
 
         return Transformer.DESCRIPTION_SEPARATOR.join(description_pieces)
 
-    def has_context_categories(self) -> typing.List[str]:
+    def has_context_categories(self) -> list:
         # TODO: resolve https://github.com/isamplesorg/isamples_inabox/issues/312
         return [vocabulary_mapper.SAMPLED_FEATURE.term_for_key("marinewaterbody").metadata_dict()]
 
-    def has_material_categories(self) -> typing.List[dict]:
+    def has_material_categories(self) -> list:
         # TODO: implement
         # ["'Organic material' unless record/entity, record/basisOfRecord, or record/collectionCode indicate otherwise"]
         return [vocabulary_mapper.MATERIAL_TYPE.term_for_key("organicmaterial").metadata_dict()]
 
-    def has_specimen_categories(self) -> typing.List[dict]:
+    def has_specimen_categories(self) -> list:
         return [vocabulary_mapper.SPECIMEN_TYPE.term_for_key("wholeorganism").metadata_dict()]
 
     def informal_classification(self) -> typing.List[str]:
@@ -170,25 +170,25 @@ class GEOMETransformer(Transformer):
         else:
             return [scientific_name]
 
-    def _place_names(self, only_general: bool) -> typing.List[str]:
+    def _place_names(self, only_general: bool) -> list:
         parent_record = self._source_record_parent_record()
         if parent_record is not None:
             place_names = []
             if not only_general:
                 if "locality" in parent_record:
-                    place_names.append(parent_record["locality"])
+                    place_names.append(Keyword(parent_record["locality"]))
             if "county" in parent_record:
-                place_names.append(parent_record["county"])
+                place_names.append(Keyword(parent_record["county"]))
             if "stateProvince" in parent_record:
-                place_names.append(parent_record["stateProvince"])
+                place_names.append(Keyword(parent_record["stateProvince"]))
             if "island" in parent_record:
-                place_names.append(parent_record["island"])
+                place_names.append(Keyword(parent_record["island"]))
             if "islandGroup" in parent_record:
-                place_names.append(parent_record["islandGroup"])
+                place_names.append(Keyword(parent_record["islandGroup"]))
             if "country" in parent_record:
-                place_names.append(parent_record["country"])
+                place_names.append(Keyword(parent_record["country"]))
             if "continentOcean" in parent_record:
-                place_names.append(parent_record["continentOcean"])
+                place_names.append(Keyword(parent_record["continentOcean"]))
             return place_names
         return []
 
@@ -199,7 +199,7 @@ class GEOMETransformer(Transformer):
             keyword = Keyword(keyword_value, None, scheme_name)
             keywords.append(keyword.metadata_dict())
 
-    def keywords(self) -> typing.List[dict]:
+    def keywords(self) -> list:
         # "JSON array of values from record/ -order, -phylum, -family, -class, and parent/ -country, -county,
         # -stateProvince, -continentOcean... (place names more general that the locality or most specific
         # rank place name) "
@@ -573,7 +573,7 @@ class GEOMEChildTransformer(GEOMETransformer):
         # TODO
         return ""
 
-    def has_specimen_categories(self) -> typing.List[str]:
+    def has_specimen_categories(self) -> list:
         return [vocabulary_mapper.SPECIMEN_TYPE.term_for_key("organismpart").metadata_dict()]
 
     def produced_by_label(self) -> str:
@@ -589,7 +589,7 @@ class GEOMEChildTransformer(GEOMETransformer):
     def produced_by_feature_of_interest(self) -> str:
         return ""
 
-    def produced_by_responsibilities(self) -> typing.List[str]:
+    def produced_by_responsibilities(self) -> list:
         # TODO: who did the tissue extract, if available -- where does this live, if anywhere?
         return []
 

@@ -10,7 +10,7 @@ from isamples_metadata.metadata_constants import SAMPLE_IDENTIFIER, SCHEMA, AT_I
     RESPONSIBILITY, HAS_FEATURE_OF_INTEREST, RESULT_TIME, SAMPLING_SITE, ELEVATION, LATITUDE, LONGITUDE, \
     REGISTRANT, SAMPLING_PURPOSE, CURATION, ACCESS_CONSTRAINTS, CURATION_LOCATION, RELATED_RESOURCE, AUTHORIZED_BY, \
     COMPLIES_WITH, INFORMAL_CLASSIFICATION, PLACE_NAME, ROLE, NAME, SAMPLE_LOCATION
-from isamples_metadata.vocabularies.vocabulary_mapper import ControlledVocabulary
+from isamples_metadata.vocabularies.vocabulary_mapper import ControlledVocabulary, VocabularyTerm
 
 NOT_PROVIDED = "Not Provided"
 
@@ -189,7 +189,7 @@ class Transformer(ABC):
         """Map from the source record into an iSamples context category"""
         pass
 
-    def has_context_category_confidences(self, context_categories: list[str]) -> typing.Optional[typing.List[float]]:
+    def has_context_category_confidences(self, context_categories: list[dict[str, str]]) -> typing.Optional[typing.List[float]]:
         """If a machine-predicted label is used for context, subclasses should return non-None confidence values"""
         return Transformer._rule_based_confidence_list_for_categories_list(context_categories)
 
@@ -198,7 +198,7 @@ class Transformer(ABC):
         """Map from the source record into an iSamples material category"""
         pass
 
-    def has_material_category_confidences(self, material_categories: list[str]) -> typing.Optional[typing.List[float]]:
+    def has_material_category_confidences(self, material_categories: list[dict[str, str]]) -> typing.Optional[typing.List[float]]:
         """If a machine-predicted label is used for material, subclasses should return non-None confidence values"""
         return Transformer._rule_based_confidence_list_for_categories_list(material_categories)
 
@@ -207,7 +207,7 @@ class Transformer(ABC):
         """Map from the source record into an iSamples specimen category"""
         pass
 
-    def has_specimen_category_confidences(self, specimen_categories: list[str]) -> typing.Optional[typing.List[float]]:
+    def has_specimen_category_confidences(self, specimen_categories: list[dict[str, str]]) -> typing.Optional[typing.List[float]]:
         """If a machine-predicted label is used for specimen, subclasses should return non-None confidence values"""
         return Transformer._rule_based_confidence_list_for_categories_list(specimen_categories)
 
@@ -342,7 +342,7 @@ class AbstractCategoryMapper(ABC):
         self,
         potential_match: str,
         auxiliary_match: typing.Optional[str] = None,
-        categories_list: typing.List[dict] = list(),
+        categories_list: typing.List[VocabularyTerm] = list(),
     ):
         if self.matches(potential_match, auxiliary_match):
             if self._destination != NOT_PROVIDED:
@@ -373,15 +373,15 @@ class AbstractCategoryMetaMapper(ABC):
         cls,
         source_category: str,
         auxiliary_source_category: typing.Optional[str] = None,
-    ) -> list[dict]:
-        categories: list[dict] = []
+    ) -> list[VocabularyTerm]:
+        categories: list[VocabularyTerm] = []
         if source_category is not None:
             for mapper in cls._categoriesMappers:
                 mapper.append_if_matched(
                     source_category, auxiliary_source_category, categories
                 )
         if len(categories) == 0:
-            categories.append(Transformer.NOT_PROVIDED)
+            categories.append(VocabularyTerm(None, Transformer.NOT_PROVIDED, None))
         return categories
 
     @classmethod
@@ -498,12 +498,13 @@ class StringPairedCategoryMapper(AbstractCategoryMapper):
         )
 
 
-class Keyword:
+class Keyword(dict):
     """Keyword for inclusion in the iSamples keywords metadata key"""
     def __init__(self, value: str, uri: Optional[str] = None, scheme: Optional[str] = None):
         self.value = value
         self.uri = uri
         self.scheme = scheme
+        super().__init__(self.metadata_dict())
 
     def metadata_dict(self) -> dict[str, str]:
         metadata_dict = {

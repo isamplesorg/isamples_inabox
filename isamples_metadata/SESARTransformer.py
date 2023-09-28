@@ -15,6 +15,7 @@ from isamples_metadata.Transformer import (
 
 from isamples_metadata.taxonomy.metadata_model_client import MODEL_SERVER_CLIENT, PredictionResult
 from isamples_metadata.vocabularies import vocabulary_mapper
+from isamples_metadata.vocabularies.vocabulary_mapper import VocabularyTerm  # noqa: F401
 
 
 def fullIgsn(v):
@@ -304,7 +305,7 @@ class SESARTransformer(Transformer):
         # TODO: implement
         return Transformer.NOT_PROVIDED
 
-    def has_context_categories(self) -> typing.List[str]:
+    def has_context_categories(self) -> list:
         material_type = self._material_type()
         primary_location_type = self._primary_location_type()
         return ContextCategoryMetaMapper.categories(
@@ -330,7 +331,7 @@ class SESARTransformer(Transformer):
     #     return None
 
     # Disabled pending resolution of https://github.com/isamplesorg/isamples_inabox/issues/255
-    def has_material_categories(self) -> typing.List[str]:
+    def has_material_categories(self) -> list:
         material = self._material_type()
         if not material:
             prediction_results = self._compute_material_prediction_results()
@@ -340,14 +341,14 @@ class SESARTransformer(Transformer):
                 return []
         return MaterialCategoryMetaMapper.categories(material)
 
-    def has_material_category_confidences(self, material_categories: list[str]) -> typing.Optional[typing.List[float]]:
+    def has_material_category_confidences(self, material_categories: list) -> typing.Optional[typing.List[float]]:
         prediction_results = self._compute_material_prediction_results()
         if prediction_results is None:
             return None
         else:
             return [prediction.confidence for prediction in prediction_results]
 
-    def has_specimen_categories(self) -> typing.List[str]:
+    def has_specimen_categories(self) -> list:
         sample_type = self._source_record_description()["sampleType"]
         return SpecimenCategoryMetaMapper.categories(sample_type)
 
@@ -435,7 +436,7 @@ class SESARTransformer(Transformer):
             return primary_location_type
         return Transformer.NOT_PROVIDED
 
-    def produced_by_responsibilities(self) -> typing.List[str]:
+    def produced_by_responsibilities(self) -> list:
         responsibilities = list()
         description_dict = self._source_record_description()
         if "collector" in description_dict:

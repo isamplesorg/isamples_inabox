@@ -269,7 +269,7 @@ class OpenContextTransformer(Transformer):
     def _item_category(self):
         return self.source_record.get("item category", "")
 
-    def has_material_categories(self) -> typing.List[str]:
+    def has_material_categories(self) -> list:
         item_category = self._item_category()
         to_classify_items = ["Object", "Pottery", "Sample", "Sculpture"]
         if item_category in to_classify_items:
@@ -280,7 +280,7 @@ class OpenContextTransformer(Transformer):
                 return []
         return MaterialCategoryMetaMapper.categories(item_category)
 
-    def has_material_category_confidences(self, material_categories: typing.List[str]) -> typing.Optional[typing.List[float]]:
+    def has_material_category_confidences(self, material_categories: list[dict[str, str]]) -> typing.Optional[typing.List[float]]:
         prediction_results = self._compute_material_prediction_results()
         if prediction_results is None:
             material_categories = self.has_material_categories()
@@ -301,7 +301,7 @@ class OpenContextTransformer(Transformer):
             self._specimen_prediction_results = MODEL_SERVER_CLIENT.make_opencontext_sample_request(self.source_record)
             return self._specimen_prediction_results
 
-    def has_specimen_categories(self) -> typing.List[str]:
+    def has_specimen_categories(self) -> list:
         item_category = self._item_category()
         to_classify_items = ["Animal Bone"]
         if item_category in to_classify_items:
@@ -312,7 +312,7 @@ class OpenContextTransformer(Transformer):
                 return []
         return [term.metadata_dict() for term in SpecimenCategoryMetaMapper.categories(item_category)]
 
-    def has_specimen_category_confidences(self, specimen_categories: typing.List[str]) -> typing.Optional[typing.List[float]]:
+    def has_specimen_category_confidences(self, specimen_categories: list[dict[str, str]]) -> typing.Optional[typing.List[float]]:
         prediction_results = self._compute_specimen_prediction_results()
         if prediction_results is None:
             # Not computed, so default to human entered confidence
@@ -336,7 +336,7 @@ class OpenContextTransformer(Transformer):
         # We don't know all the terms beforehand, so we'll iterate the dictionary keys, and look for things that have
         # the getty-aat key format in them, check to see if it has URI in the key, and build a Keyword that glues
         # them together.
-        keywords_by_getty_id = {}
+        keywords_by_getty_id: dict[str, Keyword] = {}
         for k, v in self.source_record.items():
             if "getty-aat" in k:
                 # extract out the piece of the key that is the getty specific piece
