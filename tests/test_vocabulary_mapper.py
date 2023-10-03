@@ -5,7 +5,7 @@ def test_controlled_vocabularies():
     assert vocabulary_mapper.MATERIAL_TYPE is not None
     assert vocabulary_mapper.SAMPLED_FEATURE is not None
     assert vocabulary_mapper.SPECIMEN_TYPE is not None
-    past_human_activities = vocabulary_mapper.SAMPLED_FEATURE.term_for_key("pasthumanoccupationsite")
+    past_human_activities = vocabulary_mapper.SAMPLED_FEATURE.term_for_key("sf:pasthumanoccupationsite")
     assert past_human_activities is not None
     metadata_dict = past_human_activities.metadata_dict()
     assert metadata_dict.get("label") is not None

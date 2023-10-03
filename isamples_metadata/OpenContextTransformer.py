@@ -251,7 +251,7 @@ class OpenContextTransformer(Transformer):
         return ""
 
     def has_context_categories(self) -> typing.List[dict[str, str]]:
-        return [vocabulary_mapper.SAMPLED_FEATURE.term_for_key("pasthumanoccupationsite").metadata_dict()]
+        return [vocabulary_mapper.SAMPLED_FEATURE.term_for_key("sf:pasthumanoccupationsite").metadata_dict()]
 
     def _compute_material_prediction_results(self) -> typing.Optional[typing.List[PredictionResult]]:
         item_category = self._item_category()

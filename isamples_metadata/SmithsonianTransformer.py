@@ -138,9 +138,9 @@ class SmithsonianTransformer(Transformer):
     def has_material_categories(self) -> typing.List[dict[str, str]]:
         material_sample_type = self.source_record.get("materialSampleType")
         if material_sample_type == "Environmental sample":
-            return [vocabulary_mapper.MATERIAL_TYPE.term_for_key("biogenicnonorganicmaterial").metadata_dict()]
+            return [vocabulary_mapper.MATERIAL_TYPE.term_for_key("mat:biogenicnonorganicmaterial").metadata_dict()]
         else:
-            return [vocabulary_mapper.MATERIAL_TYPE.term_for_key("organicmaterial").metadata_dict()]
+            return [vocabulary_mapper.MATERIAL_TYPE.term_for_key("mat:organicmaterial").metadata_dict()]
 
     def has_specimen_categories(self) -> typing.List[dict[str, str]]:
         preparation_type = self.source_record.get("preparationType", "")

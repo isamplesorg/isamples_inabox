@@ -40,7 +40,7 @@ class ControlledVocabulary:
             for row in csvreader:
                 # The first column is the term key and has a prefix, which we ignore for the purpose of this API,
                 # e.g. mat:anthropogenicmetal -> anthropogenicmetal
-                key = row[0].split(":")[1]
+                key = row[0]
                 label = row[1]
                 uri = os.path.join(uri_prefix, key)
                 term = VocabularyTerm(key, label, uri)

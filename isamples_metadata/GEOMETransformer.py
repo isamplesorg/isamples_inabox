@@ -145,15 +145,16 @@ class GEOMETransformer(Transformer):
 
     def has_context_categories(self) -> list:
         # TODO: resolve https://github.com/isamplesorg/isamples_inabox/issues/312
-        return [vocabulary_mapper.SAMPLED_FEATURE.term_for_key("marinewaterbody").metadata_dict()]
+        # This should probably return the biological kingdom once that is hooked into the vocabulary
+        return [vocabulary_mapper.SAMPLED_FEATURE.term_for_key("sf:marinewaterbody").metadata_dict()]
 
     def has_material_categories(self) -> list:
         # TODO: implement
         # ["'Organic material' unless record/entity, record/basisOfRecord, or record/collectionCode indicate otherwise"]
-        return [vocabulary_mapper.MATERIAL_TYPE.term_for_key("organicmaterial").metadata_dict()]
+        return [vocabulary_mapper.MATERIAL_TYPE.term_for_key("mat:organicmaterial").metadata_dict()]
 
     def has_specimen_categories(self) -> list:
-        return [vocabulary_mapper.SPECIMEN_TYPE.term_for_key("wholeorganism").metadata_dict()]
+        return [vocabulary_mapper.SPECIMEN_TYPE.term_for_key("spec:wholeorganism").metadata_dict()]
 
     def informal_classification(self) -> typing.List[str]:
         main_record = self._source_record_main_record()
@@ -574,7 +575,7 @@ class GEOMEChildTransformer(GEOMETransformer):
         return ""
 
     def has_specimen_categories(self) -> list:
-        return [vocabulary_mapper.SPECIMEN_TYPE.term_for_key("organismpart").metadata_dict()]
+        return [vocabulary_mapper.SPECIMEN_TYPE.term_for_key("spec:organismpart").metadata_dict()]
 
     def produced_by_label(self) -> str:
         return f"tissue subsample from {self._source_record_main_record()['materialSampleID']}"
