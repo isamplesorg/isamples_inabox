@@ -617,8 +617,8 @@ class GEOMEChildTransformer(GEOMETransformer):
         parent_dict = {}
         main_record = self._source_record_main_record()
         parent_dict[LABEL] = f"parent sample {main_record.get('materialSampleID')}"
-        parent_dict["target"] = main_record.get("bcid", "")
-        parent_dict["relationshipType"] = "derived_from"
+        parent_dict[TARGET] = main_record.get("bcid", "")
+        parent_dict[RELATIONSHIP] = "derived_from"
         return [parent_dict]
 
     def authorized_by(self) -> typing.List[str]:
