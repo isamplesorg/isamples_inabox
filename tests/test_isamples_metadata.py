@@ -25,6 +25,7 @@ from isb_lib.models.thing import Thing
 from isb_lib.sesar_adapter import SESARItem
 
 ASSERT_ON_OUTPUT = False
+WRITE_OUTPUT_FILES = False
 
 
 def _run_transformer(
@@ -52,6 +53,11 @@ def _assert_transformed_dictionary(
         if ASSERT_ON_OUTPUT:
             isamples_record = json.load(isamples_file)
             assert transformed_to_isamples_record == isamples_record
+
+    if WRITE_OUTPUT_FILES:
+        with open(isamples_path, "w") as json_file:
+            json.dump(transformed_to_isamples_record, json_file, indent=4)
+            print(f"Dumped iSamples file to {isamples_path}")
 
 
 SESAR_test_values = [
