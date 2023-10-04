@@ -269,21 +269,8 @@ def lat_lon_to_solr(coreMetadata: typing.Dict, latitude: typing.SupportsFloat, l
 
 
 def _gather_produced_by_responsibilities(responsibility_dicts: list[dict]) -> list[str]:
-    responsibilities_list = []
-    for responsibility_dict in responsibility_dicts:
-        name = responsibility_dict[NAME]
-        responsibilities_list.append(f"{responsibility_dict[ROLE]}:{name}")
-    return responsibilities_list
+    return [f"{responsibility_dict[ROLE]}:{responsibility_dict[NAME]}" for responsibility_dict in responsibility_dicts]
 
-def _gather_sampling_site_place_names(place_names: list[dict]) -> list[str]:
-    place_names_str = []
-    for place_name in place_names:
-        # TODO: reconcile the formats -- we shouldn't need to check type on this
-        if type(place_name) is dict:
-            place_names_str.append(place_name[KEYWORD])
-        else:
-            place_names_str.append(place_name)
-    return place_names_str
 
 def handle_produced_by_fields(coreMetadata: typing.Dict, doc: typing.Dict):  # noqa: C901 -- need to examine computational complexity
     # The solr index flattens subdictionaries, so check the keys explicitly in the subdictionary to see if they should be added to the index
@@ -320,7 +307,7 @@ def handle_produced_by_fields(coreMetadata: typing.Dict, doc: typing.Dict):  # n
         if _shouldAddMetadataValueToSolrDoc(samplingSite, LABEL):
             doc["producedBy_samplingSite_label"] = samplingSite[LABEL]
         if _shouldAddMetadataValueToSolrDoc(samplingSite, PLACE_NAME):
-            doc["producedBy_samplingSite_placeName"] = _gather_sampling_site_place_names(samplingSite[PLACE_NAME])
+            doc["producedBy_samplingSite_placeName"] = samplingSite[PLACE_NAME]
 
         if SAMPLE_LOCATION in samplingSite:
             location = samplingSite[SAMPLE_LOCATION]

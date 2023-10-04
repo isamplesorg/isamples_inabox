@@ -91,27 +91,13 @@
                 "longitude": 115.88083
             },
             "place_name": [
-                {
-                    "keyword": "Gili Asahan"
-                },
-                {
-                    "keyword": "Indonesia"
-                },
-                {
-                    "keyword": "West Nusa Tenggara"
-                },
-                {
-                    "keyword": "Nusa Tenggara"
-                },
-                {
-                    "keyword": "Lombok"
-                },
-                {
-                    "keyword": "Indonesia"
-                },
-                {
-                    "keyword": "Asia"
-                }
+                "Gili Asahan",
+                "Indonesia",
+                "West Nusa Tenggara",
+                "Nusa Tenggara",
+                "Lombok",
+                "Indonesia",
+                "Asia"
             ]
         }
     },

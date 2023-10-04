@@ -116,21 +116,11 @@
                 "longitude": -118.277367
             },
             "place_name": [
-                {
-                    "keyword": "San Pedro Bay, breakwater"
-                },
-                {
-                    "keyword": "Los Angeles"
-                },
-                {
-                    "keyword": "California"
-                },
-                {
-                    "keyword": "USA"
-                },
-                {
-                    "keyword": "North Pacific Ocean"
-                }
+                "San Pedro Bay, breakwater",
+                "Los Angeles",
+                "California",
+                "USA",
+                "North Pacific Ocean"
             ]
         }
     },

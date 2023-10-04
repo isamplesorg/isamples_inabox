@@ -72,21 +72,11 @@
                 "longitude": 95.25293
             },
             "place_name": [
-                {
-                    "keyword": "Pulau Seulako"
-                },
-                {
-                    "keyword": "Aceh"
-                },
-                {
-                    "keyword": "Sumatra"
-                },
-                {
-                    "keyword": "Indonesia"
-                },
-                {
-                    "keyword": "Asia"
-                }
+                "Pulau Seulako",
+                "Aceh",
+                "Sumatra",
+                "Indonesia",
+                "Asia"
             ]
         }
     },

@@ -177,19 +177,19 @@ class GEOMETransformer(Transformer):
             place_names = []
             if not only_general:
                 if "locality" in parent_record:
-                    place_names.append(Keyword(parent_record["locality"]))
+                    place_names.append(parent_record["locality"])
             if "county" in parent_record:
-                place_names.append(Keyword(parent_record["county"]))
+                place_names.append(parent_record["county"])
             if "stateProvince" in parent_record:
-                place_names.append(Keyword(parent_record["stateProvince"]))
+                place_names.append(parent_record["stateProvince"])
             if "island" in parent_record:
-                place_names.append(Keyword(parent_record["island"]))
+                place_names.append(parent_record["island"])
             if "islandGroup" in parent_record:
-                place_names.append(Keyword(parent_record["islandGroup"]))
+                place_names.append(parent_record["islandGroup"])
             if "country" in parent_record:
-                place_names.append(Keyword(parent_record["country"]))
+                place_names.append(parent_record["country"])
             if "continentOcean" in parent_record:
-                place_names.append(Keyword(parent_record["continentOcean"]))
+                place_names.append(parent_record["continentOcean"])
             return place_names
         return []
 
@@ -204,7 +204,8 @@ class GEOMETransformer(Transformer):
         # "JSON array of values from record/ -order, -phylum, -family, -class, and parent/ -country, -county,
         # -stateProvince, -continentOcean... (place names more general that the locality or most specific
         # rank place name) "
-        keywords = self._place_names(True)
+        place_names = self._place_names(True)
+        keywords = [Keyword(place_name) for place_name in place_names]
         parent_record = self._source_record_parent_record()
         microhabitat = parent_record.get("microHabitat")
         if microhabitat is not None:
