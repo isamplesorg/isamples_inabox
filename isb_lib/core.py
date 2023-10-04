@@ -155,11 +155,14 @@ def _shouldAddMetadataValueToSolrDoc(metadata: typing.Dict, key: str) -> bool:
 def _gather_keyword_labels(keyword_dicts: list[dict]) -> list[str]:
     return [keyword_dict[KEYWORD] for keyword_dict in keyword_dicts]
 
+
 def _gather_vocabulary_labels(vocabulary_dicts: list[dict]) -> list[str]:
     return [vocabulary_dict[LABEL] for vocabulary_dict in vocabulary_dicts]
 
+
 def _gather_registrant_name(registrant_dict: dict) -> str:
     return registrant_dict[NAME]
+
 
 def _coreRecordAsSolrDoc(coreMetadata: typing.Dict) -> typing.Dict:  # noqa: C901 -- need to examine computational complexity
     # Before preparing the document in solr format, strip out any whitespace in string values
@@ -228,6 +231,7 @@ def coreRecordAsSolrDoc(transformer: Transformer) -> typing.Dict:
 
 def _gather_curation_responsibility(responsibility_dicts: list[str]) -> str:
     return [f"{responsibility_dict[ROLE]}:{responsibility_dict[NAME]}" for responsibility_dict in responsibility_dicts]
+
 
 def handle_curation_fields(coreMetadata: typing.Dict, doc: typing.Dict):
     curation = coreMetadata[CURATION]
