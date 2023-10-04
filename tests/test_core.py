@@ -39,13 +39,14 @@ def test_coreRecordAsSolrDoc():
     core_doc_str = """
 {
     "$schema": "iSamplesSchemaCore1.0.json",
-    "@id": "https://data.isamples.org/digitalsample/igsn/EOI00002H",
-    "label": "J730-GTHFS-16",
-    "sample_identifier": "IGSN:EOI00002H",
+    "@id": "metadata/21547/Cat2INDO106431.1",
+    "label": "INDO106431.1",
+    "sample_identifier": "ark:/21547/Cat2INDO106431.1",
     "description": "",
     "has_context_category": [
         {
-            "label": "subsurfacefluidreservoir"
+            "label": "Marine environment",
+            "identifier": "https://w3id.org/isample/vocabulary/sampledfeature/0.9/sf:marinewaterbody"
         }
     ],
     "has_context_category_confidence": [
@@ -53,84 +54,121 @@ def test_coreRecordAsSolrDoc():
     ],
     "has_material_category": [
         {
-            "label": "gas"
+            "label": "Organic material",
+            "identifier": "https://w3id.org/isample/vocabulary/material/0.9/mat:organicmaterial"
         }
     ],
-    "has_material_category_confidence": null,
+    "has_material_category_confidence": [
+        1.0
+    ],
     "has_specimen_category": [
         {
-            "label": "othersolidobject"
+            "label": "Organism part",
+            "identifier": "https://w3id.org/isample/vocabulary/specimentype/0.9/spec:organismpart"
         }
     ],
     "has_specimen_category_confidence": [
         1.0
     ],
     "informal_classification": [
-        ""
+        "Gastropoda"
     ],
     "keywords": [
-        "Individual Sample"
+        {
+            "keyword": "Aceh"
+        },
+        {
+            "keyword": "Sumatra"
+        },
+        {
+            "keyword": "Indonesia"
+        },
+        {
+            "keyword": "Asia"
+        },
+        {
+            "keyword": "Mollusca",
+            "scheme_name": "Taxon: phylum"
+        },
+        {
+            "keyword": "Gastropoda",
+            "scheme_name": "Taxon: class"
+        }
     ],
     "produced_by": {
-        "@id": "",
-        "label": "Sampler:Fluid:GTHFS",
-        "description": "cruiseFieldPrgrm:TN300. launchPlatformName:Jason II. Sampler:Fluid:GTHFS. HFS gastight. Red-center-9. T=250C. launch type:ROV, navigation type:USBL",
-        "has_feature_of_interest": "volcano",
-        "responsibility": [
-            "Evans_Leigh,,Collector",
-            "Andra Bobbitt,,Sample Owner"
-        ],
-        "result_time": "2013-09-14 01:30:00",
+        "@id": "ark:/21547/Car2PIRE_0334",
+        "label": "tissue subsample from PIRE_0334",
+        "description": "tissueCatalogNumber: http://n2t.net/ark:/21547/Q2INDO106431.1",
+        "has_feature_of_interest": "",
+        "responsibility": [],
+        "result_time": "",
         "sampling_site": {
-            "description": "Trevi:Jason Tmax=257.9 C. In the direct flow at this small anhydrite mound (anhydrite knocked over).",
-            "label": "",
+            "description": "Shallow, coastal reef. Apparent exposure to current, Porites dominated. Less impacted bleaching site, high recruitment, 12 m.",
+            "label": "Pulau Seulako",
             "sample_location": {
-                "elevation": "-1520.0 m",
-                "latitude": 45.9463,
-                "longitude": -129.9837
+                "elevation": "12 m",
+                "latitude": 5.8943,
+                "longitude": 95.25293
             },
             "place_name": [
-                "Axial Seamount"
+                {
+                    "keyword": "Pulau Seulako"
+                },
+                {
+                    "keyword": "Aceh"
+                },
+                {
+                    "keyword": "Sumatra"
+                },
+                {
+                    "keyword": "Indonesia"
+                },
+                {
+                    "keyword": "Asia"
+                }
             ]
         }
     },
     "registrant": {
-        "name": "Andra Bobbitt"
+        "name": "Chris Meyer"
     },
-    "sampling_purpose": "",
+    "sampling_purpose": "genomic analysis",
     "curation": {
         "label": "",
         "description": "",
         "access_constraints": "",
-        "curation_location": "",
+        "curation_location": "tissueWell: C06, tissuePlate: 03_ACEH_080916",
         "responsibility": [
-
+            {
+                "role": "curator",
+                "name": "No Voucher"
+            }
         ]
     },
     "related_resource": [
-
+        {
+            "label": "parent sample PIRE_0334",
+            "target": "ark:/21547/Car2PIRE_0334",
+            "relationship": "derived_from"
+        }
     ],
-    "authorized_by": [
-
-    ],
-    "complies_with": [
-
-    ],
-    "producedBy_samplingSite_location_h3_0": "8029fffffffffff",
-    "producedBy_samplingSite_location_h3_1": "8128fffffffffff",
-    "producedBy_samplingSite_location_h3_2": "8228effffffffff",
-    "producedBy_samplingSite_location_h3_3": "8328edfffffffff",
-    "producedBy_samplingSite_location_h3_4": "8428ed7ffffffff",
-    "producedBy_samplingSite_location_h3_5": "8528ed7bfffffff",
-    "producedBy_samplingSite_location_h3_6": "8628ed797ffffff",
-    "producedBy_samplingSite_location_h3_7": "8728ed791ffffff",
-    "producedBy_samplingSite_location_h3_8": "8828ed791bfffff",
-    "producedBy_samplingSite_location_h3_9": "8928ed791bbffff",
-    "producedBy_samplingSite_location_h3_10": "8a28ed791baffff",
-    "producedBy_samplingSite_location_h3_11": "8b28ed791a36fff",
-    "producedBy_samplingSite_location_h3_12": "8c28ed791ba97ff",
-    "producedBy_samplingSite_location_h3_13": "8d28ed791ba96ff",
-    "producedBy_samplingSite_location_h3_14": "8e28ed791ba96ef"
+    "authorized_by": [],
+    "complies_with": [],
+    "producedBy_samplingSite_location_h3_0": "8065fffffffffff",
+    "producedBy_samplingSite_location_h3_1": "81643ffffffffff",
+    "producedBy_samplingSite_location_h3_2": "826557fffffffff",
+    "producedBy_samplingSite_location_h3_3": "83642cfffffffff",
+    "producedBy_samplingSite_location_h3_4": "8465535ffffffff",
+    "producedBy_samplingSite_location_h3_5": "8565534bfffffff",
+    "producedBy_samplingSite_location_h3_6": "8665534b7ffffff",
+    "producedBy_samplingSite_location_h3_7": "8765534b3ffffff",
+    "producedBy_samplingSite_location_h3_8": "8865534b37fffff",
+    "producedBy_samplingSite_location_h3_9": "8965534b37bffff",
+    "producedBy_samplingSite_location_h3_10": "8a65534b37a7fff",
+    "producedBy_samplingSite_location_h3_11": "8b65534b37a2fff",
+    "producedBy_samplingSite_location_h3_12": "8c65534b37a2dff",
+    "producedBy_samplingSite_location_h3_13": "8d65534b37a2c3f",
+    "producedBy_samplingSite_location_h3_14": "8e65534b37a2c0f"
 }
     """
     solr_dict = _try_to_add_solr_doc(core_doc_str)
@@ -143,14 +181,14 @@ def test_coreRecordAsSolrDoc2():
     core_doc_str = """
 {
     "$schema": "iSamplesSchemaCore1.0.json",
-    "@id": "metadata/28722/k2ks6xw6t",
-    "label": "Object Object 68",
-    "sample_identifier": "ark:/28722/k2ks6xw6t",
-    "description": "'updated': 2023-07-18T02:30:12Z | 'Has type': color patches (military patches)",
+    "@id": "metadata/28722/k26h4xk1f",
+    "label": "Object Reg. 697",
+    "sample_identifier": "ark:/28722/k26h4xk1f",
+    "description": "'early bce/ce': -800.0 | 'late bce/ce': 1000.0 | 'updated': 2022-10-23T07:15:31Z | 'Consists of': glass (material)",
     "has_context_category": [
         {
             "label": "Site of past human activities",
-            "identifier": "https://w3id.org/isample/vocabulary/sampledfeature/0.9/pasthumanoccupationsite"
+            "identifier": "https://w3id.org/isample/vocabulary/sampledfeature/0.9/sf:pasthumanoccupationsite"
         }
     ],
     "has_context_category_confidence": [
@@ -158,19 +196,12 @@ def test_coreRecordAsSolrDoc2():
     ],
     "has_material_category": [
         {
-            "label": "mat:rock"
-        },
-        {
-            "label": "ocmat:ceramicclay"
-        },
-        {
-            "label": "mat:anthropogenicmetal"
+            "label": "Any anthropogenic material",
+            "identifier": "https://w3id.org/isample/vocabulary/material/0.9/mat:anyanthropogenicmaterial"
         }
     ],
     "has_material_category_confidence": [
-        0.7636867165565491,
-        0.08359246701002121,
-        0.07399434596300125
+        1.0
     ],
     "has_specimen_category": [
         {
@@ -180,55 +211,39 @@ def test_coreRecordAsSolrDoc2():
     "has_specimen_category_confidence": [
         1.0
     ],
-    "informal_classification": [
-
-    ],
+    "informal_classification": [],
     "keywords": [
         {
-            "keyword": "Space archaeology"
-        },
-        {
-            "keyword": "Space stations"
-        },
-        {
-            "keyword": "International Space Station"
-        },
-        {
-            "keyword": "Religion"
+            "keyword": "glass (material)",
+            "keyword_uri": "https://vocab.getty.edu/aat/300010797",
+            "scheme_name": "Getty Art & Architecture Thesaurus"
         }
     ],
     "produced_by": {
         "@id": "",
-        "label": "Archaeology of the International Space Station",
-        "description": "https://opencontext.org/projects/e682f907-6e4a-44cc-8a5f-3e2c73001673",
+        "label": "Excavations at Polis",
+        "description": "https://opencontext.org/projects/766d9fd5-2175-41e3-b7c9-7eba6777f1f0",
         "has_feature_of_interest": "",
         "responsibility": [
             {
                 "role": "creator",
-                "name": "Justin Walsh"
-            },
-            {
-                "role": "creator",
-                "name": "Alice Gorman"
-            },
-            {
-                "role": "creator",
-                "name": "Wendy Salmond"
+                "name": "Joanna Smith"
             }
         ],
-        "result_time": "2021-01-27T02:47:12Z",
+        "result_time": "2017-01-30T22:57:28Z",
         "sampling_site": {
             "description": "",
-            "label": "Off World/International Space Station/Zvezda Service Module",
+            "label": "Europe/Cyprus/Polis Chrysochous/E.F2:R09",
             "sample_location": {
                 "elevation": "",
                 "latitude": null,
                 "longitude": null
             },
             "place_name": [
-                "Off World",
-                "International Space Station",
-                "Zvezda Service Module"
+                "Europe",
+                "Cyprus",
+                "Polis Chrysochous",
+                "E.F2:R09"
             ]
         }
     },
@@ -241,38 +256,69 @@ def test_coreRecordAsSolrDoc2():
         "description": "",
         "access_constraints": "",
         "curation_location": "",
-        "responsibility": [
-
-        ]
+        "responsibility": []
     },
-    "related_resource": [
-
-    ],
-    "authorized_by": [
-
-    ],
-    "complies_with": [
-
-    ],
-    "producedBy_samplingSite_location_h3_0": null,
-    "producedBy_samplingSite_location_h3_1": null,
-    "producedBy_samplingSite_location_h3_2": null,
-    "producedBy_samplingSite_location_h3_3": null,
-    "producedBy_samplingSite_location_h3_4": null,
-    "producedBy_samplingSite_location_h3_5": null,
-    "producedBy_samplingSite_location_h3_6": null,
-    "producedBy_samplingSite_location_h3_7": null,
-    "producedBy_samplingSite_location_h3_8": null,
-    "producedBy_samplingSite_location_h3_9": null,
-    "producedBy_samplingSite_location_h3_10": null,
-    "producedBy_samplingSite_location_h3_11": null,
-    "producedBy_samplingSite_location_h3_12": null,
-    "producedBy_samplingSite_location_h3_13": null,
-    "producedBy_samplingSite_location_h3_14": null
+    "related_resource": [],
+    "authorized_by": [],
+    "complies_with": [],
+    "producedBy_samplingSite_location_h3_0": "803ffffffffffff",
+    "producedBy_samplingSite_location_h3_1": "813f7ffffffffff",
+    "producedBy_samplingSite_location_h3_2": "823f4ffffffffff",
+    "producedBy_samplingSite_location_h3_3": "833f4dfffffffff",
+    "producedBy_samplingSite_location_h3_4": "843f4d9ffffffff",
+    "producedBy_samplingSite_location_h3_5": "853f4d8bfffffff",
+    "producedBy_samplingSite_location_h3_6": "863f4d8a7ffffff",
+    "producedBy_samplingSite_location_h3_7": "873f4d8a5ffffff",
+    "producedBy_samplingSite_location_h3_8": "883f4d8a59fffff",
+    "producedBy_samplingSite_location_h3_9": "893f4d8a583ffff",
+    "producedBy_samplingSite_location_h3_10": "8a3f4d8a5837fff",
+    "producedBy_samplingSite_location_h3_11": "8b3f4d8a5830fff",
+    "producedBy_samplingSite_location_h3_12": "8c3f4d8a5830bff",
+    "producedBy_samplingSite_location_h3_13": "8d3f4d8a5830abf",
+    "producedBy_samplingSite_location_h3_14": "8e3f4d8a5830a8f"
 }
     """
     solr_dict = _try_to_add_solr_doc(core_doc_str)
     assert "producedBy_samplingSite_location_latlon" not in solr_dict
+
+
+def _load_test_file_into_solr_doc(file_path: str) -> dict:
+    with open(file_path, "r") as source_file:
+        source_record = source_file.read()
+        solr_doc = _try_to_add_solr_doc(source_record)
+    return solr_doc
+
+
+def test_vocabulary_included():
+    solr_doc = _load_test_file_into_solr_doc("./test_data/GEOME/test/ark-21547-Car2PIRE_0334-child-test.json")
+    context_categories = solr_doc.get("hasContextCategory")
+    assert context_categories is not None
+    assert context_categories[0] == "Marine environment"
+    material_categories = solr_doc.get("hasMaterialCategory")
+    assert material_categories is not None
+    assert material_categories[0] == "Organic material"
+    specimen_categories = solr_doc.get("hasSpecimenCategory")
+    assert specimen_categories is not None
+    assert specimen_categories[0] == "Organism part"
+    keywords = solr_doc.get("keywords")
+    assert keywords is not None
+    assert keywords[0] == "Aceh"
+
+
+def test_produced_by_fields():
+    solr_doc = _load_test_file_into_solr_doc("./test_data/GEOME/test/ark-21547-Car2PIRE_0334-test.json")
+    produced_by_responsibility = solr_doc.get("producedBy_responsibility")
+    assert produced_by_responsibility is not None
+    assert produced_by_responsibility[0] == "Collector:Aji Wahyu Anggoro"
+    registrant = solr_doc.get("registrant")
+    assert registrant is not None
+    assert registrant == "Chris Meyer"
+    curation_responsibility = solr_doc.get("curation_responsibility")
+    assert curation_responsibility is not None
+    assert curation_responsibility[0] == "curator:No Voucher"
+    sampling_site_place_name = solr_doc.get("producedBy_samplingSite_placeName")
+    assert sampling_site_place_name is not None
+    assert sampling_site_place_name[0] == "Pulau Seulako"
 
 
 def test_date_year_only():
