@@ -272,6 +272,7 @@ def _gather_produced_by_responsibilities(responsibility_dicts: list[dict]) -> li
     responsibilities_list = []
     for responsibility_dict in responsibility_dicts:
         name = responsibility_dict[NAME]
+        # TODO: reconcile the formats -- we shouldn't need to check type on this
         if type(name) is dict:
             name = name[LABEL]
         responsibilities_list.append(f"{responsibility_dict[ROLE]}:{name}")
@@ -280,6 +281,7 @@ def _gather_produced_by_responsibilities(responsibility_dicts: list[dict]) -> li
 def _gather_sampling_site_place_names(place_names: list[dict]) -> list[str]:
     place_names_str = []
     for place_name in place_names:
+        # TODO: reconcile the formats -- we shouldn't need to check type on this
         if type(place_name) is dict:
             place_names_str.append(place_name[KEYWORD])
         else:
