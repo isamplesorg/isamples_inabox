@@ -198,7 +198,7 @@ class GEOMETransformer(Transformer):
         if keyword_value is not None:
             scheme_name = f"Taxon: {rank_key}"
             keyword = Keyword(keyword_value, None, scheme_name)
-            keywords.append(keyword.metadata_dict())
+            keywords.append(keyword)
 
     def keywords(self) -> list:
         # "JSON array of values from record/ -order, -phylum, -family, -class, and parent/ -country, -county,
@@ -209,7 +209,7 @@ class GEOMETransformer(Transformer):
         parent_record = self._source_record_parent_record()
         microhabitat = parent_record.get("microHabitat")
         if microhabitat is not None:
-            keywords.append(Keyword(microhabitat).metadata_dict())
+            keywords.append(Keyword(microhabitat))
         self._append_taxon_keyword_dict(keywords, "order")
         self._append_taxon_keyword_dict(keywords, "phylum")
         self._append_taxon_keyword_dict(keywords, "family")
