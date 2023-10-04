@@ -4,13 +4,21 @@ from typing import Optional
 
 import h3
 
+from isamples_metadata.metadata_constants import SAMPLE_IDENTIFIER, SCHEMA, AT_ID, LABEL, DESCRIPTION, \
+    HAS_CONTEXT_CATEGORY, HAS_CONTEXT_CATEGORY_CONFIDENCE, HAS_MATERIAL_CATEGORY, HAS_MATERIAL_CATEGORY_CONFIDENCE, \
+    HAS_SPECIMEN_CATEGORY, HAS_SPECIMEN_CATEGORY_CONFIDENCE, KEYWORDS, KEYWORD, KEYWORD_URI, SCHEME_NAME, PRODUCED_BY, \
+    RESPONSIBILITY, HAS_FEATURE_OF_INTEREST, RESULT_TIME, SAMPLING_SITE, ELEVATION, LATITUDE, LONGITUDE, \
+    REGISTRANT, SAMPLING_PURPOSE, CURATION, ACCESS_CONSTRAINTS, CURATION_LOCATION, RELATED_RESOURCE, AUTHORIZED_BY, \
+    COMPLIES_WITH, INFORMAL_CLASSIFICATION, PLACE_NAME, ROLE, NAME, SAMPLE_LOCATION
+from isamples_metadata.vocabularies.vocabulary_mapper import ControlledVocabulary, VocabularyTerm
+
 NOT_PROVIDED = "Not Provided"
 
 
 class Transformer(ABC):
     """Abstract base class for various iSamples provider transformers"""
 
-    NOT_PROVIDED = "Not Provided"
+    NOT_PROVIDED = ""
 
     FEET_PER_METER = 3.28084
 
@@ -65,6 +73,12 @@ class Transformer(ABC):
             result_time_pieces.append(day.zfill(2))
         return "-".join(result_time_pieces)
 
+    @staticmethod
+    def _responsibility_dict(
+        role: str, name: str
+    ):
+        return {ROLE: role, NAME: name}
+
     def __init__(self, source_record: typing.Dict):
         self.source_record = source_record
 
@@ -80,49 +94,51 @@ class Transformer(ABC):
         material_categories = self.has_material_categories()
         specimen_categories = self.has_specimen_categories()
         transformed_record = {
-            "$schema": "../../iSamplesSchemaBasic0.2.json",
-            "@id": self.id_string(),
-            "label": self.sample_label(),
-            "sampleidentifier": self.sample_identifier_string(),
-            "description": self.sample_description(),
-            "hasContextCategory": context_categories,
-            "hasContextCategoryConfidence": self.has_context_category_confidences(context_categories),
-            "hasMaterialCategory": material_categories,
-            "hasMaterialCategoryConfidence": self.has_material_category_confidences(material_categories),
-            "hasSpecimenCategory": specimen_categories,
-            "hasSpecimenCategoryConfidence": self.has_specimen_category_confidences(specimen_categories),
-            "informalClassification": self.informal_classification(),
-            "keywords": self.keywords(),
-            "producedBy": {
-                "@id": self.produced_by_id_string(),
-                "label": self.produced_by_label(),
-                "description": self.produced_by_description(),
-                "hasFeatureOfInterest": self.produced_by_feature_of_interest(),
-                "responsibility": self.produced_by_responsibilities(),
-                "resultTime": self.produced_by_result_time(),
-                "samplingSite": {
-                    "description": self.sampling_site_description(),
-                    "label": self.sampling_site_label(),
-                    "location": {
-                        "elevation": self.sampling_site_elevation(),
-                        "latitude": self.sampling_site_latitude(),
-                        "longitude": self.sampling_site_longitude(),
+            SCHEMA: "iSamplesSchemaCore1.0.json",
+            AT_ID: self.id_string(),
+            LABEL: self.sample_label(),
+            SAMPLE_IDENTIFIER: self.sample_identifier_string(),
+            DESCRIPTION: self.sample_description(),
+            HAS_CONTEXT_CATEGORY: context_categories,
+            HAS_CONTEXT_CATEGORY_CONFIDENCE: self.has_context_category_confidences(context_categories),
+            HAS_MATERIAL_CATEGORY: material_categories,
+            HAS_MATERIAL_CATEGORY_CONFIDENCE: self.has_material_category_confidences(material_categories),
+            HAS_SPECIMEN_CATEGORY: specimen_categories,
+            HAS_SPECIMEN_CATEGORY_CONFIDENCE: self.has_specimen_category_confidences(specimen_categories),
+            INFORMAL_CLASSIFICATION: self.informal_classification(),
+            KEYWORDS: self.keywords(),
+            PRODUCED_BY: {
+                AT_ID: self.produced_by_id_string(),
+                LABEL: self.produced_by_label(),
+                DESCRIPTION: self.produced_by_description(),
+                HAS_FEATURE_OF_INTEREST: self.produced_by_feature_of_interest(),
+                RESPONSIBILITY: self.produced_by_responsibilities(),
+                RESULT_TIME: self.produced_by_result_time(),
+                SAMPLING_SITE: {
+                    DESCRIPTION: self.sampling_site_description(),
+                    LABEL: self.sampling_site_label(),
+                    SAMPLE_LOCATION: {
+                        ELEVATION: self.sampling_site_elevation(),
+                        LATITUDE: self.sampling_site_latitude(),
+                        LONGITUDE: self.sampling_site_longitude(),
                     },
-                    "placeName": self.sampling_site_place_names(),
+                    PLACE_NAME: self.sampling_site_place_names(),
                 },
             },
-            "registrant": self.sample_registrant(),
-            "samplingPurpose": self.sample_sampling_purpose(),
-            "curation": {
-                "label": self.curation_label(),
-                "description": self.curation_description(),
-                "accessConstraints": self.curation_access_constraints(),
-                "curationLocation": self.curation_location(),
-                "responsibility": self.curation_responsibility(),
+            REGISTRANT: {
+                NAME: self.sample_registrant()
             },
-            "relatedResource": self.related_resources(),
-            "authorizedBy": self.authorized_by(),
-            "compliesWith": self.complies_with(),
+            SAMPLING_PURPOSE: self.sample_sampling_purpose(),
+            CURATION: {
+                LABEL: self.curation_label(),
+                DESCRIPTION: self.curation_description(),
+                ACCESS_CONSTRAINTS: self.curation_access_constraints(),
+                CURATION_LOCATION: self.curation_location(),
+                RESPONSIBILITY: self.curation_responsibility(),
+            },
+            RELATED_RESOURCE: self.related_resources(),
+            AUTHORIZED_BY: self.authorized_by(),
+            COMPLIES_WITH: self.complies_with(),
         }
         for index in range(0, 15):
             h3_at_resolution = self.h3_function()(self.source_record, index)
@@ -169,29 +185,29 @@ class Transformer(ABC):
         return confidences
 
     @abstractmethod
-    def has_context_categories(self) -> typing.List[str]:
+    def has_context_categories(self) -> typing.List[dict[str, str]]:
         """Map from the source record into an iSamples context category"""
         pass
 
-    def has_context_category_confidences(self, context_categories: list[str]) -> typing.Optional[typing.List[float]]:
+    def has_context_category_confidences(self, context_categories: list[dict[str, str]]) -> typing.Optional[typing.List[float]]:
         """If a machine-predicted label is used for context, subclasses should return non-None confidence values"""
         return Transformer._rule_based_confidence_list_for_categories_list(context_categories)
 
     @abstractmethod
-    def has_material_categories(self) -> typing.List[str]:
+    def has_material_categories(self) -> typing.List[dict[str, str]]:
         """Map from the source record into an iSamples material category"""
         pass
 
-    def has_material_category_confidences(self, material_categories: list[str]) -> typing.Optional[typing.List[float]]:
+    def has_material_category_confidences(self, material_categories: list[dict[str, str]]) -> typing.Optional[typing.List[float]]:
         """If a machine-predicted label is used for material, subclasses should return non-None confidence values"""
         return Transformer._rule_based_confidence_list_for_categories_list(material_categories)
 
     @abstractmethod
-    def has_specimen_categories(self) -> typing.List[str]:
+    def has_specimen_categories(self) -> typing.List[dict[str, str]]:
         """Map from the source record into an iSamples specimen category"""
         pass
 
-    def has_specimen_category_confidences(self, specimen_categories: list[str]) -> typing.Optional[typing.List[float]]:
+    def has_specimen_category_confidences(self, specimen_categories: list[dict[str, str]]) -> typing.Optional[typing.List[float]]:
         """If a machine-predicted label is used for specimen, subclasses should return non-None confidence values"""
         return Transformer._rule_based_confidence_list_for_categories_list(specimen_categories)
 
@@ -201,7 +217,7 @@ class Transformer(ABC):
         pass
 
     @abstractmethod
-    def keywords(self) -> typing.List[str]:
+    def keywords(self) -> typing.List[dict[str, str]]:
         """The keywords for the sample in source record"""
         pass
 
@@ -226,7 +242,7 @@ class Transformer(ABC):
         pass
 
     @abstractmethod
-    def produced_by_responsibilities(self) -> typing.List[str]:
+    def produced_by_responsibilities(self) -> typing.List[dict[str, str]]:
         """The responsibility list for the producedBy dictionary"""
         pass
 
@@ -280,8 +296,8 @@ class Transformer(ABC):
     def curation_location(self) -> str:
         return Transformer.NOT_PROVIDED
 
-    def curation_responsibility(self) -> str:
-        return Transformer.NOT_PROVIDED
+    def curation_responsibility(self) -> list[dict[str, str]]:
+        return []
 
     # endregion
 
@@ -311,6 +327,7 @@ class Transformer(ABC):
 
 class AbstractCategoryMapper(ABC):
     _destination: str
+    _controlled_vocabulary: ControlledVocabulary
 
     @abstractmethod
     def matches(
@@ -325,10 +342,11 @@ class AbstractCategoryMapper(ABC):
         self,
         potential_match: str,
         auxiliary_match: typing.Optional[str] = None,
-        categories_list: typing.List[str] = list(),
+        categories_list: typing.List[VocabularyTerm] = list(),
     ):
         if self.matches(potential_match, auxiliary_match):
-            categories_list.append(self._destination)
+            if self._destination != NOT_PROVIDED:
+                categories_list.append(self._controlled_vocabulary.term_for_label(self._destination))
 
     @property
     def destination(self):
@@ -337,6 +355,14 @@ class AbstractCategoryMapper(ABC):
     @destination.setter
     def destination(self, destination):
         self._destination = destination
+
+    @property
+    def controlled_vocabulary(self):
+        return self._controlled_vocabulary
+
+    @controlled_vocabulary.setter
+    def controlled_vocabulary(self, controlled_vocabulary):
+        self._controlled_vocabulary = controlled_vocabulary
 
 
 class AbstractCategoryMetaMapper(ABC):
@@ -347,15 +373,15 @@ class AbstractCategoryMetaMapper(ABC):
         cls,
         source_category: str,
         auxiliary_source_category: typing.Optional[str] = None,
-    ):
-        categories: list[str] = []
+    ) -> list[VocabularyTerm]:
+        categories: list[VocabularyTerm] = []
         if source_category is not None:
             for mapper in cls._categoriesMappers:
                 mapper.append_if_matched(
                     source_category, auxiliary_source_category, categories
                 )
         if len(categories) == 0:
-            categories.append(Transformer.NOT_PROVIDED)
+            categories.append(VocabularyTerm(None, Transformer.NOT_PROVIDED, None))
         return categories
 
     @classmethod
@@ -372,8 +398,10 @@ class StringConstantCategoryMapper(AbstractCategoryMapper):
     def __init__(
         self,
         destination_category: str,
+        controlled_vocabulary: ControlledVocabulary
     ):
         self._destination = destination_category
+        self._controlled_vocabulary = controlled_vocabulary
 
     def matches(
         self,
@@ -390,11 +418,13 @@ class StringEqualityCategoryMapper(AbstractCategoryMapper):
         self,
         categories: list[str],
         destination_category: str,
+        controlled_vocabulary: ControlledVocabulary
     ):
         categories = [keyword.lower() for keyword in categories]
         categories = [keyword.strip() for keyword in categories]
         self._categories = categories
         self._destination = destination_category
+        self._controlled_vocabulary = controlled_vocabulary
 
     def matches(
         self,
@@ -407,9 +437,10 @@ class StringEqualityCategoryMapper(AbstractCategoryMapper):
 class StringEndsWithCategoryMapper(AbstractCategoryMapper):
     """A mapper that matches if the potentialMatch ends with the specified string"""
 
-    def __init__(self, ends_with: str, destination_category: str):
+    def __init__(self, ends_with: str, destination_category: str, controlled_vocabulary: ControlledVocabulary):
         self._endsWith = ends_with.lower().strip()
         self._destination = destination_category
+        self._controlled_vocabulary = controlled_vocabulary
 
     def matches(
         self,
@@ -434,6 +465,7 @@ class StringOrderedCategoryMapper(AbstractCategoryMapper):
             if mapper.matches(potential_match, auxiliary_match):
                 # Note that this isn't thread-safe -- we expect one of these objects per thread
                 self.destination = mapper.destination
+                self.controlled_vocabulary = mapper.controlled_vocabulary
                 return True
         return False
 
@@ -446,10 +478,12 @@ class StringPairedCategoryMapper(AbstractCategoryMapper):
         primary_match: str,
         auxiliary_match: str,
         destination_category: str,
+        controlled_vocabulary: ControlledVocabulary
     ):
         self._primaryMatch = primary_match.lower().strip()
         self._auxiliaryMatch = auxiliary_match.lower().strip()
         self._destination = destination_category
+        self._controlled_vocabulary = controlled_vocabulary
 
     def matches(
         self,
@@ -462,6 +496,25 @@ class StringPairedCategoryMapper(AbstractCategoryMapper):
             and potential_match.lower().strip() == self._primaryMatch
             and auxiliary_match.lower().strip() == self._auxiliaryMatch
         )
+
+
+class Keyword(dict):
+    """Keyword for inclusion in the iSamples keywords metadata key"""
+    def __init__(self, value: str, uri: Optional[str] = None, scheme: Optional[str] = None):
+        self.value = value
+        self.uri = uri
+        self.scheme = scheme
+        super().__init__(self.metadata_dict())
+
+    def metadata_dict(self) -> dict[str, str]:
+        metadata_dict = {
+            KEYWORD: self.value
+        }
+        if self.uri is not None:
+            metadata_dict[KEYWORD_URI] = self.uri
+        if self.scheme is not None:
+            metadata_dict[SCHEME_NAME] = self.scheme
+        return metadata_dict
 
 
 def geo_to_h3(latitude: typing.Optional[float], longitude: typing.Optional[float], resolution: int = Transformer.DEFAULT_H3_RESOLUTION) -> typing.Optional[str]:

@@ -6,9 +6,10 @@ from isamples_metadata.Transformer import (
     Transformer,
     AbstractCategoryMetaMapper,
     StringEqualityCategoryMapper,
-    AbstractCategoryMapper, StringConstantCategoryMapper,
+    AbstractCategoryMapper, StringConstantCategoryMapper, Keyword,
 )
 from isamples_metadata.taxonomy.metadata_model_client import MODEL_SERVER_CLIENT
+from isamples_metadata.vocabularies import vocabulary_mapper
 
 
 class SpecimenCategoryMetaMapper(AbstractCategoryMetaMapper):
@@ -23,7 +24,8 @@ class SpecimenCategoryMetaMapper(AbstractCategoryMetaMapper):
             "DNA, RNA, Proteins; Whole genomic DNA",
             "DNA, RNA, Proteins; Unknown DNA, RNA, or Protein"
         ],
-        "Organism part",
+        "organismpart",
+        vocabulary_mapper.SPECIMEN_TYPE
     )
 
     _biome_aggregation_mapper = StringEqualityCategoryMapper(
@@ -31,17 +33,19 @@ class SpecimenCategoryMetaMapper(AbstractCategoryMetaMapper):
             "Tissue & Parts; Mixed tissue sample; MH",
             "Environmental Sample; Host-Associated; Small Intestine RNA",
         ],
-        "Biome aggregation",
+        "biomeaggregation",
+        vocabulary_mapper.SPECIMEN_TYPE
     )
 
     _whole_organism_mapper = StringEqualityCategoryMapper(
         [
             "Tissue & Parts; Egg; Multiple eggs",
         ],
-        "Whole organism",
+        "wholeorganism",
+        vocabulary_mapper.SPECIMEN_TYPE
     )
 
-    _default_organism_part_mapper = StringConstantCategoryMapper("Organism part")
+    _default_organism_part_mapper = StringConstantCategoryMapper("Organism part", vocabulary_mapper.SPECIMEN_TYPE)
 
     @classmethod
     def categories_mappers(cls) -> typing.List[AbstractCategoryMapper]:
@@ -119,7 +123,7 @@ class SmithsonianTransformer(Transformer):
         )
         return Transformer.DESCRIPTION_SEPARATOR.join(description_pieces)
 
-    def has_context_categories(self) -> typing.List[str]:
+    def has_context_categories(self) -> typing.List[dict[str, str]]:
         categories = MODEL_SERVER_CLIENT.make_smithsonian_sampled_feature_request(
             [
                 self.source_record.get("collectionCode", ""),
@@ -129,34 +133,36 @@ class SmithsonianTransformer(Transformer):
                 self.source_record.get("higherClassification", ""),
             ]
         )
-        return [categories]
+        return [vocabulary_mapper.SAMPLED_FEATURE.term_for_label(category).metadata_dict() for category in categories]
 
-    def has_material_categories(self) -> typing.List[str]:
+    def has_material_categories(self) -> typing.List[dict[str, str]]:
         material_sample_type = self.source_record.get("materialSampleType")
         if material_sample_type == "Environmental sample":
-            return ["Biogenic non organic material"]
+            return [vocabulary_mapper.MATERIAL_TYPE.term_for_key("mat:biogenicnonorganicmaterial").metadata_dict()]
         else:
-            return ["Organic material"]
+            return [vocabulary_mapper.MATERIAL_TYPE.term_for_key("mat:organicmaterial").metadata_dict()]
 
-    def has_specimen_categories(self) -> typing.List[str]:
+    def has_specimen_categories(self) -> typing.List[dict[str, str]]:
         preparation_type = self.source_record.get("preparationType", "")
-        return SpecimenCategoryMetaMapper.categories(preparation_type)
+        return [term.metadata_dict() for term in SpecimenCategoryMetaMapper.categories(preparation_type)]
 
     def informal_classification(self) -> typing.List[str]:
         return [self.source_record.get("scientificName", "")]
 
-    def keywords(self) -> typing.List[str]:
-        keywords = [self.source_record.get("collectionCode", "")]
+    def keywords(self) -> typing.List[dict[str, str]]:
+        keywords: list[Keyword] = [Keyword(self.source_record.get("collectionCode", ""))]
         water_body = self.source_record.get("waterBody", "")
         if len(water_body) > 0:
-            keywords.append(water_body)
+            keywords.append(Keyword(water_body))
         higher_classification = self.source_record.get("higherClassification", "")
         if len(higher_classification) > 0:
-            keywords.extend(higher_classification.split(", "))
-        keywords.append(self.source_record.get("scientificName"))
+            keywords.extend([Keyword(scientific_name) for scientific_name in higher_classification.split(", ")])
+        scientific_name = self.source_record.get("scientificName")
+        if scientific_name is not None:
+            keywords.append(Keyword(scientific_name))
         # TODO: do we want to include the locations in keywords?  Some of the other collections did.
         # If so, which ones?
-        return keywords
+        return [keyword.metadata_dict() for keyword in keywords]
 
     def sample_registrant(self) -> str:
         return Transformer.NOT_PROVIDED
@@ -178,22 +184,22 @@ class SmithsonianTransformer(Transformer):
     def produced_by_feature_of_interest(self) -> str:
         return Transformer.NOT_PROVIDED
 
-    def _add_to_responsibilities(self, label: str, responsibilities: typing.List[str]):
-        value = self.source_record[label]
+    def _add_to_responsibilities(self, source_label: str, dict_label: str, responsibilities: list[dict[str, str]]):
+        value = self.source_record[source_label]
         if len(value) > 0:
             for current in self.RESPONSIBILITIES_SPLIT_RE.split(value):
-                responsibilities.append(f"{label}: {current.strip()}")
+                responsibilities.append({"role": dict_label, "name": current.strip()})
 
-    def produced_by_responsibilities(self) -> typing.List[str]:
-        responsibilities: list[str] = []
-        self._add_to_responsibilities("recordedBy", responsibilities)
-        self._add_to_responsibilities("scientificNameAuthorship", responsibilities)
+    def produced_by_responsibilities(self) -> list[dict[str, str]]:
+        responsibilities: list[dict[str, str]] = []
+        self._add_to_responsibilities("recordedBy", "recorded by", responsibilities)
+        self._add_to_responsibilities("scientificNameAuthorship", "scientific name authorship", responsibilities)
 
         # unfortunately it looks like this field uses a ; separator for multiple people
         identified_by = self.source_record["identifiedBy"]
         if len(identified_by) > 0:
             for current in identified_by.split(";"):
-                responsibilities.append(f"identifiedBy: {current}")
+                responsibilities.append({"role": "identified by", "name": current.strip()})
         return responsibilities
 
     def produced_by_result_time(self) -> str:
@@ -282,8 +288,9 @@ class SmithsonianTransformer(Transformer):
             place_names.append(higher_geography)
         return place_names
 
-    def curation_responsibility(self) -> str:
-        return f"{self.source_record.get('institutionCode')} {self.source_record.get('institutionID')}"
+    def curation_responsibility(self) -> list[dict[str, str]]:
+        curation_str = f"{self.source_record.get('institutionCode')} {self.source_record.get('institutionID')}"
+        return [Transformer._responsibility_dict("curator", curation_str)]
 
     def last_updated_time(self) -> typing.Optional[str]:
         # This doesn't appear to be available in the Smithsonian DwC

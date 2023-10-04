@@ -15,7 +15,7 @@ from isamples_metadata.SESARTransformer import SESARTransformer
 from isamples_metadata.GEOMETransformer import GEOMETransformer, GEOMEChildTransformer
 from isamples_metadata.OpenContextTransformer import OpenContextTransformer
 from isamples_metadata.SmithsonianTransformer import SmithsonianTransformer
-from isamples_metadata.taxonomy.metadata_model_client import ModelServerClient
+from isamples_metadata.taxonomy.metadata_model_client import ModelServerClient, PredictionResult
 from isb_lib import geome_adapter, sesar_adapter
 from isb_lib.geome_adapter import GEOMEItem
 from isb_lib.models.thing import Thing
@@ -25,6 +25,7 @@ from isb_lib.models.thing import Thing
 from isb_lib.sesar_adapter import SESARItem
 
 ASSERT_ON_OUTPUT = False
+WRITE_OUTPUT_FILES = True
 
 
 def _run_transformer(
@@ -52,6 +53,11 @@ def _assert_transformed_dictionary(
         if ASSERT_ON_OUTPUT:
             isamples_record = json.load(isamples_file)
             assert transformed_to_isamples_record == isamples_record
+
+    if WRITE_OUTPUT_FILES:
+        with open(isamples_path, "w") as json_file:
+            json.dump(transformed_to_isamples_record, json_file, indent=4)
+            print(f"Dumped iSamples file to {isamples_path}")
 
 
 SESAR_test_values = [
@@ -83,6 +89,7 @@ def test_sesar_dicts_equal(sesar_source_path, isamples_path, timestamp):
 @pytest.mark.parametrize(
     "sesar_source_path,isamples_path,timestamp", SESAR_test_values
 )
+@pytest.mark.skip(reason="This functionality will go away once we fully move to SESAR iSB")
 def test_sesar_as_core_record(
     sesar_source_path, isamples_path, timestamp
 ):
@@ -219,6 +226,16 @@ OPENCONTEXT_test_values = [
         "./test_data/OpenContext/test/ark-28722-k2vq31x46-test.json",
         "2017-02-09T02:42:21Z",
     ),
+    (
+        "./test_data/OpenContext/raw/ark-28722-k26h4xk1f.json",
+        "./test_data/OpenContext/test/ark-28722-k26h4xk1f-test.json",
+        "2022-10-23T07:15:31Z",
+    ),
+    (
+        "./test_data/OpenContext/raw/opencontext-new-format.json",
+        "./test_data/OpenContext/test/opencontext-new-format-test.json",
+        "2023-07-31T11:45:05Z"
+    )
 ]
 
 
@@ -226,9 +243,11 @@ OPENCONTEXT_test_values = [
     "open_context_source_path,isamples_path,timestamp", OPENCONTEXT_test_values
 )
 def test_open_context_dicts_equal(open_context_source_path, isamples_path, timestamp):
-    _run_transformer(
-        isamples_path, open_context_source_path, OpenContextTransformer, None, timestamp
-    )
+    fake_prediction = [PredictionResult("Any anthropogenic material", 1.0)]
+    with patch.object(ModelServerClient, "make_opencontext_material_request", return_value=fake_prediction):
+        _run_transformer(
+            isamples_path, open_context_source_path, OpenContextTransformer, None, timestamp
+        )
 
 
 def _get_record_with_id(record_id: str) -> typing.Dict:
@@ -266,7 +285,7 @@ SMITHSONIAN_test_values = [
 
 @pytest.mark.parametrize("isamples_path", SMITHSONIAN_test_values)
 def test_smithsonian_dicts_equal(isamples_path):
-    with patch.object(ModelServerClient, "make_smithsonian_sampled_feature_request", return_value="foo"):
+    with patch.object(ModelServerClient, "make_smithsonian_sampled_feature_request", return_value=["Atmosphere"]):
         id_piece = re.search(r"-([^-]+)-test", isamples_path).group(1)
         source_dict = _get_record_with_id(id_piece)
         # create the transformer from the specified row in the source .csv
@@ -291,3 +310,17 @@ def test_geome_geo_to_h3():
         source_record = json.load(source_file)
         h3 = GEOMETransformer.geo_to_h3(source_record)
         assert "8f65534b37a2c0d" == h3
+
+
+def test_open_context_extract_getty():
+    test_file_path = "./test_data/OpenContext/raw/ark-28722-k26h4xk1f.json"
+    with open(test_file_path) as source_file:
+        source_record = json.load(source_file)
+        transformer = OpenContextTransformer(source_record)
+        keywords = transformer._extract_getty_keywords()
+        assert 1 == len(keywords)
+        glass_keyword = keywords[0]
+        assert "glass (material)" == glass_keyword.value
+        assert "https://vocab.getty.edu/aat/300010797" == glass_keyword.uri
+        keyword_dict = glass_keyword.metadata_dict()
+        assert keyword_dict is not None

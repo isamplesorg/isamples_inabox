@@ -1,37 +1,141 @@
 {
-    "@schema": "../../iSamplesSchemaBasic0.2.json",
+    "$schema": "iSamplesSchemaCore1.0.json",
     "@id": "metadata/65665/30004d383-9b25-4cfd-840d-a720361ec77e",
-    "label": "AF6EY68",
-    "sampleidentifier": "ark:/65665/30004d383-9b25-4cfd-840d-a720361ec77e",
-    "description": "type: PhysicalObject | basisOfRecord : MaterialSample | individualCount: 1 | disposition: in collection | startDayOfYear: 302 | endDayOfYear: 302 | fieldNumber: MBIO/BIZ-064 | catalogNumber: 1428583.12896321 | recordNumber： BMOO-07287 | sex: male",
-    "hasContextCategory": ["Marine water body bottom"],
-    "hasMaterialCategory": ["Organic Material"],
-    "hasSpecimenCategory": ["Whole Organism"],
-    "informalClassification": [""],
-    "keywords": ["Invertebrate Zoology", "on shell of Calcinus nitidus", "South Pacific Ocean", "Society Islands", "Moorea", "French Polynesia", "Animalia", "Cnidaria", "Hydrozoa", "Anthoathecatae", "Hydractiniidae"],
-    "producedBy": {
+    "label": " AF6EY68",
+    "sample_identifier": "ark:/65665/30004d383-9b25-4cfd-840d-a720361ec77e",
+    "description": "basisOfRecord: MaterialSample | catalogNumber: 1428583.12896321 | recordNumber: BMOO-07287 | fieldNumber: MBIO/BIZ-064 | type: PhysicalObject | individualCount: 1 | disposition: in collection | startDayOfYear: 302 | endDayOfYear: 302",
+    "has_context_category": [
+        {
+            "label": "Atmosphere",
+            "identifier": "https://w3id.org/isample/vocabulary/sampledfeature/0.9/sf:atmosphere"
+        }
+    ],
+    "has_context_category_confidence": [
+        1.0
+    ],
+    "has_material_category": [
+        {
+            "label": "Organic material",
+            "identifier": "https://w3id.org/isample/vocabulary/material/0.9/mat:organicmaterial"
+        }
+    ],
+    "has_material_category_confidence": [
+        1.0
+    ],
+    "has_specimen_category": [
+        {
+            "label": "Organism part",
+            "identifier": "https://w3id.org/isample/vocabulary/specimentype/0.9/spec:organismpart"
+        }
+    ],
+    "has_specimen_category_confidence": [
+        1.0
+    ],
+    "informal_classification": [
+        ""
+    ],
+    "keywords": [
+        {
+            "keyword": "Invertebrate Zoology"
+        },
+        {
+            "keyword": "South Pacific Ocean"
+        },
+        {
+            "keyword": "Animalia"
+        },
+        {
+            "keyword": "Cnidaria"
+        },
+        {
+            "keyword": "Hydrozoa"
+        },
+        {
+            "keyword": "Leptolinae"
+        },
+        {
+            "keyword": "Anthoathecatae"
+        },
+        {
+            "keyword": "Filifera"
+        },
+        {
+            "keyword": "Hydractiniidae"
+        },
+        {
+            "keyword": ""
+        }
+    ],
+    "produced_by": {
         "@id": "",
         "label": "",
         "description": "",
-        "hasFeatureOfInterest": "",
-        "responsibility": ["'recordedBy': S. McPherson", "'recordedBy': K. Hendrickson ", "'identifiedBy': Anker", "'identifiedBy': Arthur"],
-        "resultTime": "2009-10-29",
-        "samplingSite": {
+        "has_feature_of_interest": "",
+        "responsibility": [
+            {
+                "role": "recorded by",
+                "name": "S. McPherson"
+            },
+            {
+                "role": "recorded by",
+                "name": "K. Hendrickson"
+            },
+            {
+                "role": "identified by",
+                "name": "Anker, Arthur"
+            }
+        ],
+        "result_time": "2009-10-29",
+        "sampling_site": {
             "description": "locationID: BIZ-064 | verbatimLatitude: -17.47568 | verbatimLongitude: -149.83762",
             "label": "Society Islands, Moorea, West of Cook's Bay pass, toward Hilton",
-            "location": {
-                "elevation": "maximumDepthInMeters: 15.0",
+            "sample_location": {
+                "elevation": "minimumDepthInMeters: 12.0 | maximumDepthInMeters: 15.0",
                 "latitude": -17.4757,
                 "longitude": -149.838
             },
-            "placeName": ["Society Islands, Moorea, West of Cook's Bay pass, toward Hilton", "South Pacific Ocean", "Society Islands", "Moorea", "French Polynesia"]
+            "place_name": [
+                "Society Islands, Moorea, West of Cook's Bay pass, toward Hilton",
+                "French Polynesia",
+                "Moorea",
+                "Society Islands",
+                "South Pacific Ocean",
+                "South Pacific Ocean, French Polynesia, Society Islands, Moorea"
+            ]
         }
     },
-    "registrant": "",
-    "samplingPurpose": "",
+    "registrant": {
+        "name": ""
+    },
+    "sampling_purpose": "",
     "curation": {
-        "accessConstraints": "",
-        "curationLocation": "",
-        "responsibility": "USNM http://grbio.org/cool/142r-0w94"
-    }
+        "label": "",
+        "description": "",
+        "access_constraints": "",
+        "curation_location": "",
+        "responsibility": [
+            {
+                "role": "curator",
+                "name": "USNM http://grbio.org/cool/142r-0w94"
+            }
+        ]
+    },
+    "related_resource": [],
+    "authorized_by": [],
+    "complies_with": [],
+    "producedBy_samplingSite_location_h3_0": "8089fffffffffff",
+    "producedBy_samplingSite_location_h3_1": "81893ffffffffff",
+    "producedBy_samplingSite_location_h3_2": "828937fffffffff",
+    "producedBy_samplingSite_location_h3_3": "838935fffffffff",
+    "producedBy_samplingSite_location_h3_4": "8489343ffffffff",
+    "producedBy_samplingSite_location_h3_5": "85893427fffffff",
+    "producedBy_samplingSite_location_h3_6": "868934247ffffff",
+    "producedBy_samplingSite_location_h3_7": "878934245ffffff",
+    "producedBy_samplingSite_location_h3_8": "888934245dfffff",
+    "producedBy_samplingSite_location_h3_9": "898934245cfffff",
+    "producedBy_samplingSite_location_h3_10": "8a8934245ccffff",
+    "producedBy_samplingSite_location_h3_11": "8b8934245cccfff",
+    "producedBy_samplingSite_location_h3_12": "8c8934245cccdff",
+    "producedBy_samplingSite_location_h3_13": "8d8934245ccccff",
+    "producedBy_samplingSite_location_h3_14": "8e8934245cccccf"
 }

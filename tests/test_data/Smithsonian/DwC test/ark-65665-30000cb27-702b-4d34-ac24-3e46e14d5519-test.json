@@ -1,37 +1,168 @@
 {
-    "@schema": "../../iSamplesSchemaBasic0.2.json",
+    "$schema": "iSamplesSchemaCore1.0.json",
     "@id": "metadata/65665/30000cb27-702b-4d34-ac24-3e46e14d5519",
     "label": "Epinephelus merra AG5NS72",
-    "sampleidentifier": "ark:/65665/30000cb27-702b-4d34-ac24-3e46e14d5519",
-    "description": "basisOfRecord : MaterialSample | occurrenceRemarks: Specimen voucher located at Museum National d'Histoire Naturelle, Paris. | catalogNumber: 439549.12401721 | recordNumber:mbio324 | fieldNumber: Moorea F-06-05 | type: PhysicalObject | individualCount: 1 | disposition: in collection | startDayOfYear: 71 | endDayOfYear: 71",
-    "hasContextCategory": ["Marine water body"],
-    "hasMaterialCategory": ["Organic Material"],
-    "hasSpecimenCategory": ["Whole Organism"],
-    "informalClassification": ["Epinephelus merra"],
-    "keywords": ["Fishes", "French Polynesia", "Moorea", "Pacific", "Animalia", "Chordata", "Actinopterygii", "Perciformes", "Actiniaria", "Serranidae", "Epinephelus", "merra"],
-    "producedBy": {
+    "sample_identifier": "ark:/65665/30000cb27-702b-4d34-ac24-3e46e14d5519",
+    "description": "basisOfRecord: MaterialSample | occurrenceRemarks: Specimen voucher located at Museum National d'Histoire Naturelle, Paris. | catalogNumber: 439549.12401721 | recordNumber: mbio324 | fieldNumber: Moorea F-06-05 | type: PhysicalObject | individualCount: 1 | disposition: in collection | startDayOfYear: 71 | endDayOfYear: 71",
+    "has_context_category": [
+        {
+            "label": "Atmosphere",
+            "identifier": "https://w3id.org/isample/vocabulary/sampledfeature/0.9/sf:atmosphere"
+        }
+    ],
+    "has_context_category_confidence": [
+        1.0
+    ],
+    "has_material_category": [
+        {
+            "label": "Organic material",
+            "identifier": "https://w3id.org/isample/vocabulary/material/0.9/mat:organicmaterial"
+        }
+    ],
+    "has_material_category_confidence": [
+        1.0
+    ],
+    "has_specimen_category": [
+        {
+            "label": "Organism part",
+            "identifier": "https://w3id.org/isample/vocabulary/specimentype/0.9/spec:organismpart"
+        }
+    ],
+    "has_specimen_category_confidence": [
+        1.0
+    ],
+    "informal_classification": [
+        "Epinephelus merra"
+    ],
+    "keywords": [
+        {
+            "keyword": "Fishes"
+        },
+        {
+            "keyword": "Pacific"
+        },
+        {
+            "keyword": "Animalia"
+        },
+        {
+            "keyword": "Chordata"
+        },
+        {
+            "keyword": "Vertebrata"
+        },
+        {
+            "keyword": "Osteichthyes"
+        },
+        {
+            "keyword": "Actinopterygii"
+        },
+        {
+            "keyword": "Neopterygii"
+        },
+        {
+            "keyword": "Acanthopterygii"
+        },
+        {
+            "keyword": "Perciformes"
+        },
+        {
+            "keyword": "Percoidei"
+        },
+        {
+            "keyword": "Serranidae"
+        },
+        {
+            "keyword": "Epinephelinae"
+        },
+        {
+            "keyword": "Epinephelus merra"
+        }
+    ],
+    "produced_by": {
         "@id": "",
         "label": "",
         "description": "",
-        "hasFeatureOfInterest": "",
-        "responsibility": ["'recordsBy':R. Causse", "'recordsBy': J. Grignon", "'recordsBy': D. Lecchini", "'recordsBy': V. Messmer", "'recordsBy': S. Planes", "'recordsBy': J. Williams", "'recordsBy': R. Galzin"],
-        "resultTime": "2006-3-12",
-        "samplingSite": {
-            "description": "verbatimLatitude: 17 29 69.8 S | verbatimLongitude: 149 55 29.9 W | geodeticDatum: WGS 84 | georeferenceProtocol：GPS",
+        "has_feature_of_interest": "",
+        "responsibility": [
+            {
+                "role": "recorded by",
+                "name": "R. Causse"
+            },
+            {
+                "role": "recorded by",
+                "name": "J. Grignon"
+            },
+            {
+                "role": "recorded by",
+                "name": "D. Lecchini"
+            },
+            {
+                "role": "recorded by",
+                "name": "V. Messmer"
+            },
+            {
+                "role": "recorded by",
+                "name": "S. Planes"
+            },
+            {
+                "role": "recorded by",
+                "name": "J. Williams"
+            },
+            {
+                "role": "recorded by",
+                "name": "R. Galzin"
+            }
+        ],
+        "result_time": "2006-03-12",
+        "sampling_site": {
+            "description": "geodeticDatum: WGS 84 | georeferenceProtocol: GPS | verbatimLatitude: 17 29 69.8 S | verbatimLongitude: 149 55 29.9 W",
             "label": "Moorea, Club Med.",
-            "location": {
+            "sample_location": {
                 "elevation": "maximumDepthInMeters: 1.7",
                 "latitude": -17.5027,
                 "longitude": -149.925
             },
-            "placeName": ["Moorea, Club Med.", "United States", "French Polynesia", "Moorea", "Pacific"]
+            "place_name": [
+                "Moorea, Club Med.",
+                "French Polynesia",
+                "Moorea",
+                "Pacific",
+                "Pacific, French Polynesia, Society Islands, Moorea"
+            ]
         }
     },
-    "registrant": "",
-    "samplingPurpose": "",
+    "registrant": {
+        "name": ""
+    },
+    "sampling_purpose": "",
     "curation": {
-        "accessConstraints": "",
-        "curationLocation": "",
-        "responsibility": "USNM http://grbio.org/cool/142r-0w94"
-    }
+        "label": "",
+        "description": "",
+        "access_constraints": "",
+        "curation_location": "",
+        "responsibility": [
+            {
+                "role": "curator",
+                "name": "USNM http://grbio.org/cool/142r-0w94"
+            }
+        ]
+    },
+    "related_resource": [],
+    "authorized_by": [],
+    "complies_with": [],
+    "producedBy_samplingSite_location_h3_0": "8089fffffffffff",
+    "producedBy_samplingSite_location_h3_1": "81893ffffffffff",
+    "producedBy_samplingSite_location_h3_2": "828937fffffffff",
+    "producedBy_samplingSite_location_h3_3": "838935fffffffff",
+    "producedBy_samplingSite_location_h3_4": "848935dffffffff",
+    "producedBy_samplingSite_location_h3_5": "858935cbfffffff",
+    "producedBy_samplingSite_location_h3_6": "868935c9fffffff",
+    "producedBy_samplingSite_location_h3_7": "878935c9affffff",
+    "producedBy_samplingSite_location_h3_8": "888935c9a9fffff",
+    "producedBy_samplingSite_location_h3_9": "898935c9a93ffff",
+    "producedBy_samplingSite_location_h3_10": "8a8935c9a917fff",
+    "producedBy_samplingSite_location_h3_11": "8b8935c9a916fff",
+    "producedBy_samplingSite_location_h3_12": "8c8935c9a9163ff",
+    "producedBy_samplingSite_location_h3_13": "8d8935c9a9162ff",
+    "producedBy_samplingSite_location_h3_14": "8e8935c9a9162c7"
 }

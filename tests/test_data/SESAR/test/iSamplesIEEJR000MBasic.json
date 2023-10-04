@@ -1,30 +1,91 @@
 {
-    "$schema": "../iSamplesSchemaBasicSMR.json",
+    "$schema": "iSamplesSchemaCore1.0.json",
     "@id": "https://data.isamples.org/digitalsample/igsn/IEEJR000M",
     "label": "16ER6F3",
-    "sampleidentifier": "igsn:IEEJR000M",
-    "description": "Not Provided",
-    "hasContextCategory": ["Earth interior"],
-    "hasMaterialCategory": ["Rock"],
-    "hasSpecimenCategory": ["Other solid object"],
-    "keywords": ["Metamorphic>Meta-Carbonate", "Marble"],
-    "producedBy": {
-        "label": "collection event",
+    "sample_identifier": "IGSN:IEEJR000M",
+    "description": "",
+    "has_context_category": [
+        {
+            "label": "earthinterior"
+        }
+    ],
+    "has_context_category_confidence": [
+        1.0
+    ],
+    "has_material_category": [
+        {
+            "label": "rock"
+        }
+    ],
+    "has_material_category_confidence": null,
+    "has_specimen_category": [
+        {
+            "label": "othersolidobject"
+        }
+    ],
+    "has_specimen_category_confidence": [
+        1.0
+    ],
+    "informal_classification": [
+        ""
+    ],
+    "keywords": [
+        "Individual Sample"
+    ],
+    "produced_by": {
+        "@id": "",
+        "label": "Manual>Hammer",
         "description": "Manual>Hammer",
-        "hasFeatureOfInterest": "Metamorphic aureole",
-        "responsibility": ["Jade Star Lackey,,Collector","Evan Ramos,,Sample Owner"],
-        "resultTime": "2021-01-19 04:32:44",
-        "samplingSite": {
-            "description": "Not Provided",
-            "label": "Not Provided",
-            "location": {
-                "elevation": "Not Provided",
+        "has_feature_of_interest": "Metamorphic aureole",
+        "responsibility": [
+            "Jade Star Lackey,,Collector",
+            "Evan Ramos,,Sample Owner"
+        ],
+        "result_time": "2021-01-19 04:32:44",
+        "sampling_site": {
+            "description": "",
+            "label": "",
+            "sample_location": {
+                "elevation": "",
                 "latitude": 36.4617,
                 "longitude": -118.5839
             },
-            "placeName": ["Mineral King","Sequoia National Forest","California","Tulare","Silver City"]
+            "place_name": [
+                "Mineral King",
+                "Sequoia National Forest",
+                "California",
+                "Tulare",
+                "Silver City"
+            ]
         }
     },
-    "registrant": "Sam Kodama",
-    "samplingPurpose": ""
+    "registrant": {
+        "name": "Sam Kodama"
+    },
+    "sampling_purpose": "",
+    "curation": {
+        "label": "",
+        "description": "",
+        "access_constraints": "",
+        "curation_location": "",
+        "responsibility": []
+    },
+    "related_resource": [],
+    "authorized_by": [],
+    "complies_with": [],
+    "producedBy_samplingSite_location_h3_0": "8029fffffffffff",
+    "producedBy_samplingSite_location_h3_1": "8129bffffffffff",
+    "producedBy_samplingSite_location_h3_2": "8229affffffffff",
+    "producedBy_samplingSite_location_h3_3": "8329aafffffffff",
+    "producedBy_samplingSite_location_h3_4": "8429aa9ffffffff",
+    "producedBy_samplingSite_location_h3_5": "8529aa8ffffffff",
+    "producedBy_samplingSite_location_h3_6": "8629aa8f7ffffff",
+    "producedBy_samplingSite_location_h3_7": "8729aa8f2ffffff",
+    "producedBy_samplingSite_location_h3_8": "8829aa8f2dfffff",
+    "producedBy_samplingSite_location_h3_9": "8929aa8f2d7ffff",
+    "producedBy_samplingSite_location_h3_10": "8a29aa8f66dffff",
+    "producedBy_samplingSite_location_h3_11": "8b29aa8f66dbfff",
+    "producedBy_samplingSite_location_h3_12": "8c29aa8f2d66dff",
+    "producedBy_samplingSite_location_h3_13": "8d29aa8f2d66dbf",
+    "producedBy_samplingSite_location_h3_14": "8e29aa8f2d66d97"
 }

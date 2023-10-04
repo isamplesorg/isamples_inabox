@@ -1,77 +1,100 @@
 {
-    "$schema":"../../iSamplesSchemaBasic0.2.json",
-    "@id":"metadata/http://n2t.net/ark:/28722/k26d5xr5z",
-    "label":"Arch. Frag. 16511",
-    "sampleidentifier":"http://n2t.net/ark:/28722/k26d5xr5z",
-    "description":"early bce/ce: -200.0 | late bce/ce: 360.0 | updated: 2017-02-09T02:38:47Z",
-    "hasContextCategory":[
-       "Site of past human activities"
+    "$schema": "iSamplesSchemaCore1.0.json",
+    "@id": "metadata/28722/k26d5xr5z",
+    "label": "Architectural Element Arch. Frag. 16511",
+    "sample_identifier": "http://n2t.net/ark:/28722/k26d5xr5z",
+    "description": "'early bce/ce': -200.0 | 'late bce/ce': 360.0 | 'updated': 2017-02-09T02:38:47Z",
+    "has_context_category": [
+        {
+            "label": "Site of past human activities",
+            "identifier": "https://w3id.org/isample/vocabulary/sampledfeature/0.9/sf:pasthumanoccupationsite"
+        }
     ],
-    "hasContextCategoryConfidence":[
-       1.0
+    "has_context_category_confidence": [
+        1.0
     ],
-    "hasMaterialCategory":[
-       "Anthropogenic material"
+    "has_material_category": [
+        {
+            "label": "anyanthropogenicmaterial"
+        }
     ],
-    "hasMaterialCategoryConfidence":"None",
-    "hasSpecimenCategory":[
-       "Artifact"
+    "has_material_category_confidence": [
+        1.0
     ],
-    "hasSpecimenCategoryConfidence":"None",
-    "informalClassification":[
-       
+    "has_specimen_category": [
+        {
+            "label": "artifact"
+        }
     ],
-    "keywords":[
-       "Jordan",
-       "Petra Great Temple",
-       "Upper Temenos",
-       "Trench 105-106",
-       "Locus 22"
+    "has_specimen_category_confidence": [
+        1.0
     ],
-    "producedBy":{
-       "@id":"Not Provided",
-       "label":"Petra Great Temple Excavations",
-       "description":"http://opencontext.org/projects/A5DDBEA2-B3C8-43F9-8151-33343CBDC857",
-       "hasFeatureOfInterest":"Not Provided",
-       "responsibility":[
-          "creator: Martha Sharp Joukowsky",
-          "collector: Eleanor A. Power",
-          "collector: Marshall C. Agnew"
-       ],
-       "resultTime":"2007-11-11T00:00:00Z",
-       "samplingSite":{
-          "description":"Not Provided",
-          "label":"Jordan/Petra Great Temple/Upper Temenos/Trench 105-106/Locus 22",
-          "location":{
-             "elevation":"Not Provided",
-             "latitude":30.3287,
-             "longitude":35.4421
-          },
-          "placeName":[
-             "Jordan",
-             "Petra Great Temple",
-             "Upper Temenos",
-             "Trench 105-106",
-             "Locus 22"
-          ]
-       }
+    "informal_classification": [],
+    "keywords": [],
+    "produced_by": {
+        "@id": "",
+        "label": "Petra Great Temple Excavations",
+        "description": "",
+        "has_feature_of_interest": "",
+        "responsibility": [
+            {
+                "role": "creator",
+                "name": "Martha Sharp Joukowsky"
+            },
+            {
+                "role": "collector",
+                "name": "Eleanor A. Power"
+            },
+            {
+                "role": "collector",
+                "name": "Marshall C. Agnew"
+            }
+        ],
+        "result_time": "2007-11-11T00:00:00Z",
+        "sampling_site": {
+            "description": "",
+            "label": "Jordan/Petra Great Temple/Upper Temenos/Trench 105-106/Locus 22",
+            "sample_location": {
+                "elevation": "",
+                "latitude": 30.3287,
+                "longitude": 35.4421
+            },
+            "place_name": [
+                "Jordan",
+                "Petra Great Temple",
+                "Upper Temenos",
+                "Trench 105-106",
+                "Locus 22"
+            ]
+        }
     },
-    "registrant":"None",
-    "samplingPurpose":"None",
-    "curation":{
-       "label":"Not Provided",
-       "description":"Not Provided",
-       "accessConstraints":"Not Provided",
-       "curationLocation":"Not Provided",
-       "responsibility":"Not Provided"
+    "registrant": {
+        "name": ""
     },
-    "relatedResource":[
-       
-    ],
-    "authorizedBy":[
-       
-    ],
-    "compliesWith":[
-       
-    ]
- }
+    "sampling_purpose": "",
+    "curation": {
+        "label": "",
+        "description": "",
+        "access_constraints": "",
+        "curation_location": "",
+        "responsibility": []
+    },
+    "related_resource": [],
+    "authorized_by": [],
+    "complies_with": [],
+    "producedBy_samplingSite_location_h3_0": "803ffffffffffff",
+    "producedBy_samplingSite_location_h3_1": "813e7ffffffffff",
+    "producedBy_samplingSite_location_h3_2": "823e6ffffffffff",
+    "producedBy_samplingSite_location_h3_3": "833e6dfffffffff",
+    "producedBy_samplingSite_location_h3_4": "843e6ddffffffff",
+    "producedBy_samplingSite_location_h3_5": "853e6dcbfffffff",
+    "producedBy_samplingSite_location_h3_6": "863e6dca7ffffff",
+    "producedBy_samplingSite_location_h3_7": "873e6dca5ffffff",
+    "producedBy_samplingSite_location_h3_8": "883e6dca51fffff",
+    "producedBy_samplingSite_location_h3_9": "893e6dca50bffff",
+    "producedBy_samplingSite_location_h3_10": "8a3e6dca5017fff",
+    "producedBy_samplingSite_location_h3_11": "8b3e6dca5012fff",
+    "producedBy_samplingSite_location_h3_12": "8c3e6dca50121ff",
+    "producedBy_samplingSite_location_h3_13": "8d3e6dca50120bf",
+    "producedBy_samplingSite_location_h3_14": "8e3e6dca50120b7"
+}

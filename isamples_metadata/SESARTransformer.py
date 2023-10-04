@@ -14,6 +14,8 @@ from isamples_metadata.Transformer import (
 )
 
 from isamples_metadata.taxonomy.metadata_model_client import MODEL_SERVER_CLIENT, PredictionResult
+from isamples_metadata.vocabularies import vocabulary_mapper
+from isamples_metadata.vocabularies.vocabulary_mapper import VocabularyTerm  # noqa: F401
 
 
 def fullIgsn(v):
@@ -21,17 +23,17 @@ def fullIgsn(v):
 
 
 class MaterialCategoryMetaMapper(AbstractCategoryMetaMapper):
-    _endsWithRockMapper = StringEndsWithCategoryMapper("Rock", "Rock")
-    _endsWithMineralMapper = StringEndsWithCategoryMapper("Mineral", "Mineral")
-    _endsWithAqueousMapper = StringEndsWithCategoryMapper("aqueous", "Liquid water")
-    _endsWithSedimentMapper = StringEndsWithCategoryMapper("Sediment", "Sediment")
-    _endsWithSoilMapper = StringEndsWithCategoryMapper("Soil", "Soil")
+    _endsWithRockMapper = StringEndsWithCategoryMapper("Rock", "rock", vocabulary_mapper.MATERIAL_TYPE)
+    _endsWithMineralMapper = StringEndsWithCategoryMapper("Mineral", "mineral", vocabulary_mapper.MATERIAL_TYPE)
+    _endsWithAqueousMapper = StringEndsWithCategoryMapper("aqueous", "liquidwater", vocabulary_mapper.MATERIAL_TYPE)
+    _endsWithSedimentMapper = StringEndsWithCategoryMapper("Sediment", "sediment", vocabulary_mapper.MATERIAL_TYPE)
+    _endsWithSoilMapper = StringEndsWithCategoryMapper("Soil", "soil", vocabulary_mapper.MATERIAL_TYPE)
     _endsWithParticulateMapper = StringEndsWithCategoryMapper(
-        "Particulate", "Particulate"
+        "Particulate", "particulate", vocabulary_mapper.MATERIAL_TYPE
     )
-    _endsWithBiologyMapper = StringEndsWithCategoryMapper("Biology", "Organic material")
+    _endsWithBiologyMapper = StringEndsWithCategoryMapper("Biology", "organicmaterial", vocabulary_mapper.MATERIAL_TYPE)
     _endsWithSyntheticMapper = StringEndsWithCategoryMapper(
-        "Synthetic", "Anthropogenic material"
+        "Synthetic", "anyanthropogenicmaterial", vocabulary_mapper.MATERIAL_TYPE
     )
     _equalsRockMapper = StringEqualityCategoryMapper(
         [
@@ -43,15 +45,17 @@ class MaterialCategoryMetaMapper(AbstractCategoryMetaMapper):
             "Sedimentary>Other",
             "Xenolithic>Other",
         ],
-        "Rock",
+        "rock",
+        vocabulary_mapper.MATERIAL_TYPE
     )
-    _equalsSedimentMapper = StringEqualityCategoryMapper(["Tephra"], "Sediment")
+    _equalsSedimentMapper = StringEqualityCategoryMapper(["Tephra"], "sediment", vocabulary_mapper.MATERIAL_TYPE)
     _equalsOrganicMaterialMapper = StringEqualityCategoryMapper(
         ["Siderite>Mineral", "Macrobiology>Other", "Organic Material"],
-        "Organic material",
+        "organicmaterial",
+        vocabulary_mapper.MATERIAL_TYPE
     )
     _equalsNonAqueousLiquidMaterialMapper = StringEqualityCategoryMapper(
-        ["Liquid>organic"], "Non-aqueous liquid material"
+        ["Liquid>organic"], "nonaqueousliquid", vocabulary_mapper.MATERIAL_TYPE
     )
     _equalsMineralMapper = StringEqualityCategoryMapper(
         [
@@ -66,21 +70,22 @@ class MaterialCategoryMetaMapper(AbstractCategoryMetaMapper):
             "AmphiboleGroup>Other",
             "Actinolite>Other",
         ],
-        "Mineral",
+        "mineral",
+        vocabulary_mapper.MATERIAL_TYPE
     )
-    _equalsIceMapper = StringEqualityCategoryMapper(["Ice"], "Ice")
-    _equalsGasMapper = StringEqualityCategoryMapper(["Gas"], "Gaseous material")
+    _equalsIceMapper = StringEqualityCategoryMapper(["Ice"], "anyice", vocabulary_mapper.MATERIAL_TYPE)
+    _equalsGasMapper = StringEqualityCategoryMapper(["Gas"], "gas", vocabulary_mapper.MATERIAL_TYPE)
     _equalsBiogenicMapper = StringEqualityCategoryMapper(
-        ["Macrobiology>Coral>Biology", "Coral>Biology"], "Biogenic non-organic material"
+        ["Macrobiology>Coral>Biology", "Coral>Biology"], "biogenicnonorganicmaterial", vocabulary_mapper.MATERIAL_TYPE
     )
     _equalsNaturalSolidMapper = StringEqualityCategoryMapper(
-        ["Natural Solid Material"], "Natural Solid Material"
+        ["Natural Solid Material"], "earthmaterial", vocabulary_mapper.MATERIAL_TYPE
     )
     _equalsMixedMapper = StringEqualityCategoryMapper(
-        ["Mixed soil, sediment, rock"], "Mixed soil, sediment, rock"
+        ["Mixed soil, sediment, rock"], "mixedsoilsedimentrock", vocabulary_mapper.MATERIAL_TYPE
     )
     _equalsMaterialMapper = StringEqualityCategoryMapper(
-        ["Material"], "Material"
+        ["Material"], "material", vocabulary_mapper.MATERIAL_TYPE
     )
 
     @classmethod
@@ -128,7 +133,8 @@ class SpecimenCategoryMetaMapper(AbstractCategoryMetaMapper):
             "Individual Sample>Specimen",
             "Oriented Core",
         ],
-        "Other solid object",
+        "othersolidobject",
+        vocabulary_mapper.SPECIMEN_TYPE
     )
     _containersWithFluidMapper = StringEqualityCategoryMapper(
         [
@@ -136,13 +142,14 @@ class SpecimenCategoryMetaMapper(AbstractCategoryMetaMapper):
             "Individual Sample>Gas",
             "Individual Sample>Liquid",
         ],
-        "Fluid in container",
+        "fluidincontainer",
+        vocabulary_mapper.SPECIMEN_TYPE
     )
     _experimentalProductsMapper = StringEqualityCategoryMapper(
-        ["Experimental Specimen"], "Experiment product"
+        ["Experimental Specimen"], "experimentalproduct", vocabulary_mapper.SPECIMEN_TYPE
     )
     _biomeAggregationsMapper = StringEqualityCategoryMapper(
-        ["Trawl"], "Biome aggregation"
+        ["Trawl"], "biomeaggregation", vocabulary_mapper.SPECIMEN_TYPE
     )
     _analyticalPreparationsMapper = StringEqualityCategoryMapper(
         [
@@ -157,10 +164,11 @@ class SpecimenCategoryMetaMapper(AbstractCategoryMetaMapper):
             "Individual Sample>U-Channel",
             "Rock Powder",
         ],
-        "Analytical preparation",
+        "analyticalpreparation",
+        vocabulary_mapper.SPECIMEN_TYPE
     )
     _aggregationsMapper = StringEqualityCategoryMapper(
-        ["Cuttings", "Dredge"], "Aggregation"
+        ["Cuttings", "Dredge"], "anyaggregation", vocabulary_mapper.SPECIMEN_TYPE
     )
 
     @classmethod
@@ -176,49 +184,50 @@ class SpecimenCategoryMetaMapper(AbstractCategoryMetaMapper):
 
 
 class ContextCategoryMetaMapper(AbstractCategoryMetaMapper):
-    _endsWithRockMapper = StringEndsWithCategoryMapper("Rock", "Earth interior")
-    _endsWithMineralMapper = StringEndsWithCategoryMapper("Mineral", "Earth interior")
+    _endsWithRockMapper = StringEndsWithCategoryMapper("Rock", "earthinterior", vocabulary_mapper.SAMPLED_FEATURE)
+    _endsWithMineralMapper = StringEndsWithCategoryMapper("Mineral", "earthinterior", vocabulary_mapper.SAMPLED_FEATURE)
     _equalsGasMapper = StringEqualityCategoryMapper(
-        ["Gas"], "Subsurface fluid reservoir"
+        ["Gas"], "subsurfacefluidreservoir", vocabulary_mapper.SAMPLED_FEATURE
     )
     # This one is actually incorrect as written, we need to use the combo of material and primaryLocationType
     _endsWithSoilMapper = StringEndsWithCategoryMapper(
-        "Soil", "Subaerial surface environment"
+        "Soil", "subaerialsurfaceenvironment", vocabulary_mapper.SAMPLED_FEATURE
     )
     _soilFloodplainMapper = StringPairedCategoryMapper(
-        "Microbiology>Soil", "floodplain", "Subaerial terrestrial biome"
+        "Microbiology>Soil", "floodplain", "subaerialsurfaceenvironment", vocabulary_mapper.SAMPLED_FEATURE
     )
     _soilMapper = StringOrderedCategoryMapper(
         # Order matters here, the generic one needs to be last
         [_soilFloodplainMapper, _endsWithSoilMapper]
     )
     _seaSedimentMapper = StringPairedCategoryMapper(
-        "Sediment", "sea", "Marine water body bottom"
+        "Sediment", "sea", "marinewaterbodybottom", vocabulary_mapper.SAMPLED_FEATURE
     )
     _lakeSedimentMapper = StringPairedCategoryMapper(
-        "Sediment", "lake", "Lake, river or stream bottom"
+        "Sediment", "lake", "lakeriverstreambottom", vocabulary_mapper.SAMPLED_FEATURE
     )
     _sedimentMapper = StringOrderedCategoryMapper(
         [_seaSedimentMapper, _lakeSedimentMapper]
     )
-    _lakeMapper = StringPairedCategoryMapper("", "lake", "Terrestrial water body")
+    _lakeMapper = StringPairedCategoryMapper("", "lake", "terrestrialwaterbody", vocabulary_mapper.SAMPLED_FEATURE)
     _mountainLiquidMapper = StringPairedCategoryMapper(
-        "Liquid>aqueous", "Mountain", "Terrestrial water body"
+        "Liquid>aqueous", "Mountain", "terrestrialwaterbody", vocabulary_mapper.SAMPLED_FEATURE
     )
     _seaMapper = StringPairedCategoryMapper(
-        "Liquid>aqueous", "Sea", "Marine water body"
+        "Liquid>aqueous", "Sea", "marinewaterbody", vocabulary_mapper.SAMPLED_FEATURE
     )
-    _ventBiologyMapper = StringPairedCategoryMapper("Biology", "Vent", "Marine biome")
+    _ventBiologyMapper = StringPairedCategoryMapper("Biology", "Vent", "marinewaterbody", vocabulary_mapper.SAMPLED_FEATURE)
     _ventLiquidMapper = StringPairedCategoryMapper(
-        "Liquid>aqueous", "Vent", "Subsurface fluid reservoir"
+        "Liquid>aqueous", "Vent", "subsurfacefluidreservoir", vocabulary_mapper.SAMPLED_FEATURE
     )
     _floodplainAquiferMapper = StringPairedCategoryMapper(
-        "Liquid>aqueous", "floodplain\, aquifer", "Subsurface fluid reservoir"  # noqa: W605
+        "Liquid>aqueous", "floodplain\, aquifer", "subsurfacefluidreservoir", vocabulary_mapper.SAMPLED_FEATURE  # noqa: W605
     )
     _creekBankMapper = StringPairedCategoryMapper(
         "Sedimentary>GlacialAndOrPaleosol>Rock",
         "Creek bank",
-        "Subaerial surface environment",
+        "subaerialsurfaceenvironment",
+        vocabulary_mapper.SAMPLED_FEATURE
     )
     # Note that this represents the combos down to row 109 of
     # https://docs.google.com/spreadsheets/d/1QitBRkWH6YySZnNO-uR7D2rTaQ826WPT_xow9lPdJDM/edit#gid=1251732948
@@ -296,7 +305,7 @@ class SESARTransformer(Transformer):
         # TODO: implement
         return Transformer.NOT_PROVIDED
 
-    def has_context_categories(self) -> typing.List[str]:
+    def has_context_categories(self) -> list:
         material_type = self._material_type()
         primary_location_type = self._primary_location_type()
         return ContextCategoryMetaMapper.categories(
@@ -322,7 +331,7 @@ class SESARTransformer(Transformer):
     #     return None
 
     # Disabled pending resolution of https://github.com/isamplesorg/isamples_inabox/issues/255
-    def has_material_categories(self) -> typing.List[str]:
+    def has_material_categories(self) -> list:
         material = self._material_type()
         if not material:
             prediction_results = self._compute_material_prediction_results()
@@ -332,14 +341,14 @@ class SESARTransformer(Transformer):
                 return []
         return MaterialCategoryMetaMapper.categories(material)
 
-    def has_material_category_confidences(self, material_categories: list[str]) -> typing.Optional[typing.List[float]]:
+    def has_material_category_confidences(self, material_categories: list) -> typing.Optional[typing.List[float]]:
         prediction_results = self._compute_material_prediction_results()
         if prediction_results is None:
             return None
         else:
             return [prediction.confidence for prediction in prediction_results]
 
-    def has_specimen_categories(self) -> typing.List[str]:
+    def has_specimen_categories(self) -> list:
         sample_type = self._source_record_description()["sampleType"]
         return SpecimenCategoryMetaMapper.categories(sample_type)
 
@@ -427,7 +436,7 @@ class SESARTransformer(Transformer):
             return primary_location_type
         return Transformer.NOT_PROVIDED
 
-    def produced_by_responsibilities(self) -> typing.List[str]:
+    def produced_by_responsibilities(self) -> list:
         responsibilities = list()
         description_dict = self._source_record_description()
         if "collector" in description_dict:

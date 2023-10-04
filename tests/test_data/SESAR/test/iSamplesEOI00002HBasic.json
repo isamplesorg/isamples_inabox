@@ -1,30 +1,87 @@
 {
-    "$schema": "../iSamplesSchemaBasicSMR.json",
+    "$schema": "iSamplesSchemaCore1.0.json",
     "@id": "https://data.isamples.org/digitalsample/igsn/EOI00002H",
     "label": "J730-GTHFS-16",
-    "sampleidentifier": "igsn:EOI00002H",
-    "description": "Not Provided",
-    "hasContextCategory": ["Subsurface fluid reservoir"],
-    "hasMaterialCategory": ["Gaseous material"],
-    "hasSpecimenCategory": ["Container with fluid"],
-    "keywords": ["Individual Sample"],
-    "producedBy": {
+    "sample_identifier": "IGSN:EOI00002H",
+    "description": "",
+    "has_context_category": [
+        {
+            "label": "subsurfacefluidreservoir"
+        }
+    ],
+    "has_context_category_confidence": [
+        1.0
+    ],
+    "has_material_category": [
+        {
+            "label": "gas"
+        }
+    ],
+    "has_material_category_confidence": null,
+    "has_specimen_category": [
+        {
+            "label": "othersolidobject"
+        }
+    ],
+    "has_specimen_category_confidence": [
+        1.0
+    ],
+    "informal_classification": [
+        ""
+    ],
+    "keywords": [
+        "Individual Sample"
+    ],
+    "produced_by": {
+        "@id": "",
         "label": "Sampler:Fluid:GTHFS",
         "description": "cruiseFieldPrgrm:TN300. launchPlatformName:Jason II. Sampler:Fluid:GTHFS. HFS gastight. Red-center-9. T=250C. launch type:ROV, navigation type:USBL",
-        "hasFeatureOfInterest": "volcano",
-        "responsibility": ["Evans_Leigh,,Collector","Andra Bobbitt,,Sample Owner"],
-        "resultTime": "2013-09-14 01:30:00",
-        "samplingSite": {
+        "has_feature_of_interest": "volcano",
+        "responsibility": [
+            "Evans_Leigh,,Collector",
+            "Andra Bobbitt,,Sample Owner"
+        ],
+        "result_time": "2013-09-14 01:30:00",
+        "sampling_site": {
             "description": "Trevi:Jason Tmax=257.9 C. In the direct flow at this small anhydrite mound (anhydrite knocked over).",
-            "label": "Not Provided",
-            "location": {
+            "label": "",
+            "sample_location": {
                 "elevation": "-1520.0 m",
                 "latitude": 45.9463,
                 "longitude": -129.9837
             },
-            "placeName": ["Axial Seamount"]
+            "place_name": [
+                "Axial Seamount"
+            ]
         }
     },
-    "registrant": "Andra Bobbitt",
-    "samplingPurpose": ""
+    "registrant": {
+        "name": "Andra Bobbitt"
+    },
+    "sampling_purpose": "",
+    "curation": {
+        "label": "",
+        "description": "",
+        "access_constraints": "",
+        "curation_location": "",
+        "responsibility": []
+    },
+    "related_resource": [],
+    "authorized_by": [],
+    "complies_with": [],
+    "producedBy_samplingSite_location_h3_0": "8029fffffffffff",
+    "producedBy_samplingSite_location_h3_1": "8128fffffffffff",
+    "producedBy_samplingSite_location_h3_2": "8228effffffffff",
+    "producedBy_samplingSite_location_h3_3": "8328edfffffffff",
+    "producedBy_samplingSite_location_h3_4": "8428ed7ffffffff",
+    "producedBy_samplingSite_location_h3_5": "8528ed7bfffffff",
+    "producedBy_samplingSite_location_h3_6": "8628ed797ffffff",
+    "producedBy_samplingSite_location_h3_7": "8728ed791ffffff",
+    "producedBy_samplingSite_location_h3_8": "8828ed791bfffff",
+    "producedBy_samplingSite_location_h3_9": "8928ed791bbffff",
+    "producedBy_samplingSite_location_h3_10": "8a28ed791baffff",
+    "producedBy_samplingSite_location_h3_11": "8b28ed791a36fff",
+    "producedBy_samplingSite_location_h3_12": "8c28ed791ba97ff",
+    "producedBy_samplingSite_location_h3_13": "8d28ed791ba96ff",
+    "producedBy_samplingSite_location_h3_14": "8e28ed791ba96ef"
 }

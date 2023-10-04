@@ -1,43 +1,142 @@
 {
-    "@schema": "../../iSamplesSchemaBasic0.2.json",
+    "$schema": "iSamplesSchemaCore1.0.json",
     "@id": "metadata/21547/Car2PIRE_0334",
-    "label": "PIRE_0334",
-    "sampleidentifier": "ark:/21547/Car2PIRE_0334",
+    "label": "Gastropoda PIRE_0334",
+    "sample_identifier": "ark:/21547/Car2PIRE_0334",
     "description": "",
-    "hasContextCategory": ["Marine Biome"],
-    "hasMaterialCategory": ["Organic Material"],
-    "hasSpecimenCategory": ["Whole Organism"],
-    "informalClassification": ["Gastropoda"],
-    "keywords": ["Aceh", "Sumatra","Indonesia","Asia", "Mollusca"],
-    "producedBy": {
-        "@id":"ark:/21547/Cas2INDO_2016_SEU_1B",
-        "label": "INDO_2016_SEU_1B",
-        "description": "expeditionCode: INDO_PIRE | samplingProtocol: ARMS | taxonomy team: MINV | projectId: 80",
-        "hasFeatureOfInterest": "coral reef",
-        "responsibility": ["Aji Wahyu Anggoro","Andrianus Sembiring"],
-        "resultTime": "2016-08-09",
-        "samplingSite": {
+    "has_context_category": [
+        {
+            "label": "Marine environment",
+            "identifier": "https://w3id.org/isample/vocabulary/sampledfeature/0.9/sf:marinewaterbody"
+        }
+    ],
+    "has_context_category_confidence": [
+        1.0
+    ],
+    "has_material_category": [
+        {
+            "label": "Organic material",
+            "identifier": "https://w3id.org/isample/vocabulary/material/0.9/mat:organicmaterial"
+        }
+    ],
+    "has_material_category_confidence": [
+        1.0
+    ],
+    "has_specimen_category": [
+        {
+            "label": "Whole organism specimen",
+            "identifier": "https://w3id.org/isample/vocabulary/specimentype/0.9/spec:wholeorganism"
+        }
+    ],
+    "has_specimen_category_confidence": [
+        1.0
+    ],
+    "informal_classification": [
+        "Gastropoda"
+    ],
+    "keywords": [
+        {
+            "keyword": "Aceh"
+        },
+        {
+            "keyword": "Sumatra"
+        },
+        {
+            "keyword": "Indonesia"
+        },
+        {
+            "keyword": "Asia"
+        },
+        {
+            "keyword": "Mollusca",
+            "scheme_name": "Taxon: phylum"
+        },
+        {
+            "keyword": "Gastropoda",
+            "scheme_name": "Taxon: class"
+        }
+    ],
+    "produced_by": {
+        "@id": "ark:/21547/Car2PIRE_0334",
+        "label": "event INDO_2016_SEU_1B",
+        "description": "samplingProtocol: ARMS | expeditionCode: INDO_PIRE | taxonomy team: MINV | projectId: 80",
+        "has_feature_of_interest": "",
+        "responsibility": [
+            {
+                "role": "Collector",
+                "name": "Aji Wahyu Anggoro"
+            },
+            {
+                "role": "Collector",
+                "name": "Andrianus Sembiring"
+            },
+            {
+                "role": "Taxonomy team",
+                "name": "MINV"
+            },
+            {
+                "role": "Event registrant",
+                "name": "Chris Meyer"
+            }
+        ],
+        "result_time": "2016-08-09",
+        "sampling_site": {
             "description": "Shallow, coastal reef. Apparent exposure to current, Porites dominated. Less impacted bleaching site, high recruitment, 12 m.",
-            "label": "",
-            "location": {
-                "elevation": "maximumDepthInMeters: 12",
-                "latitude": 5.89430,
+            "label": "Pulau Seulako",
+            "sample_location": {
+                "elevation": "12 m",
+                "latitude": 5.8943,
                 "longitude": 95.25293
             },
-            "placeName": ["Pulau Seulako"]
+            "place_name": [
+                "Pulau Seulako",
+                "Aceh",
+                "Sumatra",
+                "Indonesia",
+                "Asia"
+            ]
         }
     },
-    "registrant": "Chris Meyer",
-    "samplingPurpose": "genomic analysis",
-    "curation": {
-        "accessConstraints": "",
-        "curationLocation": "",
-        "responsibility": ""
+    "registrant": {
+        "name": "Chris Meyer"
     },
-    "relatedResource": {
-        "label":"subsample tissue",
-        "description":"",
-        "target":"ark:/21547/Cat2INDO106431.1",
-        "relationship":"subsample"
-    }
+    "sampling_purpose": "",
+    "curation": {
+        "label": "",
+        "description": "",
+        "access_constraints": "",
+        "curation_location": "No Voucher",
+        "responsibility": [
+            {
+                "role": "curator",
+                "name": "No Voucher"
+            }
+        ]
+    },
+    "related_resource": [
+        {
+            "label": "Tissue",
+            "relationship": "tissue extract",
+            "target": "ark:/21547/Cat2INDO106431.1"
+        }
+    ],
+    "authorized_by": [
+        ""
+    ],
+    "complies_with": [],
+    "producedBy_samplingSite_location_h3_0": "8065fffffffffff",
+    "producedBy_samplingSite_location_h3_1": "81643ffffffffff",
+    "producedBy_samplingSite_location_h3_2": "826557fffffffff",
+    "producedBy_samplingSite_location_h3_3": "83642cfffffffff",
+    "producedBy_samplingSite_location_h3_4": "8465535ffffffff",
+    "producedBy_samplingSite_location_h3_5": "8565534bfffffff",
+    "producedBy_samplingSite_location_h3_6": "8665534b7ffffff",
+    "producedBy_samplingSite_location_h3_7": "8765534b3ffffff",
+    "producedBy_samplingSite_location_h3_8": "8865534b37fffff",
+    "producedBy_samplingSite_location_h3_9": "8965534b37bffff",
+    "producedBy_samplingSite_location_h3_10": "8a65534b37a7fff",
+    "producedBy_samplingSite_location_h3_11": "8b65534b37a2fff",
+    "producedBy_samplingSite_location_h3_12": "8c65534b37a2dff",
+    "producedBy_samplingSite_location_h3_13": "8d65534b37a2c3f",
+    "producedBy_samplingSite_location_h3_14": "8e65534b37a2c0f"
 }

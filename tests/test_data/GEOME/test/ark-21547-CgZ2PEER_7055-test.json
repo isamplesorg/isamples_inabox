@@ -1,43 +1,140 @@
 {
-    "@schema": "../../iSamplesSchemaBasic0.2.json",
-    "@id": "metadata:21547/CgZ2PEER_7055",
+    "$schema": "iSamplesSchemaCore1.0.json",
+    "@id": "metadata/21547/CgZ2PEER_7055",
     "label": "Polychaeta PEER_7055",
-    "sampleidentifier": "http://n2t.net/ark:/21547/R2INDO119289",
+    "sample_identifier": "ark:/21547/CgZ2PEER_7055",
     "description": "",
-    "hasContextCategory": ["Marine biome"],
-    "hasMaterialCategory": ["Biogenic material"],
-    "hasSpecimenCategory": ["Organism product"],
-    "informalClassification": [""],
-    "keywords": ["Lombok", "Indonesia","West Nusa Tenggara","Annelida"],
-    "producedBy": {
-        "@id":"ark:/21547/Cga2INDO_224",
+    "has_context_category": [
+        {
+            "label": "Marine environment",
+            "identifier": "https://w3id.org/isample/vocabulary/sampledfeature/0.9/sf:marinewaterbody"
+        }
+    ],
+    "has_context_category_confidence": [
+        1.0
+    ],
+    "has_material_category": [
+        {
+            "label": "Organic material",
+            "identifier": "https://w3id.org/isample/vocabulary/material/0.9/mat:organicmaterial"
+        }
+    ],
+    "has_material_category_confidence": [
+        1.0
+    ],
+    "has_specimen_category": [
+        {
+            "label": "Whole organism specimen",
+            "identifier": "https://w3id.org/isample/vocabulary/specimentype/0.9/spec:wholeorganism"
+        }
+    ],
+    "has_specimen_category_confidence": [
+        1.0
+    ],
+    "informal_classification": [
+        "Polychaeta"
+    ],
+    "keywords": [
+        {
+            "keyword": "Indonesia"
+        },
+        {
+            "keyword": "West Nusa Tenggara"
+        },
+        {
+            "keyword": "Nusa Tenggara"
+        },
+        {
+            "keyword": "Lombok"
+        },
+        {
+            "keyword": "Indonesia"
+        },
+        {
+            "keyword": "Asia"
+        },
+        {
+            "keyword": "Annelida",
+            "scheme_name": "Taxon: phylum"
+        },
+        {
+            "keyword": "Polychaeta",
+            "scheme_name": "Taxon: class"
+        }
+    ],
+    "produced_by": {
+        "@id": "ark:/21547/CgZ2PEER_7055",
         "label": "event INDO_224",
-        "description": "sampling protocol:Dead Coral Head; projectId:78 ; expeditionCode: PEER_2016",
-        "hasFeatureOfInterest": "Coral Reef",
-        "responsibility": ["Taxonymy team: MINV", "Collector:Eka Maya Kurniasih"],
-        "resultTime": "2017-06-04",
-        "samplingSite": {
+        "description": "samplingProtocol: Dead Coral Head | expeditionCode: PEER_2016 | taxonomy team: MINV | projectId: 78",
+        "has_feature_of_interest": "",
+        "responsibility": [
+            {
+                "role": "Collector",
+                "name": "Eka Maya Kurniasih"
+            },
+            {
+                "role": "Taxonomy team",
+                "name": "MINV"
+            },
+            {
+                "role": "Event registrant",
+                "name": "Eka Maya Kurniasih"
+            }
+        ],
+        "result_time": "2017-06-04",
+        "sampling_site": {
             "description": "",
             "label": "Gili Asahan",
-            "location": {
+            "sample_location": {
                 "elevation": "",
                 "latitude": -8.73642,
                 "longitude": 115.88083
             },
-            "placeName": ["Nusa Tenggara"]
+            "place_name": [
+                "Gili Asahan",
+                "Indonesia",
+                "West Nusa Tenggara",
+                "Nusa Tenggara",
+                "Lombok",
+                "Indonesia",
+                "Asia"
+            ]
         }
     },
-    "registrant": "Eka Maya Kurniasih",
-    "samplingPurpose": "",
-    "curation": {
-        "accessConstraints": "",
-        "curationLocation": "",
-        "responsibility": "curator:Indonesian Biodiversity Research Center"
+    "registrant": {
+        "name": "Eka Maya Kurniasih"
     },
-    "relatedResource": [ {
-        "label":"",
-        "description":"",
-        "target":"",
-        "relationshipType":""
-    } ]
+    "sampling_purpose": "",
+    "curation": {
+        "label": "",
+        "description": "",
+        "access_constraints": "",
+        "curation_location": "Indonesian Biodiversity Research Center",
+        "responsibility": [
+            {
+                "role": "curator",
+                "name": "Indonesian Biodiversity Research Center"
+            }
+        ]
+    },
+    "related_resource": [],
+    "authorized_by": [
+        ""
+    ],
+    "complies_with": [],
+    "producedBy_samplingSite_location_h3_0": "8095fffffffffff",
+    "producedBy_samplingSite_location_h3_1": "8195bffffffffff",
+    "producedBy_samplingSite_location_h3_2": "8295a7fffffffff",
+    "producedBy_samplingSite_location_h3_3": "8395a4fffffffff",
+    "producedBy_samplingSite_location_h3_4": "8495a43ffffffff",
+    "producedBy_samplingSite_location_h3_5": "8595a433fffffff",
+    "producedBy_samplingSite_location_h3_6": "8695a4307ffffff",
+    "producedBy_samplingSite_location_h3_7": "8795a4305ffffff",
+    "producedBy_samplingSite_location_h3_8": "8895a43053fffff",
+    "producedBy_samplingSite_location_h3_9": "8995a430537ffff",
+    "producedBy_samplingSite_location_h3_10": "8a95a430535ffff",
+    "producedBy_samplingSite_location_h3_11": "8b95a4305358fff",
+    "producedBy_samplingSite_location_h3_12": "8c95a43053587ff",
+    "producedBy_samplingSite_location_h3_13": "8d95a430535873f",
+    "producedBy_samplingSite_location_h3_14": "8e95a430535871f"
 }
