@@ -1,3 +1,4 @@
+import os
 import click.core
 import pytest
 import isb_lib.core
@@ -326,6 +327,26 @@ def test_produced_by_fields_opencontext():
     produced_by_responsibility = solr_doc.get("producedBy_responsibility")
     assert produced_by_responsibility is not None
     assert produced_by_responsibility[0] == "creator:Martha Sharp Joukowsky"
+
+
+def test_produced_by_fields_smithsonian():
+    solr_doc = _load_test_file_into_solr_doc("./test_data/Smithsonian/DwC test/ark-65665-30000cb27-702b-4d34-ac24-3e46e14d5519-test.json")
+    produced_by_responsibility = solr_doc.get("producedBy_responsibility")
+    assert produced_by_responsibility is not None
+    assert produced_by_responsibility[0] == "recorded by:R. Causse"
+
+
+def test_convert_all_test_files_to_solr_doc():
+    dirs = ["./test_data/Smithsonian/DwC test", "./test_data/OpenContext/test", "./test_data/GEOME/test"]
+    for dir in dirs:
+        for root, _, files in os.walk(dir):
+            for file in files:
+                if file.endswith(".json"):
+                    # Create the full path to the JSON file
+                    json_file_path = os.path.join(root, file)
+                    print(f"checking {json_file_path}")
+                    solr_doc = _load_test_file_into_solr_doc(json_file_path)
+                    assert solr_doc is not None
 
 
 def test_date_year_only():
