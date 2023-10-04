@@ -321,6 +321,13 @@ def test_produced_by_fields():
     assert sampling_site_place_name[0] == "Pulau Seulako"
 
 
+def test_produced_by_fields_opencontext():
+    solr_doc = _load_test_file_into_solr_doc("./test_data/OpenContext/test/ark-28722-k26d5xr5z-test.json")
+    produced_by_responsibility = solr_doc.get("producedBy_responsibility")
+    assert produced_by_responsibility is not None
+    assert produced_by_responsibility[0] == "creator:Martha Sharp Joukowsky"
+
+
 def test_date_year_only():
     date_str = "1985"
     datetime = isb_lib.core.parsed_date(date_str)

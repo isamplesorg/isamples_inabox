@@ -272,9 +272,6 @@ def _gather_produced_by_responsibilities(responsibility_dicts: list[dict]) -> li
     responsibilities_list = []
     for responsibility_dict in responsibility_dicts:
         name = responsibility_dict[NAME]
-        # TODO: reconcile the formats -- we shouldn't need to check type on this
-        if type(name) is dict:
-            name = name[LABEL]
         responsibilities_list.append(f"{responsibility_dict[ROLE]}:{name}")
     return responsibilities_list
 

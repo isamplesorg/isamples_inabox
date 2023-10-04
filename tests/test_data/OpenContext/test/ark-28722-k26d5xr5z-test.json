@@ -39,24 +39,15 @@
         "responsibility": [
             {
                 "role": "creator",
-                "name": {
-                    "id": "http://opencontext.org/persons/1EFB20BC-BE05-486A-C434-988892277ED5",
-                    "label": "Martha Sharp Joukowsky"
-                }
+                "name": "Martha Sharp Joukowsky"
             },
             {
                 "role": "collector",
-                "name": {
-                    "id": "http://opencontext.org/persons/A753753F-025A-4930-4F6A-5DEC08BDAEB0",
-                    "label": "Eleanor A. Power"
-                }
+                "name": "Eleanor A. Power"
             },
             {
                 "role": "collector",
-                "name": {
-                    "id": "http://opencontext.org/persons/A67D3050-C58F-4DC2-C061-867A64428A2A",
-                    "label": "Marshall C. Agnew"
-                }
+                "name": "Marshall C. Agnew"
             }
         ],
         "result_time": "2007-11-11T00:00:00Z",

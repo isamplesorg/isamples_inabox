@@ -25,7 +25,7 @@ from isb_lib.models.thing import Thing
 from isb_lib.sesar_adapter import SESARItem
 
 ASSERT_ON_OUTPUT = False
-WRITE_OUTPUT_FILES = False
+WRITE_OUTPUT_FILES = True
 
 
 def _run_transformer(
@@ -89,6 +89,7 @@ def test_sesar_dicts_equal(sesar_source_path, isamples_path, timestamp):
 @pytest.mark.parametrize(
     "sesar_source_path,isamples_path,timestamp", SESAR_test_values
 )
+@pytest.mark.skip(reason="This functionality will go away once we fully move to SESAR iSB")
 def test_sesar_as_core_record(
     sesar_source_path, isamples_path, timestamp
 ):

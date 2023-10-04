@@ -39,17 +39,11 @@
         "responsibility": [
             {
                 "role": "creator",
-                "name": {
-                    "id": "http://opencontext.org/persons/1EFB20BC-BE05-486A-C434-988892277ED5",
-                    "label": "Martha Sharp Joukowsky"
-                }
+                "name": "Martha Sharp Joukowsky"
             },
             {
                 "role": "collector",
-                "name": {
-                    "id": "http://opencontext.org/persons/B2917D64-13E2-4EC5-3E4D-A9B5D42355BA",
-                    "label": "Elizabeth E. Payne"
-                }
+                "name": "Elizabeth E. Payne"
             }
         ],
         "result_time": "2007-11-11T00:00:00Z",

@@ -39,17 +39,11 @@
         "responsibility": [
             {
                 "role": "creator",
-                "name": {
-                    "id": "http://opencontext.org/persons/1EFB20BC-BE05-486A-C434-988892277ED5",
-                    "label": "Martha Sharp Joukowsky"
-                }
+                "name": "Martha Sharp Joukowsky"
             },
             {
                 "role": "collector",
-                "name": {
-                    "id": "http://opencontext.org/persons/E0385159-90C5-4A71-C0FC-56B6545B699E",
-                    "label": "Katrina M. Haile"
-                }
+                "name": "Katrina M. Haile"
             }
         ],
         "result_time": "2007-11-11T00:00:00Z",

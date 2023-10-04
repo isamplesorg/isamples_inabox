@@ -201,29 +201,30 @@ class OpenContextTransformer(Transformer):
         self._transform_key_to_label("updated", self.source_record, description_pieces, "'updated'")
         for consists_of_str in self.source_record.get("Consists of", []):
             self._transform_key_to_label_str(
-                self._get_oc_str_or_dict_item_label(consists_of_str), description_pieces, "'Consists of'"
+                OpenContextTransformer._get_oc_str_or_dict_item_label(consists_of_str), description_pieces, "'Consists of'"
             )
         for has_type_str in self.source_record.get("Has type", []):
             self._transform_key_to_label_str(
-                self._get_oc_str_or_dict_item_label(has_type_str), description_pieces, "'Has type'"
+                OpenContextTransformer._get_oc_str_or_dict_item_label(has_type_str), description_pieces, "'Has type'"
             )
         for has_anatomical_str in self.source_record.get(
             "Has anatomical identification", []
         ):
             self._transform_key_to_label_str(
-                self._get_oc_str_or_dict_item_label(has_anatomical_str),
+                OpenContextTransformer._get_oc_str_or_dict_item_label(has_anatomical_str),
                 description_pieces,
                 "'Has anatomical identification'",
             )
         for temporal_coverage_str in self.source_record.get("Temporal Coverage", []):
             self._transform_key_to_label_str(
-                self._get_oc_str_or_dict_item_label(temporal_coverage_str),
+                OpenContextTransformer._get_oc_str_or_dict_item_label(temporal_coverage_str),
                 description_pieces,
                 "'Temporal coverage'",
             )
         return Transformer.DESCRIPTION_SEPARATOR.join(description_pieces)
 
-    def _get_oc_str_or_dict_item_label(self, str_or_dict):
+    @staticmethod
+    def _get_oc_str_or_dict_item_label(str_or_dict):
         """A utility method to get a dictionary label or if a string, return the string"""
         # This is a bit messy, but it should be a bit forgiving if the OC API returns
         # dict or string items for certain record attributes.
@@ -236,12 +237,12 @@ class OpenContextTransformer(Transformer):
 
     def _material_type(self) -> typing.Optional[str]:
         for consists_of_dict in self.source_record.get("Consists of", []):
-            return self._get_oc_str_or_dict_item_label(consists_of_dict)
+            return OpenContextTransformer._get_oc_str_or_dict_item_label(consists_of_dict)
         return None
 
     def _specimen_type(self) -> typing.Optional[str]:
         for has_type_dict in self.source_record.get("Has type", []):
-            return self._get_oc_str_or_dict_item_label(has_type_dict)
+            return OpenContextTransformer._get_oc_str_or_dict_item_label(has_type_dict)
         return None
 
     def sample_registrant(self) -> str:
@@ -397,11 +398,11 @@ class OpenContextTransformer(Transformer):
         creators = self.source_record.get("Creator")
         if creators is not None:
             for creator in creators:
-                responsibilities.append(Transformer._responsibility_dict("creator", creator))
+                responsibilities.append(Transformer._responsibility_dict("creator", OpenContextTransformer._get_oc_str_or_dict_item_label(creator)))
         contributors = self.source_record.get("Contributor")
         if contributors is not None:
             for contributor in contributors:
-                responsibilities.append(Transformer._responsibility_dict("collector", contributor))
+                responsibilities.append(Transformer._responsibility_dict("collector", OpenContextTransformer._get_oc_str_or_dict_item_label(contributor)))
         return responsibilities
 
     def produced_by_result_time(self) -> str:
@@ -437,7 +438,7 @@ class OpenContextTransformer(Transformer):
     def informal_classification(self) -> typing.List[str]:
         classifications = []
         for consists_of_dict in self.source_record.get("Has taxonomic identifier", []):
-            classifications.append(self._get_oc_str_or_dict_item_label(consists_of_dict))
+            classifications.append(OpenContextTransformer._get_oc_str_or_dict_item_label(consists_of_dict))
         return classifications
 
     def last_updated_time(self) -> Optional[str]:
