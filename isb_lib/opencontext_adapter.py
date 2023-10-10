@@ -137,7 +137,6 @@ class OpenContextRecordIterator(isb_lib.core.IdentifierIterator):
                 next_url: str = data.get("next-json")
                 results = data.get("oc-api:has-results")
 
-
             for record in data.get("oc-api:has-results", {}):
                 L.info("records_in_page Record id: %s", record.get("uri", None))
                 # force the updated date to be considered UTC as that is what the OC dates are
