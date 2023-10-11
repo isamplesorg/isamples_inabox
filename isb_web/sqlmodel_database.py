@@ -27,7 +27,7 @@ DRAFT_RESOLVED_STATUS = -1
 
 
 class DatabaseBulkUpdater:
-    def __init__(self, db_session: Session, authority_id: str, batch_size: int, resolved_media_type: str, primary_keys_by_id: dict):
+    def __init__(self, db_session: Session, authority_id: str, batch_size: int, resolved_media_type: str, primary_keys_by_id: Optional[dict]):
         self.db_session = db_session
         self.authority_id = authority_id
         self.batch_size = batch_size
@@ -36,8 +36,11 @@ class DatabaseBulkUpdater:
         self.current_existing_things_batch = []
         self.num_inserts = 0
         self.num_updates = 0
-        self.primary_keys_by_id = primary_keys_by_id
         self.unique_ids = set()
+        if primary_keys_by_id is not None:
+            self.primary_keys_by_id = primary_keys_by_id
+        else:
+            self.primary_keys_by_id = {}
 
     def add_thing(self, resolved_content: dict, thing_id: str, resolved_url: str, resolved_status: int, h3: str, t_created: Optional[datetime.datetime] = None):
         tstamp = datetime.datetime.now()
