@@ -1,5 +1,6 @@
 import datetime
 import typing
+import json
 
 import igsn_lib.time
 import sqlalchemy
@@ -23,6 +24,74 @@ from isb_web.schemas import ThingPage
 DRAFT_RESOLVED_URL = "DRAFT"
 DRAFT_AUTHORITY_ID = "DRAFT"
 DRAFT_RESOLVED_STATUS = -1
+
+
+class DatabaseBulkUpdater:
+    def __init__(self, db_session: Session, authority_id: str, batch_size: int, resolved_media_type: str, primary_keys_by_id: Optional[dict]):
+        self.db_session = db_session
+        self.authority_id = authority_id
+        self.batch_size = batch_size
+        self.resolved_media_type = resolved_media_type
+        self.current_new_things_batch = []
+        self.current_existing_things_batch = []
+        self.num_inserts = 0
+        self.num_updates = 0
+        self.unique_ids = set()
+        if primary_keys_by_id is not None:
+            self.primary_keys_by_id = primary_keys_by_id
+        else:
+            self.primary_keys_by_id = {}
+
+    def add_thing(self, resolved_content: dict, thing_id: str, resolved_url: str, resolved_status: int, h3: str, t_created: Optional[datetime.datetime] = None):
+        tstamp = datetime.datetime.now()
+        if t_created is None:
+            t_created = tstamp
+        thing_dict = {
+            "resolved_content": resolved_content,
+            "id": thing_id,
+            "tstamp": tstamp,
+            "tcreated": t_created,
+            "item_type": "sample",
+            "authority_id": self.authority_id,
+            "resolved_url": resolved_url,
+            "resolved_status": resolved_status,
+            "tresolved": tstamp,
+            "resolve_elapsed": 0,
+            "resolved_media_type": self.resolved_media_type,
+            "identifiers": json.dumps([thing_id]),
+            "h3": h3
+        }
+        if thing_id in self.primary_keys_by_id:
+            thing_dict["primary_key"] = self.primary_keys_by_id[thing_id]
+        else:
+            self.current_new_things_batch.append(thing_dict)
+        self.unique_ids.add(thing_id)
+        if (len(self.current_new_things_batch) + len(self.current_existing_things_batch)) == self.batch_size:
+            self._save_to_db()
+
+    def finish(self):
+        print("About to finish import…")
+        self._save_to_db()
+        print(f"Finished at {datetime.datetime.now()}.")
+
+    def _save_to_db(self):
+        self.num_inserts += len(self.current_new_things_batch)
+        self.num_updates += len(self.current_existing_things_batch)
+        print(f"\n\nInserting into the database because we've hit the batch size of {self.batch_size}")
+        if len(self.current_new_things_batch) > 0:
+            self.db_session.bulk_insert_mappings(
+                mapper=Thing,
+                mappings=self.current_new_things_batch,
+                return_defaults=False,
+            )
+        if len(self.current_existing_things_batch) > 0:
+            self.db_session.bulk_update_mappings(
+                mapper=Thing, mappings=self.current_existing_things_batch
+            )
+        self.db_session.commit()
+        print(f"\n\nSave complete.  Have inserted {self.num_inserts} rows, updated {self.num_updates} rows, seen {len(self.unique_ids)} unique ids.")
+        self.current_new_things_batch = []
+        self.current_existing_things_batch = []
 
 
 class SQLModelDAO:

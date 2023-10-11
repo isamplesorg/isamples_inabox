@@ -9,10 +9,12 @@ import sqlalchemy
 import sqlalchemy.orm
 import sqlalchemy.exc
 
+from isamples_metadata import OpenContextTransformer
 from isb_lib import opencontext_adapter
+from isb_lib.core import MEDIA_JSON
 from isb_lib.opencontext_adapter import OPENCONTEXT_PAGE_SIZE
 from isb_web import sqlmodel_database
-from isb_web.sqlmodel_database import SQLModelDAO, save_thing
+from isb_web.sqlmodel_database import SQLModelDAO, save_thing, DatabaseBulkUpdater
 
 BACKLOG_SIZE = 40
 
@@ -126,6 +128,25 @@ def load_records(ctx, max_records):
     L.info("loadRecords: %s", str(session))
     # ctx.obj["db_url"] = db_url
     load_open_context_entries(session, max_records, max_created)
+
+
+@main.command("recreate")
+@click.pass_context
+def recreate_records(ctx):
+    L = get_logger()
+    session = SQLModelDAO(ctx.obj["db_url"]).get_session()
+    records = isb_lib.opencontext_adapter.OpenContextRecordIterator(
+        max_entries=-1, date_start=None, page_size=OPENCONTEXT_PAGE_SIZE
+    )
+    bulk_updater = DatabaseBulkUpdater(session, opencontext_adapter.OpenContextItem.AUTHORITY_ID, 1000, MEDIA_JSON, None)
+    num_ids = 0
+    for record in records:
+        L.info("got next id from open context %s", record)
+        num_ids += 1
+        thing_id = opencontext_adapter.identifier_from_thing_dict(record)
+        h3 = OpenContextTransformer.geo_to_h3(record)
+        t_created = opencontext_adapter.t_created_from_thing_dict(record)
+        bulk_updater.add_thing(record, thing_id, records.last_url_str(), 200, h3, t_created)
 
 
 @main.command("populate_isb_core_solr")

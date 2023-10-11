@@ -1,6 +1,3 @@
-import json
-import typing
-
 import click
 import click_config_file
 import isb_lib.core
@@ -11,42 +8,47 @@ import datetime
 
 from isamples_metadata import SmithsonianTransformer
 from isb_lib import smithsonian_adapter
-from isb_lib.models.thing import Thing
 from isb_lib.smithsonian_adapter import SmithsonianItem
-from isb_web.sqlmodel_database import SQLModelDAO, all_thing_primary_keys
+from isb_web.sqlmodel_database import SQLModelDAO, all_thing_primary_keys, DatabaseBulkUpdater
 
 BATCH_SIZE = 10000
 num_inserts = 0
 num_updates = 0
-current_existing_things_batch = []
-current_new_things_batch = []
-all_ids = set()
+current_existing_things_batch: list[dict] = []
+current_new_things_batch: list[dict] = []
+all_ids: set[str] = set()
 
 
 def load_smithsonian_entries(db_session, file_path, start_from=None):
     primary_keys_by_id = all_thing_primary_keys(db_session, smithsonian_adapter.SmithsonianItem.AUTHORITY_ID)
+    bulk_updater = DatabaseBulkUpdater(db_session, smithsonian_adapter.SmithsonianItem.AUTHORITY_ID, BATCH_SIZE, SmithsonianItem.TEXT_CSV, primary_keys_by_id)
     with open(file_path, newline="") as csvfile:
         csvreader = csv.reader(csvfile, delimiter="\t", quoting=csv.QUOTE_NONE)
         num_newer = 0
         column_headers = next(csvreader)
         for i, current_values in enumerate(csvreader):
-            if i > 0 and i % BATCH_SIZE == 0:
-                save_to_db(db_session, i, num_newer)
-            # Otherwise iterate over the keys and make source JSON
             current_record = {}
             newer_than_start_from, thing_id = process_keys(column_headers, current_record, current_values, start_from)
             if newer_than_start_from:
                 num_newer += 1
-                thing_dict = thing_dict_for_db(current_record, file_path, thing_id, primary_keys_by_id)
-                if thing_id in primary_keys_by_id:
-                    current_existing_things_batch.append(thing_dict)
-                else:
-                    current_new_things_batch.append(thing_dict)
-            all_ids.add(thing_id)
-
-        # get the remainder
-        save_to_db(db_session, i, num_newer)
-        print(f"Done.  Num inserts={num_inserts}, num updates={num_updates}, num_unique_ids={len(all_ids)}")
+                h3 = SmithsonianTransformer.geo_to_h3(current_record)
+                try:
+                    year = current_record.get("year")
+                    month = current_record.get("month")
+                    day = current_record.get("day")
+                    if year is not None and month is not None and day is not None:
+                        t_created = datetime.datetime(
+                            year=int(year),
+                            month=int(month),
+                            day=int(day),
+                        )
+                except Exception:
+                    # In many cases, these don't seem to be populated.  There's nothing we can do if they aren't there, so just
+                    # leave it as None.
+                    t_created = None
+                bulk_updater.add_thing(current_record, thing_id, file_path, 200, h3, t_created)
+        bulk_updater.finish()
+        print(f"Num newer={num_newer}\n\n")
 
 
 def process_keys(column_headers, current_record, current_values, start_from):
@@ -70,62 +72,6 @@ def process_keys(column_headers, current_record, current_values, start_from):
                 "Ran into an index error processing input: %s", e
             )
     return newer_than_start_from, thing_id
-
-
-def thing_dict_for_db(resolved_content: typing.Dict, file_path: str, thing_id: str, primary_keys_by_id: typing.Dict):
-    try:
-        year = resolved_content.get("year")
-        month = resolved_content.get("month")
-        day = resolved_content.get("day")
-        if year is not None and month is not None and day is not None:
-            t_created = datetime.datetime(
-                year=int(year),
-                month=int(month),
-                day=int(day),
-            )
-    except Exception:
-        # In many cases, these don't seem to be populated.  There's nothing we can do if they aren't there, so just
-        # leave it as None.
-        t_created = None
-    tstamp = datetime.datetime.now()
-    thing_dict = {
-        "resolved_content": resolved_content,
-        "id": thing_id,
-        "tstamp": tstamp,
-        "tcreated": t_created,
-        "item_type": "sample",
-        "authority_id": SmithsonianItem.AUTHORITY_ID,
-        "resolved_url": f"file://{file_path}",
-        "resolved_status": 200,
-        "tresolved": tstamp,
-        "resolve_elapsed": 0,
-        "resolved_media_type": SmithsonianItem.TEXT_CSV,
-        "identifiers": json.dumps([thing_id]),
-        "h3": SmithsonianTransformer.geo_to_h3(resolved_content)
-    }
-    if thing_id in primary_keys_by_id:
-        thing_dict["primary_key"] = primary_keys_by_id[thing_id]
-
-    return thing_dict
-
-
-def save_to_db(db_session, i, num_newer):
-    global num_inserts, num_updates, current_new_things_batch, current_existing_things_batch
-    num_inserts += len(current_new_things_batch)
-    num_updates += len(current_existing_things_batch)
-    print(f"\n\nNum records={i}")
-    print(f"Num newer={num_newer}\n\n")
-    db_session.bulk_insert_mappings(
-        mapper=Thing,
-        mappings=current_new_things_batch,
-        return_defaults=False,
-    )
-    db_session.bulk_update_mappings(
-        mapper=Thing, mappings=current_existing_things_batch
-    )
-    db_session.commit()
-    current_new_things_batch = []
-    current_existing_things_batch = []
 
 
 @click.group()

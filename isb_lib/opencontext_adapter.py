@@ -238,9 +238,7 @@ def load_thing(
     """
     L = get_logger()
     id = identifier_from_thing_dict(thing_dict)
-    updated_time = thing_dict.get("updated")
-    if updated_time is not None:
-        t_created = dateparser.parse(updated_time)
+    t_created = t_created_from_thing_dict(thing_dict)
     L.info("loadThing: %s", id)
     item = OpenContextItem(id, thing_dict)
     # TODO, unlike the other collections, we are fetching these via a pre-paginated API, so we can't put anything in the
@@ -248,6 +246,13 @@ def load_thing(
     # nothing to do here, but it's a difference between collections.
     thing = item.as_thing(t_created, 200, url, t_resolved, None)
     return thing
+
+
+def t_created_from_thing_dict(thing_dict):
+    updated_time = thing_dict.get("updated")
+    if updated_time is not None:
+        t_created = dateparser.parse(updated_time)
+    return t_created
 
 
 def update_thing(thing: isb_lib.models.thing.Thing, updated_record: typing.Dict, t_resolved: datetime.datetime, url: str):
