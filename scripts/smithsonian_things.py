@@ -14,9 +14,9 @@ from isb_web.sqlmodel_database import SQLModelDAO, all_thing_primary_keys, Datab
 BATCH_SIZE = 10000
 num_inserts = 0
 num_updates = 0
-current_existing_things_batch = []
-current_new_things_batch = []
-all_ids = set()
+current_existing_things_batch: list[dict] = []
+current_new_things_batch: list[dict] = []
+all_ids: set[str] = set()
 
 
 def load_smithsonian_entries(db_session, file_path, start_from=None):
