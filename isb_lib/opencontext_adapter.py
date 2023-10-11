@@ -1,6 +1,6 @@
 import datetime
 from typing import Optional
-
+import random
 import pytz
 
 import isb_lib.core
@@ -14,7 +14,7 @@ from isamples_metadata import OpenContextTransformer
 
 HTTP_TIMEOUT = 60.0  # seconds
 OPENCONTEXT_PAGE_SIZE = 100       # number of result records per request "page"
-OPENCONTEXT_API = f"https://opencontext.org/query/.json?attributes=ALL-STANDARD-LD&cat=oc-gen-cat-sample-col%7C%7Coc-gen-cat-bio-subj-ecofact%7C%7Coc-gen-cat-object&response=metadata%2Curi-meta&sort=updated--desc&type=subjects&rows={OPENCONTEXT_PAGE_SIZE}"
+OPENCONTEXT_API = f"https://opencontext.org/query/.json?attributes=iSamples&cat=oc-gen-cat-sample-col%7C%7Coc-gen-cat-bio-subj-ecofact%7C%7Coc-gen-cat-object&response=metadata%2Curi-meta&rows={OPENCONTEXT_PAGE_SIZE}&sort=updated--desc&type=subjects"
 MEDIA_JSON = "application/json"
 
 
@@ -114,7 +114,29 @@ class OpenContextRecordIterator(isb_lib.core.IdentifierIterator):
                 break
             # L.debug("recordsInProject data: %s", response.text[:256])
             data = response.json()
-            next_url = data.get("next-json")
+            next_url: str = data.get("next-json")
+            results = data.get("oc-api:has-results")
+            # TODO: this is a hack to work around some OpenContext problems, remove once OC is in a better state
+            retries = 0
+            while results is None and retries < 5:
+                L.info(f"didn't get any records in the response, trying again: {self.url}, retry number {retries}")
+                url = f"{self.url}&foo={random.random()}"
+                response = requests.get(
+                    url, params=params, headers=headers, timeout=HTTP_TIMEOUT
+                )
+                retries = retries + 1
+                if response.status_code != 200:
+                    L.error(
+                        "Unable to load records; status: %s; reason: %s",
+                        response.status_code,
+                        response.reason,
+                    )
+                    break
+                # L.debug("recordsInProject data: %s", response.text[:256])
+                data = response.json()
+                next_url: str = data.get("next-json")
+                results = data.get("oc-api:has-results")
+
             for record in data.get("oc-api:has-results", {}):
                 L.info("records_in_page Record id: %s", record.get("uri", None))
                 # force the updated date to be considered UTC as that is what the OC dates are
@@ -133,7 +155,8 @@ class OpenContextRecordIterator(isb_lib.core.IdentifierIterator):
                 yield record
                 num_records += 1
 
-            self.url = next_url
+            # TODO: this is a hack and should ideally be replaced on the OC side.
+            self.url = next_url.replace("ALL-STANDARD-LD", "iSamples")
             if (
                 len(data.get("oc-api:has-results", {})) < _page_size
                 or self.url is None
