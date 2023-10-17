@@ -101,41 +101,30 @@ class OpenContextRecordIterator(isb_lib.core.IdentifierIterator):
         num_records = 0
         while more_work and self.url is not None and not self._past_date_start:
             L.info("trying to hit %s", self.url)
-            response = requests.get(
-                self.url, params=params, headers=headers, timeout=HTTP_TIMEOUT
-            )
-
-            if response.status_code != 200:
-                L.error(
-                    "Unable to load records; status: %s; reason: %s",
-                    response.status_code,
-                    response.reason,
+            try:
+                response = requests.get(
+                    self.url, params=params, headers=headers, timeout=HTTP_TIMEOUT
                 )
-                break
-            # L.debug("recordsInProject data: %s", response.text[:256])
-            data = response.json()
-            next_url: str = data.get("next-json")
-            results = data.get("oc-api:has-results")
+                data = response.json()
+                next_url: str = data.get("next-json")
+                results = data.get("oc-api:has-results")
+            except requests.exceptions.RequestException:
+                results = None
             # TODO: this is a hack to work around some OpenContext problems, remove once OC is in a better state
             retries = 0
             while results is None and retries < 5:
                 L.info(f"didn't get any records in the response, trying again: {self.url}, retry number {retries}")
                 url = f"{self.url}&foo={random.random()}"
-                response = requests.get(
-                    url, params=params, headers=headers, timeout=HTTP_TIMEOUT
-                )
-                retries = retries + 1
-                if response.status_code != 200:
-                    L.error(
-                        "Unable to load records; status: %s; reason: %s",
-                        response.status_code,
-                        response.reason,
+                try:
+                    response = requests.get(
+                        url, params=params, headers=headers, timeout=HTTP_TIMEOUT
                     )
-                    break
-                # L.debug("recordsInProject data: %s", response.text[:256])
-                data = response.json()
-                next_url: str = data.get("next-json")
-                results = data.get("oc-api:has-results")
+                    retries = retries + 1
+                    data = response.json()
+                    next_url: str = data.get("next-json")
+                    results = data.get("oc-api:has-results")
+                except requests.exceptions.RequestException:
+                    results = None
 
             for record in data.get("oc-api:has-results", {}):
                 L.info("records_in_page Record id: %s", record.get("uri", None))
