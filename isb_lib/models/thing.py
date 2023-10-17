@@ -1,4 +1,3 @@
-import sys
 import igsn_lib.time
 import json
 from typing import Optional
