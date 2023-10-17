@@ -105,15 +105,6 @@ class OpenContextRecordIterator(isb_lib.core.IdentifierIterator):
                 response = requests.get(
                     self.url, params=params, headers=headers, timeout=HTTP_TIMEOUT
                 )
-
-                if response.status_code != 200:
-                    L.error(
-                        "Unable to load records; status: %s; reason: %s",
-                        response.status_code,
-                        response.reason,
-                    )
-                    break
-                # L.debug("recordsInProject data: %s", response.text[:256])
                 data = response.json()
                 next_url: str = data.get("next-json")
                 results = data.get("oc-api:has-results")
@@ -129,14 +120,6 @@ class OpenContextRecordIterator(isb_lib.core.IdentifierIterator):
                         url, params=params, headers=headers, timeout=HTTP_TIMEOUT
                     )
                     retries = retries + 1
-                    if response.status_code != 200:
-                        L.error(
-                            "Unable to load records; status: %s; reason: %s",
-                            response.status_code,
-                            response.reason,
-                        )
-                        break
-                    # L.debug("recordsInProject data: %s", response.text[:256])
                     data = response.json()
                     next_url: str = data.get("next-json")
                     results = data.get("oc-api:has-results")
