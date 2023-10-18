@@ -1,4 +1,3 @@
-import sys
 import igsn_lib.time
 import json
 from typing import Optional
@@ -7,6 +6,7 @@ from sqlmodel import Field, SQLModel
 from datetime import datetime
 import sqlalchemy
 
+from isb_lib.models.conditional_jsonb_type import ConditionalJSONB
 from isb_lib.models.string_list_type import StringListType
 
 
@@ -66,8 +66,7 @@ class Thing(SQLModel, table=True):
     resolved_content: Optional[dict] = Field(
         # Use the raw SQLAlchemy column in order to get the proper JSON behavior
         sa_column=sqlalchemy.Column(
-            # if we're running under test, use SQLite type, otherwise prefer postgres JSONB
-            sqlalchemy.JSON if "pytest" in sys.modules else sqlalchemy.dialects.postgresql.JSONB,
+            ConditionalJSONB,
             nullable=True,
             default=None,
             doc="Resolved content, {content_type:, content: }",
