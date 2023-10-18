@@ -25,7 +25,7 @@ def insert_latlon_fields_for_record(record: typing.Dict) -> bool:
 @click.pass_context
 def main(ctx):
     solr_url = isb_web.config.Settings().solr_url
-    isb_lib.core.things_main(ctx, None, solr_url, "INFO", False)
+    isb_lib.core.things_main(ctx, None, solr_url, "INFO")
     offset = 0
     batch_size = 50000
     rsession = requests.session()

@@ -26,7 +26,6 @@ import re
 import requests
 import shapely.wkt
 import shapely.geometry
-import heartrate
 
 from isb_web import sqlmodel_database
 from isb_web.sqlmodel_database import SQLModelDAO
@@ -84,7 +83,7 @@ def initialize_logging(verbosity: str):
         L.warning("%s is not a log level, set to INFO", verbosity)
 
 
-def things_main(ctx, db_url, solr_url, verbosity="INFO", heart_rate=False):
+def things_main(ctx, db_url, solr_url, verbosity="INFO"):
     ctx.ensure_object(dict)
     initialize_logging(verbosity)
 
@@ -92,8 +91,6 @@ def things_main(ctx, db_url, solr_url, verbosity="INFO", heart_rate=False):
     ctx.obj["db_url"] = db_url
     getLogger().info("Using solr at: %s", solr_url)
     ctx.obj["solr_url"] = solr_url
-    if heart_rate:
-        heartrate.trace(browser=True)
 
 
 def datetimeToSolrStr(dt):

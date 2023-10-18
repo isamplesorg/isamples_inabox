@@ -79,9 +79,6 @@ def _filtered_value(value):
     show_default=True,
 )
 @click.option(
-    "-H", "--heart_rate", is_flag=True, help="Show heartrate diagnostics on 9999"
-)
-@click.option(
     "-q",
     "--query",
     default=None,
@@ -89,8 +86,8 @@ def _filtered_value(value):
 )
 @click_config_file.configuration_option(config_file_name="isb.cfg")
 @click.pass_context
-def main(ctx, db_url, solr_url, verbosity, heart_rate, query):
-    isb_lib.core.things_main(ctx, db_url, solr_url, verbosity, heart_rate)
+def main(ctx, db_url, solr_url, verbosity, query):
+    isb_lib.core.things_main(ctx, db_url, solr_url, verbosity)
     engine = create_engine(ctx.obj["db_url"], echo=False)
     SQLModel.metadata.drop_all(engine, tables=[ISBCoreRecord.__table__])
     SQLModel.metadata.create_all(engine, tables=[ISBCoreRecord.__table__])

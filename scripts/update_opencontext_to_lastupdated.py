@@ -32,13 +32,10 @@ def _sesar_last_updated(dict: typing.Dict) -> typing.Optional[datetime.datetime]
     help="Specify logging level",
     show_default=True,
 )
-@click.option(
-    "-H", "--heart_rate", is_flag=True, help="Show heartrate diagnositcs on 9999"
-)
 @click_config_file.configuration_option(config_file_name="opencontext.cfg")
 @click.pass_context
-def main(ctx, db_url, verbosity, heart_rate):
-    isb_lib.core.things_main(ctx, db_url, verbosity, heart_rate)
+def main(ctx, db_url, verbosity):
+    isb_lib.core.things_main(ctx, db_url, verbosity)
     session = isb_lib.core.get_db_session(db_url)
     index = 1850000
     page_size = 10000

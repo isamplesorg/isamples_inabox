@@ -55,9 +55,6 @@ def process_dictionary(
     show_default=True,
 )
 @click.option(
-    "-H", "--heart_rate", is_flag=True, help="Show heartrate diagnostics on 9999"
-)
-@click.option(
     "-a",
     "--authority",
     default="SMITHSONIAN",
@@ -65,8 +62,8 @@ def process_dictionary(
 )
 @click_config_file.configuration_option(config_file_name="isb.cfg")
 @click.pass_context
-def main(ctx, db_url, verbosity, heart_rate, authority):
-    isb_lib.core.things_main(ctx, db_url, None, verbosity, heart_rate)
+def main(ctx, db_url, verbosity, authority):
+    isb_lib.core.things_main(ctx, db_url, None, verbosity)
     session = SQLModelDAO((ctx.obj["db_url"])).get_session()
     sql = f"""select resolved_content from thing tablesample system(10) where
     resolved_status=200 and authority_id='{authority}'"""

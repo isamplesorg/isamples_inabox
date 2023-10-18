@@ -72,13 +72,10 @@ def insert_standard_identifier(session, thing):
     help="Specify logging level",
     show_default=True,
 )
-@click.option(
-    "-H", "--heart_rate", is_flag=True, help="Show heartrate diagnositcs on 9999"
-)
 @click_config_file.configuration_option(config_file_name="isb.cfg")
 @click.pass_context
-def main(ctx, db_url, verbosity, heart_rate):
-    isb_lib.core.things_main(ctx, db_url, None, verbosity, heart_rate)
+def main(ctx, db_url, verbosity):
+    isb_lib.core.things_main(ctx, db_url, None, verbosity)
     session = SQLModelDAO((ctx.obj["db_url"])).get_session()
     # start off cleaning out any existing records
     rows_deleted = session.query(ThingIdentifier).delete()

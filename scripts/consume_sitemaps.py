@@ -83,7 +83,7 @@ def main(ctx, url: str, authority: str, ignore_last_modified: bool, batch_size: 
     db_session = SQLModelDAO(db_url).get_session()
     if authority is not None:
         authority = authority.upper()
-    isb_lib.core.things_main(ctx, db_url, solr_url, "INFO", False)
+    isb_lib.core.things_main(ctx, db_url, solr_url, "INFO")
     if ignore_last_modified:
         last_updated_date = None
     else:

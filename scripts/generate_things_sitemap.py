@@ -25,9 +25,7 @@ from isb_lib.sitemaps.thing_sitemap import (
 )
 @click.pass_context
 def main(ctx, path: str, host: str):
-    isb_lib.core.things_main(
-        ctx, None, isb_web.config.Settings().solr_url, "INFO", False
-    )
+    isb_lib.core.things_main(ctx, None, isb_web.config.Settings().solr_url, "INFO")
     build_sitemap(path, host, ThingSitemapIndexIterator())
 
 
