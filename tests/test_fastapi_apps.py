@@ -159,7 +159,7 @@ TEST_AUTHORITY_ID = "SESAR"
 
 
 def test_things(client: TestClient, session: Session):
-    response = client.get("/thing/", json={"authority": "SESAR"})
+    response = client.request("GET", "/thing/", json={"authority": "SESAR"})
     data = response.json()
     first_fetched_thing = data["data"][0]
     assert data["total_records"] > 0

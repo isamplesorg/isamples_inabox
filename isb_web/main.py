@@ -160,7 +160,7 @@ async def login():
 
 
 @app.get("/thingpage/{identifier:path}", include_in_schema=False)
-async def get_thing_page(request: fastapi.Request, identifier: str, session: Session = Depends(get_session)) -> templates.TemplateResponse:
+async def get_thing_page(request: fastapi.Request, identifier: str, session: Session = Depends(get_session)):
     # Retrieve record from the database
     item = sqlmodel_database.get_thing_with_id(session, identifier)
     if item is None:
