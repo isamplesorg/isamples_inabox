@@ -7,6 +7,7 @@ license = "Apache 2.0"
 packages = [
     { include = "isb_lib"},
     { include = "isb_web"},
+    { include = "isamples_metadata"},
 ]
 
 [tool.poetry.dependencies]
