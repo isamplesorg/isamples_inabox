@@ -61,7 +61,7 @@ def main(ctx):
     db_url = isb_web.config.Settings().database_url
     isb_lib.core.things_main(ctx, db_url, solr_url)
     session = SQLModelDAO(db_url).get_session()
-    isb_lib.core.things_main(ctx, db_url, solr_url, "INFO", False)
+    isb_lib.core.things_main(ctx, db_url, solr_url, "INFO")
     geome_permit_information = compute_geome_permitting_information(session)
     total_records = 0
     batch_size = 10000

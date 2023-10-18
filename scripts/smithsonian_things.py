@@ -86,13 +86,10 @@ def process_keys(column_headers, current_record, current_values, start_from):
     help="Specify logging level",
     show_default=True,
 )
-@click.option(
-    "-H", "--heart_rate", is_flag=True, help="Show heartrate diagnositcs on 9999"
-)
 @click_config_file.configuration_option(config_file_name="smithsonian.cfg")
 @click.pass_context
-def main(ctx, db_url, solr_url, verbosity, heart_rate):
-    isb_lib.core.things_main(ctx, db_url, solr_url, verbosity, heart_rate)
+def main(ctx, db_url, solr_url, verbosity):
+    isb_lib.core.things_main(ctx, db_url, solr_url, verbosity)
 
 
 @main.command("load")
