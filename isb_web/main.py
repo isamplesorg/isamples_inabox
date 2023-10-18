@@ -48,7 +48,7 @@ THIS_PATH = os.path.dirname(os.path.abspath(__file__))
 # blowup if the logging config can't be found
 try:
     logging.config.fileConfig(config.Settings().logging_config, disable_existing_loggers=False)
-except KeyError:
+except (KeyError, FileNotFoundError):
     logging.warning("Could not load logging configuration")
     pass
 L = logging.getLogger("ISB")
