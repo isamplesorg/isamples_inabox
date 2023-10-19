@@ -1,5 +1,4 @@
 import pytest
-import json
 
 from fastapi.testclient import TestClient
 from sqlmodel import Session, SQLModel, create_engine
@@ -224,9 +223,6 @@ def test_get_thing_list_types(client: TestClient, session: Session):
 
 
 def test_get_things_for_sitemap(client: TestClient, session: Session):
-    data_dict = {
-        "identifiers": [TEST_IGSN]
-    }
     response = client.request("POST", "/things", json={"identifiers": [TEST_IGSN]})
     assert response.status_code == 200
     response_data = response.json()
