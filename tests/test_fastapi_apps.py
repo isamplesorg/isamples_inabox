@@ -227,8 +227,7 @@ def test_get_things_for_sitemap(client: TestClient, session: Session):
     data_dict = {
         "identifiers": [TEST_IGSN]
     }
-    post_data = json.dumps(data_dict).encode("utf-8")
-    response = client.post("/things", data=post_data)
+    response = client.request("POST", "/things", json={"identifiers": [TEST_IGSN]})
     assert response.status_code == 200
     response_data = response.json()
     assert response_data[0]["id"] == TEST_IGSN
