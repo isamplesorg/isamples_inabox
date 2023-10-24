@@ -12,36 +12,36 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.11"
-click = "*"
-click-config-file = "*"
+click = "^8.1.7"
+click-config-file = "^0.6.0"
 fastapi = "0.104.0"
-uvicorn = {version = "*", extras=["standard"]}
-aiofiles = "*"
+uvicorn = {version = "^0.23.2", extras=["standard"]}
+aiofiles = "^23.2.1"
 igsn-lib = {git = "https://github.com/isamplesorg/igsn_lib.git", rev = "main"}
 isamples_frictionless = {git = "https://github.com/isamplesorg/isamples_frictionless.git", rev = "main"}
-accept-types = "*"
-shapely = "*"
-geojson = "*"
-Jinja2 = "*"
-aiofile = "*"
+accept-types = "^0.4.1"
+shapely = "^2.0.2"
+geojson = "^2.5.0"
+Jinja2 = "^3.1.2"
+aiofile = "^3.8.8"
 
-sqlmodel = "*"
-Authlib = "*"
-itsdangerous = "*"
-starlette-oauth2-api = "*"
-httpx = "*"
+sqlmodel = "^0.0.8"
+Authlib = "^1.2.1"
+itsdangerous = "^2.1.2"
+starlette-oauth2-api = "^0.2.6"
+httpx = "^0.25.0"
 
-regex = "*"
-h3 = {version = "^4.0.0b1", allow-prereleases = true}
-aiodns = "*"
-aiohttp = "*"
-rdflib = "*"
+regex = "^2023.10.3"
+h3 = {version = "^4.0.0b2", allow-prereleases = true}
+aiodns = "^3.1.1"
+aiohttp = "^3.8.6"
+rdflib = "^7.0.0"
 
-connegp = "*"
-openpyxl = "*"
-xlrd = "*"
+connegp = "^0.2"
+openpyxl = "^3.1.2"
+xlrd = "^2.0.1"
 
-PyJWT = "*"
+PyJWT = "^2.8.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
