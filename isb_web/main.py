@@ -48,7 +48,7 @@ THIS_PATH = os.path.dirname(os.path.abspath(__file__))
 # blowup if the logging config can't be found
 try:
     logging.config.fileConfig(config.Settings().logging_config, disable_existing_loggers=False)
-except KeyError:
+except (KeyError, FileNotFoundError):
     logging.warning("Could not load logging configuration")
     pass
 L = logging.getLogger("ISB")
@@ -79,6 +79,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"]
 )
 app.mount(
     "/static",
@@ -160,7 +161,7 @@ async def login():
 
 
 @app.get("/thingpage/{identifier:path}", include_in_schema=False)
-async def get_thing_page(request: fastapi.Request, identifier: str, session: Session = Depends(get_session)) -> templates.TemplateResponse:
+async def get_thing_page(request: fastapi.Request, identifier: str, session: Session = Depends(get_session)):
     # Retrieve record from the database
     item = sqlmodel_database.get_thing_with_id(session, identifier)
     if item is None:

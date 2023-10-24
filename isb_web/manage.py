@@ -209,7 +209,7 @@ async def login(request: starlette.requests.Request):
     """
     Initiate OAuth2 login with ORCID
     """
-    redirect_uri = request.url_for("auth")
+    redirect_uri = request.url_for("auth").__str__()
     # check if login is for annotation purpose, if so add query param
     if "annotation" in request.query_params and request.query_params["annotation"] == "true":
         redirect_uri += "?annotation=true"
@@ -282,6 +282,8 @@ def add_orcid_id(request: starlette.requests.Request, session: Session = Depends
         orcid_id = request.query_params.get("orcid_id")
         if user.get("orcid") not in config.Settings().orcid_superusers:
             raise HTTPException(401, "orcid id not authorized to add users")
+        if orcid_id is None:
+            raise HTTPException(401, "orcid_id is a required parameter")
         person = sqlmodel_database.save_person_with_orcid_id(session, orcid_id)
         allowed_orcid_ids.append(orcid_id)
         return person.primary_key

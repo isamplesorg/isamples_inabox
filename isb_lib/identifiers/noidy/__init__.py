@@ -8,4 +8,4 @@ class Minter:
         pass
 
     def mint(self, count: int = 1) -> typing.Generator[str, None, None]:
-        raise(NotImplementedError("Base Minter must be overridden"))
+        raise NotImplementedError("Base Minter must be overridden")

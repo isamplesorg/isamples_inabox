@@ -1,5 +1,4 @@
 import pytest
-import json
 
 from fastapi.testclient import TestClient
 from sqlmodel import Session, SQLModel, create_engine
@@ -159,7 +158,7 @@ TEST_AUTHORITY_ID = "SESAR"
 
 
 def test_things(client: TestClient, session: Session):
-    response = client.get("/thing/", json={"authority": "SESAR"})
+    response = client.request("GET", "/thing/", json={"authority": "SESAR"})
     data = response.json()
     first_fetched_thing = data["data"][0]
     assert data["total_records"] > 0
@@ -224,11 +223,7 @@ def test_get_thing_list_types(client: TestClient, session: Session):
 
 
 def test_get_things_for_sitemap(client: TestClient, session: Session):
-    data_dict = {
-        "identifiers": [TEST_IGSN]
-    }
-    post_data = json.dumps(data_dict).encode("utf-8")
-    response = client.post("/things", data=post_data)
+    response = client.request("POST", "/things", json={"identifiers": [TEST_IGSN]})
     assert response.status_code == 200
     response_data = response.json()
     assert response_data[0]["id"] == TEST_IGSN

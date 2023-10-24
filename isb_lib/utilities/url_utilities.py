@@ -27,7 +27,7 @@ def full_url_from_suffix(request_url: str, suffix: str) -> str:
     # If we're running in the Docker container, this will be defined as part of docker-compose.yml
     if "ISB_SITEMAP_PREFIX" in os.environ:
         base_url = os.environ["ISB_SITEMAP_PREFIX"]
-    if not(suffix.startswith("/")):
+    if not suffix.startswith("/"):
         suffix = f"/{suffix}"
     if base_url.endswith("/"):
         base_url = base_url[:-1]
