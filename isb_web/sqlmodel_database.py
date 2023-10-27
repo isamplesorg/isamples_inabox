@@ -63,6 +63,7 @@ class DatabaseBulkUpdater:
         }
         if thing_id in self.primary_keys_by_id:
             thing_dict["primary_key"] = self.primary_keys_by_id[thing_id]
+            self.current_existing_things_batch.append(thing_dict)
         else:
             self.current_new_things_batch.append(thing_dict)
         self.unique_ids.add(thing_id)
