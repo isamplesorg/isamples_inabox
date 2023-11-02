@@ -26,6 +26,7 @@ def _add_some_things(
         )
         if tcreated is not None:
             new_thing.tcreated = tcreated
+        new_thing.tstamp = datetime.datetime.now()
         insert_identifiers(new_thing)
         session.add(new_thing)
     session.commit()

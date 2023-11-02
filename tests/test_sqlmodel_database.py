@@ -137,26 +137,22 @@ def test_things_for_sitemap(session: Session):
     # should have a list of 20
     assert 20 == len(things)
     for thing in things:
-        assert thing.authority_id == authority
+        assert 2 == len(thing)
+        assert type(thing[0]) is str
+        assert type(thing[1]) is datetime.datetime
     # remember this for later
-    last_tstamp = things[-1].tstamp
-    last_id = things[-1].primary_key
+    last_tstamp = things[-1][1]
+    last_id = things[-1][0]
 
     different_authority = "different"
     _add_some_things(session, 20, different_authority)
 
-    # fetch again, should still get the first ones because they have an older tstamp
-    things_for_sitemap(session, None, 200, 100, 0, None)
-    for thing in things:
-        assert thing.authority_id == authority
-
     # Now fetch with the tstamp and id
-    new_things = things_for_sitemap(session, None, 200, 100, 0, last_tstamp, last_id)
-    # Should get 20, should have the new authority
+    new_things = things_for_sitemap(session, different_authority, 200, 100, 0, last_tstamp, int(last_id))
+    # Should get 21, as the method returns >= timestamp
     assert 20 == len(new_things)
     for new_thing in new_things:
-        assert new_thing.authority_id == different_authority
-
+        assert new_thing[1] >= last_tstamp
 
 def test_thing_iterator(session: Session):
     authority_id = "test"
