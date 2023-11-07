@@ -1,11 +1,12 @@
 import click
 
-import isb_web
+import isb_web.config
 import isb_lib.core
 from isb_lib.sitemaps import build_sitemap
 from isb_lib.sitemaps.thing_sitemap import (
     ThingSitemapIndexIterator
 )
+from isb_web.sqlmodel_database import SQLModelDAO
 
 
 @click.command()
@@ -25,8 +26,9 @@ from isb_lib.sitemaps.thing_sitemap import (
 )
 @click.pass_context
 def main(ctx, path: str, host: str):
-    isb_lib.core.things_main(ctx, None, isb_web.config.Settings().solr_url, "INFO")
-    build_sitemap(path, host, ThingSitemapIndexIterator())
+    isb_lib.core.things_main(ctx, isb_web.config.Settings().database_url, isb_web.config.Settings().solr_url, "INFO")
+    session = SQLModelDAO(isb_web.config.Settings().database_url).get_session()
+    build_sitemap(path, host, ThingSitemapIndexIterator(session))
 
 
 if __name__ == "__main__":

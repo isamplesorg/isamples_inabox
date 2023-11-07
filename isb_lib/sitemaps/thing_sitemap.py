@@ -1,10 +1,12 @@
+import datetime
 import typing
 from typing import Optional
 
-import requests
+from sqlmodel import Session
 
+from isb_lib.core import datetimeToSolrStr
 from isb_lib.sitemaps import SitemapIndexEntry, UrlSetEntry, ThingUrlSetEntry, ThingSitemapIndexEntry
-from isb_web import isb_solr_query
+from isb_web.sqlmodel_database import things_for_sitemap
 
 MAX_URLS_IN_SITEMAP = 50000
 
@@ -16,7 +18,7 @@ class ThingUrlSetIterator:
         self,
         sitemap_index: int,
         max_length: int,
-        things: typing.List[typing.Dict[str, str]],
+        things: typing.List[tuple[str, datetime.datetime]],
     ):
         self._things: list = things
         self._thing_index = 0
@@ -34,8 +36,8 @@ class ThingUrlSetIterator:
         if self._thing_index == len(self._things):
             raise StopIteration
         next_thing = self._things[self._thing_index]
-        timestamp_str = next_thing.get("sourceUpdatedTime")
-        next_url_set_entry = ThingUrlSetEntry(next_thing["id"], timestamp_str)
+        timestamp_str = datetimeToSolrStr(next_thing[1])
+        next_url_set_entry = ThingUrlSetEntry(next_thing[0], timestamp_str)
         # Update the necessary state
         self.num_urls += 1
         self._thing_index += 1
@@ -54,6 +56,7 @@ class ThingSitemapIndexIterator:
 
     def __init__(
         self,
+        session: Session,
         authority: Optional[str] = None,
         num_things_per_file: int = MAX_URLS_IN_SITEMAP,
         status: int = 200,
@@ -66,7 +69,7 @@ class ThingSitemapIndexIterator:
         self._status = status
         self._offset = offset
         self._last_url_set_iterator: Optional[ThingUrlSetIterator] = None
-        self._rsession = requests.session()
+        self._session = session
         self.num_url_sets = 0
 
     def __iter__(self):
@@ -77,8 +80,8 @@ class ThingSitemapIndexIterator:
             # Update our last values with the last ones from the previous iterator
             self._last_timestamp_str = self._last_url_set_iterator.last_tstamp_str
             self._last_primary_key = self._last_url_set_iterator.last_identifier
-        things = isb_solr_query.solr_records_for_sitemap(
-            self._rsession, self._authority, self._offset, self._num_things_per_file
+        things = things_for_sitemap(
+            self._session, self._authority, 200, self._num_things_per_file, self._offset
         )
         if len(things) == 0:
             raise StopIteration
