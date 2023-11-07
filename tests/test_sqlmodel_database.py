@@ -154,6 +154,7 @@ def test_things_for_sitemap(session: Session):
     for new_thing in new_things:
         assert new_thing[1] >= last_tstamp
 
+
 def test_thing_iterator(session: Session):
     authority_id = "test"
     num_things = 10

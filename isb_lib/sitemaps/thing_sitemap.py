@@ -2,12 +2,10 @@ import datetime
 import typing
 from typing import Optional
 
-import requests
 from sqlmodel import Session
 
 from isb_lib.core import datetimeToSolrStr
 from isb_lib.sitemaps import SitemapIndexEntry, UrlSetEntry, ThingUrlSetEntry, ThingSitemapIndexEntry
-from isb_web import isb_solr_query
 from isb_web.sqlmodel_database import things_for_sitemap
 
 MAX_URLS_IN_SITEMAP = 50000
