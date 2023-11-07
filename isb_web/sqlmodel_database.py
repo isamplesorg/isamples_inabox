@@ -284,7 +284,7 @@ def things_for_sitemap(
     offset: int = 0,
     min_tstamp: Optional[datetime.datetime] = None,
     min_id: int = 0,
-) -> List[Thing]:
+) -> List[tuple[str, datetime]]:
     """Returns a list of Things suitable for generating a sitemap.
 
     In order to allow older unchanged records to not be refetched, order by the timestamp to support automatic diffing
