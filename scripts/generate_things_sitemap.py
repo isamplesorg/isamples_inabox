@@ -1,6 +1,6 @@
 import click
 
-import isb_web
+import isb_web.config
 import isb_lib.core
 from isb_lib.sitemaps import build_sitemap
 from isb_lib.sitemaps.thing_sitemap import (
