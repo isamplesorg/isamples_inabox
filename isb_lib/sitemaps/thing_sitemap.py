@@ -83,7 +83,7 @@ class ThingSitemapIndexIterator:
             self._last_timestamp_str = self._last_url_set_iterator.last_tstamp_str
             self._last_primary_key = self._last_url_set_iterator.last_identifier
         things = things_for_sitemap(
-            self._session, self._authority, self._offset, self._num_things_per_file
+            self._session, self._authority, 200, self._num_things_per_file, self._offset
         )
         if len(things) == 0:
             raise StopIteration
