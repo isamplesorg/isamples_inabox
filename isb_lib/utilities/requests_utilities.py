@@ -1,5 +1,6 @@
 import logging
 import random
+import typing
 
 import requests
 from requests import RequestException, Timeout, Response
@@ -8,10 +9,11 @@ L = logging.getLogger("requests_utilities")
 
 
 class RetryingRequests:
-    def __init__(self, include_random_on_failure: bool = False, timeout=60, max_retries=10):
+    def __init__(self, include_random_on_failure: bool = False, timeout=60, max_retries=10, success_func: typing.Callable=None):
         self._include_random_on_failure = include_random_on_failure
         self._timeout = timeout
         self._max_retries = max_retries
+        self._success_func = success_func
 
     def get(self, url: str, rsession: requests.Session = requests.Session(), params: dict = None, headers: dict = None) -> Response:
         retries = 0
@@ -19,6 +21,10 @@ class RetryingRequests:
             try:
                 response = rsession.get(url, params=params, headers=headers, timeout=self._timeout)
                 response.raise_for_status()
+                if self._success_func is not None:
+                    result = self._success_func(response)
+                    if not result:
+                        raise RequestException("Invalid response according to success function")
                 return response
             except (RequestException, Timeout) as e:
                 L.warning(f"Request failed: {e}")

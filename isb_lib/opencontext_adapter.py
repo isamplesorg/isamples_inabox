@@ -240,3 +240,11 @@ def update_thing(thing: isb_lib.models.thing.Thing, updated_record: typing.Dict,
     if updated_str is not None:
         thing.tcreated = dateparser.parse(updated_str)
     thing.resolved_url = url
+
+
+def is_valid_opencontext_response(response: requests.Response) -> bool:
+    data = response.json()
+    if data is None:
+        return False
+    results = data.get("oc-api:has-results", None)
+    return results is not None
