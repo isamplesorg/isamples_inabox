@@ -14,7 +14,7 @@ from isb_lib.utilities.requests_utilities import RetryingRequests
 
 HTTP_TIMEOUT = 60.0  # seconds
 OPENCONTEXT_PAGE_SIZE = 100       # number of result records per request "page"
-OPENCONTEXT_API = f"https://opencontext.org/query/.json?attributes=iSamples&cat=oc-gen-cat-sample-col%7C%7Coc-gen-cat-bio-subj-ecofact%7C%7Coc-gen-cat-object&cursorMark=%2a&response=metadata,uri-meta&rows={OPENCONTEXT_PAGE_SIZE}&sort=updated--desc,context--asc&type=subjects"
+OPENCONTEXT_API = f"https://opencontext.org/query/.json?attributes=iSamples&cat=oc-gen-cat-sample-col%7C%7Coc-gen-cat-bio-subj-ecofact%7C%7Coc-gen-cat-object&cursorMark=%2a&response=metadata,uri-meta&sort=updated--desc,context--asc&type=subjects"
 MEDIA_JSON = "application/json"
 
 
@@ -100,9 +100,10 @@ class OpenContextRecordIterator(isb_lib.core.IdentifierIterator):
         }
         more_work = True
         num_records = 0
+        rsession = requests.Session()
         while more_work and self.url is not None and not self._past_date_start:
             L.info("trying to hit %s", self.url)
-            response = self._retrying_requests.get(self.url, params=params, headers=headers)
+            response = self._retrying_requests.get(self.url, rsession=rsession, params=params, headers=headers)
             data = response.json()
             next_url: str = data.get("next-json")
             results = data.get("oc-api:has-results", {})

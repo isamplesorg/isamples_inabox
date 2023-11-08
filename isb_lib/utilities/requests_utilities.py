@@ -13,27 +13,27 @@ class RetryingRequests:
         self._timeout = timeout
         self._max_retries = max_retries
 
-    def get(self, url: str, params: dict = None, headers: dict = None) -> Response:
+    def get(self, url: str, rsession: requests.Session = requests.Session(), params: dict = None, headers: dict = None) -> Response:
         retries = 0
         while retries < self._max_retries:
             try:
-                response = requests.get(url, params=params, headers=headers, timeout=self._timeout)
+                response = rsession.get(url, params=params, headers=headers, timeout=self._timeout)
                 response.raise_for_status()
                 return response
             except (RequestException, Timeout) as e:
                 L.warning(f"Request failed: {e}")
                 retries += 1
                 if retries < self._max_retries:
-                    if self._include_random_on_failure:
+                    if self._include_random_on_failure and params is not None:
                         params["foo"] = str(random.randint(0, 10000))
                     L.warning(f"Retrying ({retries}/{self._max_retries})...")
         raise Exception(f"Failed to make a successful request after {self._max_retries} retries")
 
-    def post(self, url, data: dict = None, json: dict = None, headers: dict = None) -> Response:
+    def post(self, url, rsession: requests.Session = requests.Session(), data: dict = None, json: dict = None, headers: dict = None) -> Response:
         retries = 0
         while retries < self._max_retries:
             try:
-                response = requests.post(url, data=data, json=json, headers=headers, timeout=self._timeout)
+                response = rsession.post(url, data=data, json=json, headers=headers, timeout=self._timeout)
                 response.raise_for_status()
                 return response
             except (RequestException, Timeout) as e:
