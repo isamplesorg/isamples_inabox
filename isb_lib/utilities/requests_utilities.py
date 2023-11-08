@@ -9,7 +9,7 @@ L = logging.getLogger("requests_utilities")
 
 
 class RetryingRequests:
-    def __init__(self, include_random_on_failure: bool = False, timeout: int=60, max_retries: int=10, sleep_sec: int = 0, success_func: typing.Callable=None):
+    def __init__(self, include_random_on_failure: bool = False, timeout: int = 60, max_retries: int = 10, sleep_sec: int = 0, success_func: typing.Callable = None):
         self._include_random_on_failure = include_random_on_failure
         self._timeout = timeout
         self._max_retries = max_retries
