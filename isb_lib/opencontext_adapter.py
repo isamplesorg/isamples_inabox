@@ -1,6 +1,5 @@
 import datetime
 from typing import Optional
-import random
 import pytz
 
 import isb_lib.core
@@ -10,11 +9,11 @@ import isb_lib.models.thing
 import typing
 import dateparser
 from isamples_metadata import OpenContextTransformer
+from isb_lib.utilities.requests_utilities import RetryingRequests
 
-
-HTTP_TIMEOUT = 60.0  # seconds
+HTTP_TIMEOUT = 60  # seconds
 OPENCONTEXT_PAGE_SIZE = 100       # number of result records per request "page"
-OPENCONTEXT_API = f"https://opencontext.org/query/.json?attributes=iSamples&cat=oc-gen-cat-sample-col%7C%7Coc-gen-cat-bio-subj-ecofact%7C%7Coc-gen-cat-object&response=metadata%2Curi-meta&rows={OPENCONTEXT_PAGE_SIZE}&sort=updated--desc&type=subjects"
+OPENCONTEXT_API = "https://opencontext.org/query/.json?attributes=iSamples&cat=oc-gen-cat-sample-col%7C%7Coc-gen-cat-bio-subj-ecofact%7C%7Coc-gen-cat-object&cursorMark=%2a&response=metadata,uri-meta&sort=updated--desc,context--asc&type=subjects"
 MEDIA_JSON = "application/json"
 
 
@@ -83,6 +82,7 @@ class OpenContextRecordIterator(isb_lib.core.IdentifierIterator):
         )
         self._past_date_start = False
         self.url = OPENCONTEXT_API
+        self._retrying_requests = RetryingRequests(include_random_on_failure=True, timeout=HTTP_TIMEOUT, sleep_sec=60, success_func=is_valid_opencontext_response)
         # force the updated date to be considered UTC as that is what the OC dates are
         if self._date_start is not None:
             self._date_start = self._date_start.replace(tzinfo=pytz.utc)
@@ -99,34 +99,14 @@ class OpenContextRecordIterator(isb_lib.core.IdentifierIterator):
         }
         more_work = True
         num_records = 0
+        rsession = requests.Session()
         while more_work and self.url is not None and not self._past_date_start:
             L.info("trying to hit %s", self.url)
-            try:
-                response = requests.get(
-                    self.url, params=params, headers=headers, timeout=HTTP_TIMEOUT
-                )
-                data = response.json()
-                next_url: str = data.get("next-json")
-                results = data.get("oc-api:has-results")
-            except requests.exceptions.RequestException:
-                results = None
-            # TODO: this is a hack to work around some OpenContext problems, remove once OC is in a better state
-            retries = 0
-            while results is None and retries < 5:
-                L.info(f"didn't get any records in the response, trying again: {self.url}, retry number {retries}")
-                url = f"{self.url}&foo={random.random()}"
-                try:
-                    response = requests.get(
-                        url, params=params, headers=headers, timeout=HTTP_TIMEOUT
-                    )
-                    retries = retries + 1
-                    data = response.json()
-                    next_url: str = data.get("next-json")
-                    results = data.get("oc-api:has-results")
-                except requests.exceptions.RequestException:
-                    results = None
-
-            for record in data.get("oc-api:has-results", {}):
+            response = self._retrying_requests.get(self.url, rsession=rsession, params=params, headers=headers)
+            data = response.json()
+            next_url: str = data.get("next-json")
+            results = data.get("oc-api:has-results", {})
+            for record in results:
                 L.info("records_in_page Record id: %s", record.get("uri", None))
                 # force the updated date to be considered UTC as that is what the OC dates are
                 record_updated = dateparser.parse(record["updated"]).replace(tzinfo=pytz.utc)
@@ -259,3 +239,11 @@ def update_thing(thing: isb_lib.models.thing.Thing, updated_record: typing.Dict,
     if updated_str is not None:
         thing.tcreated = dateparser.parse(updated_str)
     thing.resolved_url = url
+
+
+def is_valid_opencontext_response(response: requests.Response) -> bool:
+    data = response.json()
+    if data is None:
+        return False
+    results = data.get("oc-api:has-results", None)
+    return results is not None
