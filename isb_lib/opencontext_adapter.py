@@ -82,7 +82,7 @@ class OpenContextRecordIterator(isb_lib.core.IdentifierIterator):
         )
         self._past_date_start = False
         self.url = OPENCONTEXT_API
-        self._retrying_requests = RetryingRequests(include_random_on_failure=True, timeout=HTTP_TIMEOUT)
+        self._retrying_requests = RetryingRequests(include_random_on_failure=True, timeout=HTTP_TIMEOUT, sleep_sec=60, success_func=is_valid_opencontext_response)
         # force the updated date to be considered UTC as that is what the OC dates are
         if self._date_start is not None:
             self._date_start = self._date_start.replace(tzinfo=pytz.utc)
