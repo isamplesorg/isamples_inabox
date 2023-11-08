@@ -96,7 +96,7 @@ def test_first_empty_response_second_success():
     global num_success_func_invocations
     mock_request = MagicMock()
     mock_request.get.side_effect = _first_invalid_response_second_valid_side_effect
-    retrying_request = RetryingRequests(True, 60, 10, _success_func)
+    retrying_request = RetryingRequests(True, 60, 10, 0, _success_func)
     response = retrying_request.get("http://foo.bar", mock_request)
     _assert_success_response(response)
     assert 2 == num_success_func_invocations
