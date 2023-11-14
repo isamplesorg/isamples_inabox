@@ -12,8 +12,8 @@ from isamples_metadata import OpenContextTransformer
 from isb_lib.utilities.requests_utilities import RetryingRequests
 
 HTTP_TIMEOUT = 60  # seconds
-OPENCONTEXT_PAGE_SIZE = 100       # number of result records per request "page"
-OPENCONTEXT_API = "https://opencontext.org/query/.json?attributes=iSamples&cat=oc-gen-cat-sample-col%7C%7Coc-gen-cat-bio-subj-ecofact%7C%7Coc-gen-cat-object&cursorMark=%2a&response=metadata,uri-meta&sort=updated--desc,context--asc&type=subjects"
+OPENCONTEXT_PAGE_SIZE = 1000       # number of result records per request "page"
+OPENCONTEXT_API = f"https://opencontext.org/query/.json?attributes=iSamples&cat=oc-gen-cat-sample-col%7C%7Coc-gen-cat-bio-subj-ecofact%7C%7Coc-gen-cat-object&cursorMark=%2a&response=metadata,uri-meta&sort=updated--desc,context--asc&type=subjects&rows={OPENCONTEXT_PAGE_SIZE}"
 MEDIA_JSON = "application/json"
 
 
