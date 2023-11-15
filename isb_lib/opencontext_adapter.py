@@ -104,7 +104,7 @@ class OpenContextRecordIterator(isb_lib.core.IdentifierIterator):
             L.info("trying to hit %s", self.url)
             response = self._retrying_requests.get(self.url, rsession=rsession, params=params, headers=headers)
             data = response.json()
-            next_url: str = data.get("next-json")
+            next_url = data.get("next-json")
             results = data.get("oc-api:has-results", {})
             for record in results:
                 L.info("records_in_page Record id: %s", record.get("uri", None))
