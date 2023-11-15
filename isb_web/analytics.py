@@ -1,5 +1,6 @@
 import logging
 import typing
+from typing import Any
 
 import fastapi
 import requests
@@ -42,7 +43,7 @@ def attach_analytics_state_to_request(
     """
     Attaches analytics data to the request for later asynchronous processing by the AnalyticsMiddleware
     """
-    metrics_dict = {
+    metrics_dict: dict[str, Any] = {
         EVENT: event
     }
     if properties is not None:
@@ -62,8 +63,8 @@ class AnalyticsMiddleware(starlette.middleware.base.BaseHTTPMiddleware):
     def __init__(
         self,
         app,
-        analytics_url: typing.Optional[str] = ANALYTICS_URL,
-        analytics_domain: typing.Optional[str] = ANALYTICS_DOMAIN,
+        analytics_url: str = ANALYTICS_URL,
+        analytics_domain: str = ANALYTICS_DOMAIN,
     ):
         super().__init__(app)
         self.analytics_url = analytics_url
