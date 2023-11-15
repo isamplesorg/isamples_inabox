@@ -144,6 +144,7 @@ def recreate_records(ctx):
         h3 = OpenContextTransformer.geo_to_h3(record)
         t_created = opencontext_adapter.t_created_from_thing_dict(record)
         bulk_updater.add_thing(record, thing_id, records.last_url_str(), 200, h3, t_created)
+    bulk_updater.finish()
 
 
 @main.command("populate_isb_core_solr")

@@ -125,7 +125,10 @@ class OpenContextRecordIterator(isb_lib.core.IdentifierIterator):
                 num_records += 1
 
             # TODO: this is a hack and should ideally be replaced on the OC side.
-            self.url = next_url.replace("ALL-STANDARD-LD", "iSamples")
+            if next_url is not None:
+                self.url = next_url.replace("ALL-STANDARD-LD", "iSamples")
+            else:
+                self.url = None
             if (
                 len(data.get("oc-api:has-results", {})) < _page_size
                 or self.url is None
