@@ -39,12 +39,6 @@
      #     key: venv-${{ runner.os }}-#{{ hashFiles('**/poetry.lock') }}
      - name: install pip
        run: poetry run python -m pip install --upgrade pip
-     - name: Hacked install of pybind11
-       run: |
-         poetry run python -m pip install pybind11
-     - name: Hacked install of fasttext
-       run: |
-         poetry run python -m pip install fasttext     
      - name: Install dependencies
        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
        run: poetry install --no-interaction --no-root
