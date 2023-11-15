@@ -81,6 +81,9 @@ app.add_middleware(
     allow_headers=["*"],
     expose_headers=["*"]
 )
+app.add_middleware(
+    analytics.AnalyticsMiddleware
+)
 app.mount(
     "/static",
     fastapi.staticfiles.StaticFiles(directory=os.path.join(THIS_PATH, "static")),
@@ -203,7 +206,7 @@ async def thing_list_metadata(
 ):
     """Information about list identifiers"""
     meta = sqlmodel_database.get_thing_meta(session)
-    analytics.record_analytics_event(AnalyticsEvent.THING_LIST_METADATA, request)
+    analytics.attach_analytics_state_to_request(AnalyticsEvent.THING_LIST_METADATA, request)
     return meta
 
 
@@ -222,7 +225,7 @@ def thing_list(
     properties = {
         "authority": authority or "None"
     }
-    analytics.record_analytics_event(AnalyticsEvent.THING_LIST, request, properties)
+    analytics.attach_analytics_state_to_request(AnalyticsEvent.THING_LIST, request, properties)
     params = {
         "limit": limit,
         "offset": offset,
@@ -243,7 +246,7 @@ async def thing_list_types(
     session: Session = Depends(get_session),
 ):
     """List of types of things with counts"""
-    analytics.record_analytics_event(AnalyticsEvent.THING_LIST_TYPES, request)
+    analytics.attach_analytics_state_to_request(AnalyticsEvent.THING_LIST_TYPES, request)
     return sqlmodel_database.get_sample_types(session)
 
 
@@ -287,7 +290,7 @@ async def get_solr_select(request: fastapi.Request):
             properties[k] = v
     params = set_default_params(params, defparams)
     logging.warning(params)
-    analytics.record_analytics_event(AnalyticsEvent.THING_SOLR_SELECT, request, properties)
+    analytics.attach_analytics_state_to_request(AnalyticsEvent.THING_SOLR_SELECT, request, properties)
 
     # response object is generated in the called method. This is necessary
     # for the streaming response as otherwise the iterator is consumed
@@ -382,7 +385,7 @@ async def get_solr_stream(request: fastapi.Request):
             properties[k] = v
     params = set_default_params(params, defparams)
     # L.debug("Params: %s", params)
-    analytics.record_analytics_event(AnalyticsEvent.THING_SOLR_STREAM, request, properties)
+    analytics.attach_analytics_state_to_request(AnalyticsEvent.THING_SOLR_STREAM, request, properties)
     return isb_solr_query.solr_searchStream(params)
 
 
@@ -392,7 +395,7 @@ async def get_solr_luke_info(request: fastapi.Request):
 
     Returns: JSON
     """
-    analytics.record_analytics_event(AnalyticsEvent.THING_SOLR_LUKE_INFO, request)
+    analytics.attach_analytics_state_to_request(AnalyticsEvent.THING_SOLR_LUKE_INFO, request)
     return isb_solr_query.solr_luke()
 
 
@@ -499,7 +502,7 @@ async def get_thing(
     properties = {
         "identifier": identifier
     }
-    analytics.record_analytics_event(AnalyticsEvent.THING_BY_IDENTIFIER, request, properties)
+    analytics.attach_analytics_state_to_request(AnalyticsEvent.THING_BY_IDENTIFIER, request, properties)
     """Record for the specified identifier"""
     if format == isb_enums.ISBFormat.SOLR:
         return solr_thing_response(identifier)
@@ -588,7 +591,7 @@ async def get_stac_item(
     properties = {
         "identifier": identifier
     }
-    analytics.record_analytics_event(AnalyticsEvent.STAC_ITEM_BY_IDENTIFIER, request, properties)
+    analytics.attach_analytics_state_to_request(AnalyticsEvent.STAC_ITEM_BY_IDENTIFIER, request, properties)
     # stac wants things to have filenames, so let these requests work, too.
     if identifier.endswith(".json"):
         identifier = identifier.removesuffix(".json")
@@ -622,7 +625,7 @@ def get_stac_collection(
     properties = {
         "authority": authority or "None"
     }
-    analytics.record_analytics_event(AnalyticsEvent.STAC_COLLECTION, request, properties)
+    analytics.attach_analytics_state_to_request(AnalyticsEvent.STAC_COLLECTION, request, properties)
 
     solr_docs, has_next = isb_solr_query.solr_records_for_stac_collection(authority, offset, limit)
     stac_collection = isb_lib.stac.stac_collection_from_solr_dicts(solr_docs, has_next, offset, limit, authority)
@@ -735,7 +738,7 @@ async def get_things_leaflet_heatmap(
 async def relation_metadata(request: fastapi.Request):
     """List of predicates with counts"""
     # return crud.getPredicateCounts(db)
-    analytics.record_analytics_event(AnalyticsEvent.RELATION_METADATA, request)
+    analytics.attach_analytics_state_to_request(AnalyticsEvent.RELATION_METADATA, request)
     session = requests.session()
     return crud.getPredicateCountsSolr(session)
 
@@ -818,7 +821,7 @@ async def get_related_solr(
 
     Each property is optional. Exact matches only.
     """
-    analytics.record_analytics_event(AnalyticsEvent.RELATED_SOLR, request)
+    analytics.attach_analytics_state_to_request(AnalyticsEvent.RELATED_SOLR, request)
     return_type = accept_types.get_best_match(accept, [MEDIA_JSON, MEDIA_NQUADS])
     rsession = requests.Session()
     res = crud.getRelationsSolr(rsession, s, p, o, source, name, offset, limit)

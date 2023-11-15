@@ -9,6 +9,10 @@ import isb_web.config
 from isb_web.isb_enums import _NoValue
 from isb_lib.core import MEDIA_JSON
 
+PROPERTIES = "properties"
+
+EVENT = "event"
+
 ANALYTICS_URL = isb_web.config.Settings().analytics_url
 ANALYTICS_DOMAIN = isb_web.config.Settings().analytics_domain
 
@@ -30,6 +34,22 @@ class AnalyticsEvent(_NoValue):
     RELATED_SOLR = "related_solr"
 
 
+def attach_analytics_state_to_request(
+    event: AnalyticsEvent,
+    request: fastapi.Request,
+    properties: typing.Optional[typing.Dict] = None,
+):
+    """
+    Attaches analytics data to the request for later asynchronous processing by the AnalyticsMiddleware
+    """
+    metrics_dict = {
+        EVENT: event
+    }
+    if properties is not None:
+        metrics_dict[PROPERTIES] = properties
+    request.state.metrics = metrics_dict
+
+
 class AnalyticsMiddleware(starlette.middleware.base.BaseHTTPMiddleware):
     """
     Middleware for sending analytics messages to plausible.
@@ -41,14 +61,13 @@ class AnalyticsMiddleware(starlette.middleware.base.BaseHTTPMiddleware):
 
     def __init__(
         self,
-        *args,
-        analytics_url: typing.Optional[str] = None,
-        analytics_domain: typing.Optional[str] = None,
-        **kwargs
+        app,
+        analytics_url: typing.Optional[str] = ANALYTICS_URL,
+        analytics_domain: typing.Optional[str] = ANALYTICS_DOMAIN,
     ):
+        super().__init__(app)
         self.analytics_url = analytics_url
         self.analytics_domain = analytics_domain
-        super().__init(*args, **kwargs)
 
     async def dispatch(self, request: fastapi.Request, call_next: typing.Callable):
         """
@@ -64,9 +83,9 @@ class AnalyticsMiddleware(starlette.middleware.base.BaseHTTPMiddleware):
             if request.state.metrics is not None:
                 _headers = self._analytics_request_headers(request)
                 _data = self._analytics_request_data(
-                    request.state.metrics.get("event", None),
+                    request.state.metrics.get(EVENT, None),
                     request,
-                    request.state.metrics.get("properties", None),
+                    request.state.metrics.get(PROPERTIES, None),
                 )
                 response.background = starlette.background.BackgroundTask(
                     self.send_metrics, _headers, _data
