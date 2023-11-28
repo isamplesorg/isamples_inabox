@@ -2,7 +2,10 @@ import pytest
 import fastapi
 import starlette.datastructures
 import json
-import isb_web.analytics
+
+from fastapi import FastAPI
+
+from isb_web import analytics
 from isb_web.analytics import AnalyticsEvent
 from isb_lib.core import MEDIA_JSON
 
@@ -27,16 +30,21 @@ def request_fixture() -> fastapi.Request:
     return request
 
 
-def test_analytics_request_headers(request_fixture: fastapi.Request):
-    headers = isb_web.analytics._analytics_request_headers(request_fixture)
+@pytest.fixture()
+def middleware_fixture() -> analytics.AnalyticsMiddleware:
+    return analytics.AnalyticsMiddleware(FastAPI())
+
+
+def test_analytics_request_headers(request_fixture: fastapi.Request, middleware_fixture: analytics.AnalyticsMiddleware):
+    headers = middleware_fixture._analytics_request_headers(request_fixture)
     assert headers is not None
     assert headers["Content-Type"] == MEDIA_JSON
     assert headers["User-Agent"] == TEST_USER_AGENT
     assert headers["X-Forwarded-For"] == TEST_FORWARDED_FOR
 
 
-def test_analytics_request_data(request_fixture: fastapi.Request):
-    data = isb_web.analytics._analytics_request_data(
+def test_analytics_request_data(request_fixture: fastapi.Request, middleware_fixture: analytics.AnalyticsMiddleware):
+    data = middleware_fixture._analytics_request_data(
         AnalyticsEvent.THING_LIST, request_fixture, None
     )
     assert data is not None
@@ -47,9 +55,9 @@ def test_analytics_request_data(request_fixture: fastapi.Request):
     assert data.get("props") is None
 
 
-def test_analytics_request_data_custom_properties(request_fixture: fastapi.Request):
+def test_analytics_request_data_custom_properties(request_fixture: fastapi.Request, middleware_fixture: analytics.AnalyticsMiddleware):
     props = {"foo": "bar"}
-    data = isb_web.analytics._analytics_request_data(
+    data = middleware_fixture._analytics_request_data(
         AnalyticsEvent.THING_LIST, request_fixture, props
     )
     props_string = data.get("props")
