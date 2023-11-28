@@ -113,7 +113,7 @@ def _get_heatmap(
         "facet.heatmap.distErrPct": dist_err_pct,
         # "facet.heatmap.gridLevel": grid_level,
         "facet.heatmap.geom": (
-            f"[{bb[MIN_LON]} {bb[MIN_LAT]}" f"TO {bb[MAX_LON]} {bb[MAX_LAT]}]"
+            f"[{bb[MIN_LON]} {bb[MIN_LAT]}" f" TO {bb[MAX_LON]} {bb[MAX_LAT]}]"
         ),
     }
     if fq is not None:
