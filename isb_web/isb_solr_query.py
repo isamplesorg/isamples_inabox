@@ -113,7 +113,7 @@ def _get_heatmap(
         "facet.heatmap.distErrPct": dist_err_pct,
         # "facet.heatmap.gridLevel": grid_level,
         "facet.heatmap.geom": (
-            f"[{bb[MIN_LON]} {bb[MIN_LAT]}" f" TO {bb[MAX_LON]} {bb[MAX_LAT]}]"
+            _solr_heatmap_geom_params_str(bb)
         ),
     }
     if fq is not None:
@@ -132,6 +132,10 @@ def _get_heatmap(
     hm = res.get("facet_counts", {}).get("facet_heatmaps", {}).get(_RPT_FIELD, {})
     hm["numDocs"] = total_matching
     return hm
+
+
+def _solr_heatmap_geom_params_str(bb):
+    return f"[{bb[MIN_LON]} {bb[MIN_LAT]}" f" TO {bb[MAX_LON]} {bb[MAX_LAT]}]"
 
 
 ##
