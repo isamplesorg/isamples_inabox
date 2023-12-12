@@ -162,7 +162,7 @@ def _gather_keyword_labels(keyword_dicts: list[dict]) -> list[str]:
                   },
                   "keyword_uri": "",
                   "scheme_name": "Getty Art & Architecture Thesaurus"
-                }            
+                }
             """
             label = label.get(LABEL)
         labels.append(label)
