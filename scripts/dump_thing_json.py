@@ -46,11 +46,12 @@ def main(ctx, db_url: str, verbosity: str, authority: str, count: int, path: str
     session = SQLModelDAO((db_url)).get_session()
     things = paged_things_with_ids(session, authority, 200, count)
     for thing in things:
-        id = thing.id.replace("http://opencontext.org/subjects/", "")
-        id = id.replace("https://opencontext.org/subjects/", "")
-        dest_path = os.path.join(path, f"{id}.json")
-        with open(dest_path, "w") as json_file:
-            json.dump(thing.resolved_content, json_file)
+        thing_id = thing.id
+        if thing_id is not None:
+            id = thing_id.replace("http://opencontext.org/subjects/", "")
+            dest_path = os.path.join(path, f"{id}.json")
+            with open(dest_path, "w") as json_file:
+                json.dump(thing.resolved_content, json_file)
 
 
 if __name__ == "__main__":
