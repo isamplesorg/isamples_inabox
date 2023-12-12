@@ -5,6 +5,7 @@ import isb_lib.core
 import json
 import requests
 
+from isamples_metadata.metadata_constants import KEYWORDS
 from isb_lib.core import things_main
 
 TEST_LIVE_SERVER = 0
@@ -281,6 +282,135 @@ def test_coreRecordAsSolrDoc2():
     """
     solr_dict = _try_to_add_solr_doc(core_doc_str)
     assert "producedBy_samplingSite_location_latlon" not in solr_dict
+
+
+def test_core_record_as_solr_doc_3():
+    core_doc_str = """
+{
+  "$schema": "iSamplesSchemaCore1.0.json",
+  "@id": "metadata/28722/k2tb16c3r",
+  "label": "Object 9019A (5)",
+  "sample_identifier": "ark:/28722/k2tb16c3r",
+  "description": "'early bce/ce': -200.0 | 'late bce/ce': 360.0 | 'updated': 2023-10-06T06:32:42Z | 'Consists of': rock (inorganic material)",
+  "has_context_category": [
+    {
+      "label": "Site of past human activities",
+      "identifier": "https://w3id.org/isample/vocabulary/sampledfeature/0.9/sf:pasthumanoccupationsite"
+    }
+  ],
+  "has_context_category_confidence": [
+    1
+  ],
+  "has_material_category": [
+    {
+      "label": "Anthropogenic material",
+      "identifier": "https://w3id.org/isample/vocabulary/material/0.9/mat:otheranthropogenicmaterial"
+    },
+    {
+      "label": "Anthropogenic metal"
+    },
+    {
+      "label": "Natural solid material"
+    }
+  ],
+  "has_material_category_confidence": [
+    0.3525295853614807,
+    0.32352039217948914,
+    0.22828949987888336
+  ],
+  "has_specimen_category": [
+    {
+      "label": "physicalspecimen"
+    }
+  ],
+  "has_specimen_category_confidence": [
+    1
+  ],
+  "informal_classification": [],
+  "keywords": [
+    {
+      "keyword": {
+        "id": "https://vocab.getty.edu/aat/300247919",
+        "label": "fossils"
+      },
+      "keyword_uri": "",
+      "scheme_name": "Getty Art & Architecture Thesaurus"
+    },
+    {
+      "keyword": "Archaeology"
+    },
+    {
+      "keyword": "Architecture"
+    },
+    {
+      "keyword": "Religion"
+    },
+    {
+      "keyword": "Nabateans"
+    },
+    {
+      "keyword": "Chronology, Roman"
+    },
+    {
+      "keyword": "Hellenistic Greek, Roman Republic"
+    }
+  ],
+  "produced_by": {
+    "@id": "",
+    "label": "",
+    "description": "",
+    "has_feature_of_interest": "",
+    "responsibility": [
+      {
+        "role": "creator",
+        "name": "Martha Sharp Joukowsky"
+      }
+    ],
+    "result_time": "2007-11-11T00:00:00Z",
+    "sampling_site": {
+      "description": "https://opencontext.org/subjects/d9ae02e5-c3f1-41d0-eb3a-39798f63f6c4",
+      "label": "Petra Great Temple",
+      "sample_location": {
+        "elevation": "",
+        "latitude": 30.3287,
+        "longitude": 35.4421
+      },
+      "place_name": []
+    }
+  },
+  "registrant": {
+    "name": ""
+  },
+  "sampling_purpose": "",
+  "curation": {
+    "label": "",
+    "description": "",
+    "access_constraints": "",
+    "curation_location": "",
+    "responsibility": []
+  },
+  "related_resource": [],
+  "authorized_by": [],
+  "complies_with": [],
+  "producedBy_samplingSite_location_h3_0": "803ffffffffffff",
+  "producedBy_samplingSite_location_h3_1": "813e7ffffffffff",
+  "producedBy_samplingSite_location_h3_2": "823e6ffffffffff",
+  "producedBy_samplingSite_location_h3_3": "833e6dfffffffff",
+  "producedBy_samplingSite_location_h3_4": "843e6ddffffffff",
+  "producedBy_samplingSite_location_h3_5": "853e6dcbfffffff",
+  "producedBy_samplingSite_location_h3_6": "863e6dca7ffffff",
+  "producedBy_samplingSite_location_h3_7": "873e6dca5ffffff",
+  "producedBy_samplingSite_location_h3_8": "883e6dca51fffff",
+  "producedBy_samplingSite_location_h3_9": "893e6dca50bffff",
+  "producedBy_samplingSite_location_h3_10": "8a3e6dca5017fff",
+  "producedBy_samplingSite_location_h3_11": "8b3e6dca5012fff",
+  "producedBy_samplingSite_location_h3_12": "8c3e6dca50121ff",
+  "producedBy_samplingSite_location_h3_13": "8d3e6dca50120bf",
+  "producedBy_samplingSite_location_h3_14": "8e3e6dca50120b7"
+}
+"""
+    solr_dict = _try_to_add_solr_doc(core_doc_str)
+    assert "fossils" in solr_dict.get(KEYWORDS)
 
 
 def _load_test_file_into_solr_doc(file_path: str) -> dict:

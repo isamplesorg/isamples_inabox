@@ -150,7 +150,23 @@ def _shouldAddMetadataValueToSolrDoc(metadata: typing.Dict, key: str) -> bool:
 
 
 def _gather_keyword_labels(keyword_dicts: list[dict]) -> list[str]:
-    return [keyword_dict[KEYWORD] for keyword_dict in keyword_dicts]
+    labels = []
+    for keyword_dict in keyword_dicts:
+        label = keyword_dict.get(KEYWORD)
+        if type(label) is dict:
+            """ complex keywords look like:
+                {
+                  "keyword": {
+                    "id": "https://vocab.getty.edu/aat/300247919",
+                    "label": "fossils"
+                  },
+                  "keyword_uri": "",
+                  "scheme_name": "Getty Art & Architecture Thesaurus"
+                }
+            """
+            label = label.get(LABEL)
+        labels.append(label)
+    return labels
 
 
 def _gather_vocabulary_labels(vocabulary_dicts: list[dict]) -> list[str]:
