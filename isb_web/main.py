@@ -299,12 +299,10 @@ async def _get_solr_select(request: fastapi.Request):
 
 # TODO: Don't blindly accept user input!
 @app.get(f"/{THING_URL_PATH}/select", response_model=typing.Any)
-async def get_solr_select(request: fastapi.Request):
-    return await _get_solr_select(request)
-
-
 @app.get(f"/{THING_URL_PATH}/select/", response_model=typing.Any)
-async def get_solr_select_with_slash(request: fastapi.Request):
+@app.post(f"/{THING_URL_PATH}/select", response_model=typing.Any)
+@app.post(f"/{THING_URL_PATH}/select/", response_model=typing.Any)
+async def get_solr_select(request: fastapi.Request):
     return await _get_solr_select(request)
 
 
