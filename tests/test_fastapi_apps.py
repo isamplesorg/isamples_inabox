@@ -1,8 +1,13 @@
+from unittest.mock import MagicMock, patch
+
 import pytest
 
 from fastapi.testclient import TestClient
+from httpx import Response
 from sqlmodel import Session, SQLModel, create_engine
 from sqlmodel.pool import StaticPool
+
+
 from isb_lib.models import thing
 from isb_web.main import get_session, app, manage_app
 
@@ -261,3 +266,32 @@ def test_manage_with_invalid_authorization_header(manage_client: TestClient, ses
     }
     response = manage_client.get("/userinfo", headers=headers, allow_redirects=False)
     assert response.status_code == 400
+
+
+def _assert_on_solr_response(mock_solr_query: MagicMock, response: Response):
+    assert response.status_code == 200
+    assert mock_solr_query.called is True
+
+
+@patch("isb_web.isb_solr_query.solr_query")
+def test_solr_select_get(mock_solr_query: MagicMock, client: TestClient, session: Session):
+    response = client.get("/thing/select")
+    _assert_on_solr_response(mock_solr_query, response)
+
+
+@patch("isb_web.isb_solr_query.solr_query")
+def test_solr_select_get_with_slash(mock_solr_query: MagicMock, client: TestClient, session: Session):
+    response = client.get("/thing/select/")
+    _assert_on_solr_response(mock_solr_query, response)
+
+
+@patch("isb_web.isb_solr_query.solr_query")
+def test_solr_select_post(mock_solr_query: MagicMock, client: TestClient, session: Session):
+    response = client.post("/thing/select")
+    _assert_on_solr_response(mock_solr_query, response)
+
+
+@patch("isb_web.isb_solr_query.solr_query")
+def test_solr_select_post_with_slash(mock_solr_query: MagicMock, client: TestClient, session: Session):
+    response = client.post("/thing/select/")
+    _assert_on_solr_response(mock_solr_query, response)

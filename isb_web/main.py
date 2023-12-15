@@ -262,9 +262,7 @@ def set_default_params(params, defs):
     return params
 
 
-# TODO: Don't blindly accept user input!
-@app.get(f"/{THING_URL_PATH}/select", response_model=typing.Any)
-async def get_solr_select(request: fastapi.Request):
+async def _get_solr_select(request: fastapi.Request):
     """Send select request to the Solr isb_core_records collection.
 
     See https://solr.apache.org/guide/8_11/common-query-parameters.html
@@ -297,6 +295,15 @@ async def get_solr_select(request: fastapi.Request):
     # before returning here, hence defeating the purpose of the streaming
     # response.
     return isb_solr_query.solr_query(params)
+
+
+# TODO: Don't blindly accept user input!
+@app.get(f"/{THING_URL_PATH}/select", response_model=typing.Any)
+@app.get(f"/{THING_URL_PATH}/select/", response_model=typing.Any)
+@app.post(f"/{THING_URL_PATH}/select", response_model=typing.Any)
+@app.post(f"/{THING_URL_PATH}/select/", response_model=typing.Any)
+async def get_solr_select(request: fastapi.Request):
+    return await _get_solr_select(request)
 
 
 @app.post(f"/{THING_URL_PATH}/reliquery", response_model=ReliqueryResponse)
