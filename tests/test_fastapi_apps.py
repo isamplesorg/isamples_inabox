@@ -3,9 +3,10 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from fastapi.testclient import TestClient
+from httpx import Response
 from sqlmodel import Session, SQLModel, create_engine
 from sqlmodel.pool import StaticPool
-from starlette.responses import Response
+
 
 from isb_lib.models import thing
 from isb_web.main import get_session, app, manage_app
