@@ -78,9 +78,11 @@ opencontext_projects = [
     "Petra Great Temple Excavations",
     # Commented out due to https://github.com/isamplesorg/isamples_inabox/issues/102
     # "Excavations at Polis",
-    "Avkat Archaeological Project",
+    # Commented out due to https://github.com/isamplesorg/isamples_inabox/issues/340
+    # "Avkat Archaeological Project",
     "Kenan Tepe",
-    "Giza Botanical Database",
+    # Commented out due to https://github.com/isamplesorg/isamples_inabox/issues/340
+    # "Giza Botanical Database",
 ]
 
 

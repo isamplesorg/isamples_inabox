@@ -49,9 +49,13 @@ def main(ctx, db_url: str, verbosity: str, authority: str, count: int, path: str
         thing_id = thing.id
         if thing_id is not None:
             id = thing_id.replace("http://opencontext.org/subjects/", "")
+            # strip out special characters that prevent us from saving the files
+            id = id.replace(":", "_")
+            id = id.replace("/", "-")
             dest_path = os.path.join(path, f"{id}.json")
-            with open(dest_path, "w") as json_file:
-                json.dump(thing.resolved_content, json_file)
+            if not os.path.exists(dest_path):
+                with open(dest_path, "w+") as json_file:
+                    json.dump(thing.resolved_content, json_file)
 
 
 if __name__ == "__main__":
