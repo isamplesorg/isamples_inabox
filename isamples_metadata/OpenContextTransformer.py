@@ -380,11 +380,14 @@ class OpenContextTransformer(Transformer):
     def produced_by_id_string(self) -> str:
         return Transformer.NOT_PROVIDED
 
+    def _project_dict(self) -> dict:
+        return self.source_record.get("project", {})
+
     def produced_by_label(self) -> str:
-        return self.source_record.get("project label", Transformer.NOT_PROVIDED)
+        return self._project_dict().get("label", Transformer.NOT_PROVIDED)
 
     def produced_by_description(self) -> str:
-        return self.source_record.get("project href", Transformer.NOT_PROVIDED)
+        return self._project_dict().get("id", Transformer.NOT_PROVIDED)
 
     def produced_by_feature_of_interest(self) -> str:
         return Transformer.NOT_PROVIDED
