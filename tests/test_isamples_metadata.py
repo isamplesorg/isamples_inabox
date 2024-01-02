@@ -335,4 +335,3 @@ def test_open_context_project_fields():
         assert "Avkat Archaeological Project" == produced_by_label
         produced_by_description = transformer.produced_by_description()
         assert "http://opencontext.org/projects/02b55e8c-e9b1-49e5-8edf-0afeea10e2be" == produced_by_description
-
