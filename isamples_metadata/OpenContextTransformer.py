@@ -322,8 +322,11 @@ class OpenContextTransformer(Transformer):
         else:
             return [prediction.confidence for prediction in prediction_results]
 
+    def _context_label_str(self) -> str:
+        return self.source_record.get("context", {}).get("label", Transformer.NOT_PROVIDED)
+
     def _context_label_pieces(self) -> typing.List[str]:
-        context_label = self.source_record.get("context label")
+        context_label = self._context_label_str()
         if type(context_label) is str and len(context_label) > 0:
             return context_label.split("/")
         else:
@@ -421,7 +424,7 @@ class OpenContextTransformer(Transformer):
         explicit_sampling_site = self._explicit_sampling_site()
         if explicit_sampling_site is not None:
             return explicit_sampling_site.get("label")
-        return self.source_record.get("context label", Transformer.NOT_PROVIDED)
+        return self._context_label_str()
 
     def _explicit_sampling_site(self):
         return self.source_record.get("isam:SamplingSite")

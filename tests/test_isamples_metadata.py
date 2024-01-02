@@ -335,3 +335,12 @@ def test_open_context_project_fields():
         assert "Avkat Archaeological Project" == produced_by_label
         produced_by_description = transformer.produced_by_description()
         assert "http://opencontext.org/projects/02b55e8c-e9b1-49e5-8edf-0afeea10e2be" == produced_by_description
+
+
+def test_open_context_place_names():
+    test_file_path = "./test_data/OpenContext/raw/ark-28722-k2qv3rz30.json"
+    with open(test_file_path) as source_file:
+        source_record = json.load(source_file)
+        transformer = OpenContextTransformer(source_record)
+        place_names = transformer.sampling_site_place_names()
+        assert ["Asia", "Turkey", "Avkat Survey Area", "SU Group 10", "S1001"] == place_names
