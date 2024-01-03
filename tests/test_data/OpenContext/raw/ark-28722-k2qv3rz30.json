@@ -1,0 +1,110 @@
+{
+    "id": "http://opencontext.org/subjects/b7c7cbde-7365-4908-a3f9-d85f55f48c9c",
+    "uri": "http://opencontext.org/subjects/b7c7cbde-7365-4908-a3f9-d85f55f48c9c",
+    "href": "https://opencontext.org/subjects/b7c7cbde-7365-4908-a3f9-d85f55f48c9c",
+    "icon": "https://opencontext.org/static/oc/icons-v2/noun-sample-4489840.svg",
+    "label": "S1001-A04",
+    "Creator":
+    [
+        {
+            "id": "http://opencontext.org/persons/702d2450-2a0d-4988-8928-b17563b226cb",
+            "label": "John F. Haldon"
+        },
+        {
+            "id": "http://opencontext.org/persons/c960b08c-9f15-4609-85c0-72cd921da517",
+            "label": "Hugh W. Elton"
+        },
+        {
+            "id": "http://opencontext.org/persons/3cec7bae-4afa-46d0-95e6-500626394750",
+            "label": "James ML Newhard"
+        }
+    ],
+    "License":
+    [
+        {
+            "id": "https://creativecommons.org/licenses/by/4.0",
+            "label": "Attribution 4.0 International (CC BY 4.0)"
+        }
+    ],
+    "Subject":
+    [
+        {
+            "id": "https://id.loc.gov/authorities/subjects/sh85006507",
+            "label": "Archaeology"
+        },
+        {
+            "id": "https://id.loc.gov/authorities/subjects/sh85006504",
+            "label": "Archaeological surveying"
+        },
+        {
+            "id": "https://id.loc.gov/authorities/subjects/sh94001190",
+            "label": "Landscape archaeology"
+        },
+        {
+            "id": "https://id.loc.gov/authorities/subjects/sh85026692",
+            "label": "Classical antiquities"
+        },
+        {
+            "id": "https://id.loc.gov/authorities/subjects/sh85006512",
+            "label": "Archaeology, Medieval"
+        }
+    ],
+    "context":
+    {
+        "id": "http://opencontext.org/subjects/c2c5ff61-32f6-4bbc-bf6d-dcee48fd2165",
+        "label": "Asia/Turkey/Avkat Survey Area/SU Group 10/S1001"
+    },
+    "project":
+    {
+        "id": "http://opencontext.org/projects/02b55e8c-e9b1-49e5-8edf-0afeea10e2be",
+        "label": "Avkat Archaeological Project"
+    },
+    "updated": "2023-10-03T22:55:48Z",
+    "latitude": 40.57656658406278,
+    "longitude": 35.27044686014545,
+    "published": "2019-05-16T02:34:29Z",
+    "late bce/ce": 900.0,
+    "citation uri": "https://n2t.net/ark:/28722/k2qv3rz30",
+    "early bce/ce": 600.0,
+    "item category": "Sample",
+    "Spatial Coverage":
+    [
+        {
+            "id": "https://www.geonames.org/298795",
+            "label": "Turkey"
+        }
+    ],
+    "Temporal Coverage":
+    [
+        {
+            "id": "https://n2t.net/ark:/99152/p0m63nj633s",
+            "label": "Early Roman"
+        },
+        {
+            "id": "https://n2t.net/ark:/99152/p0m63njsqs7",
+            "label": "Middle Roman"
+        },
+        {
+            "id": "https://n2t.net/ark:/99152/p0m63njdrpn",
+            "label": "Late Roman"
+        },
+        {
+            "id": "https://n2t.net/ark:/99152/p03wskd6vvr",
+            "label": "Middle Byzantine"
+        },
+        {
+            "id": "https://n2t.net/ark:/99152/p06c6g3sd9k",
+            "label": "Medieval"
+        },
+        {
+            "id": "https://n2t.net/ark:/99152/p03wskd97z7",
+            "label": "Ottoman Empire (AD 1513-1918)"
+        }
+    ],
+    "isam:SamplingSite":
+    {
+        "id": "https://opencontext.org/subjects/f2a4260a-0a27-4bef-afb6-db38e4a9466f",
+        "label": "SU Group 10",
+        "identifier": "https://opencontext.org/subjects/f2a4260a-0a27-4bef-afb6-db38e4a9466f"
+    }
+}
