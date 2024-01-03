@@ -76,13 +76,10 @@ def test_solr_query_by_source(
 opencontext_projects = [
     "Çatalhöyük Zooarchaeology",
     "Petra Great Temple Excavations",
-    # Commented out due to https://github.com/isamplesorg/isamples_inabox/issues/102
-    # "Excavations at Polis",
-    # Commented out due to https://github.com/isamplesorg/isamples_inabox/issues/340
-    # "Avkat Archaeological Project",
+    "Excavations at Polis",
+    "Avkat Archaeological Project",
     "Kenan Tepe",
-    # Commented out due to https://github.com/isamplesorg/isamples_inabox/issues/340
-    # "Giza Botanical Database",
+    "Giza Botanical Database",
 ]
 
 
