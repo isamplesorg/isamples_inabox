@@ -281,11 +281,20 @@ async def _get_solr_select(request: fastapi.Request):
         "q": defparams["q"]
     }
     params = []
-    # Update params with the provided parameters
-    for k, v in request.query_params.multi_items():
-        params.append([k, v])
-        if k in properties:
-            properties[k] = v
+    if request.method == "POST":
+        body = await request.body()
+        if request.headers.get("Content-Type").startswith("application/json"):
+            json_body = json.loads(body)
+            for k, v in json_body.items():
+                params.append([k, v])
+                if k in properties:
+                    properties[k] = v
+    else:
+        # Update params with the provided parameters
+        for k, v in request.query_params.multi_items():
+            params.append([k, v])
+            if k in properties:
+                properties[k] = v
     params = set_default_params(params, defparams)
     logging.warning(params)
     analytics.attach_analytics_state_to_request(AnalyticsEvent.THING_SOLR_SELECT, request, properties)
