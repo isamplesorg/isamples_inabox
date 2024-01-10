@@ -1,5 +1,6 @@
 import os
 import datetime
+from json import JSONDecodeError
 from typing import Optional
 
 import uvicorn
@@ -283,8 +284,25 @@ async def _get_solr_select(request: fastapi.Request):
     params = []
     if request.method == "POST":
         body = await request.body()
-        if request.headers.get("Content-Type").startswith("application/json"):
-            json_body = json.loads(body)
+        content_type = request.headers.get("Content-Type")
+        if content_type is None:
+            raise fastapi.HTTPException(
+                status_code=400,
+                detail="Content-Type header not present.  application/json is only supported Content-Type."
+            )
+        if not content_type.startswith("application/json"):
+            raise fastapi.HTTPException(
+                status_code=400,
+                detail=f"application/json is only supported Content-Type. {content_type} is not supported."
+            )
+        if content_type is not None and content_type.startswith("application/json"):
+            try:
+                json_body = json.loads(body)
+            except JSONDecodeError as e:
+                raise fastapi.HTTPException(
+                    status_code=400,
+                    detail=f"Request body is not valid JSON: {e}"
+                )
             for k, v in json_body.items():
                 params.append([k, v])
                 if k in properties:
