@@ -1,5 +1,6 @@
 import os
 import datetime
+from json import JSONDecodeError
 from typing import Optional
 
 import uvicorn
@@ -281,11 +282,14 @@ async def _get_solr_select(request: fastapi.Request):
         "q": defparams["q"]
     }
     params = []
-    # Update params with the provided parameters
-    for k, v in request.query_params.multi_items():
-        params.append([k, v])
-        if k in properties:
-            properties[k] = v
+    if request.method == "POST":
+        await _handle_post_solr_select(params, properties, request)
+    else:
+        # Update params with the provided parameters
+        for k, v in request.query_params.multi_items():
+            params.append([k, v])
+            if k in properties:
+                properties[k] = v
     params = set_default_params(params, defparams)
     logging.warning(params)
     analytics.attach_analytics_state_to_request(AnalyticsEvent.THING_SOLR_SELECT, request, properties)
@@ -295,6 +299,33 @@ async def _get_solr_select(request: fastapi.Request):
     # before returning here, hence defeating the purpose of the streaming
     # response.
     return isb_solr_query.solr_query(params)
+
+
+async def _handle_post_solr_select(params, properties, request):
+    body = await request.body()
+    content_type = request.headers.get("Content-Type")
+    if content_type is None:
+        raise fastapi.HTTPException(
+            status_code=400,
+            detail="Content-Type header not present.  application/json is only supported Content-Type."
+        )
+    if not content_type.startswith("application/json"):
+        raise fastapi.HTTPException(
+            status_code=400,
+            detail=f"application/json is only supported Content-Type. {content_type} is not supported."
+        )
+    if content_type is not None and content_type.startswith("application/json"):
+        try:
+            json_body = json.loads(body)
+        except JSONDecodeError as e:
+            raise fastapi.HTTPException(
+                status_code=400,
+                detail=f"Request body is not valid JSON: {e}"
+            )
+        for k, v in json_body.items():
+            params.append([k, v])
+            if k in properties:
+                properties[k] = v
 
 
 # TODO: Don't blindly accept user input!
