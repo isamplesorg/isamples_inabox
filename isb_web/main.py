@@ -532,7 +532,6 @@ def solr_thing_response(identifier: str):
 async def get_thing(
     request: fastapi.Request,
     identifier: str,
-    full: bool = False,
     format: typing.Optional[isb_enums.ISBFormat] = None,
     _profile: Optional[str] = None,
     session: Session = Depends(get_session),
@@ -559,7 +558,7 @@ async def get_thing(
         raise fastapi.HTTPException(
             status_code=404, detail=f"Thing not found: {identifier}"
         )
-    if full or format == isb_enums.ISBFormat.FULL:
+    if format == isb_enums.ISBFormat.FULL:
         return item
     if (request_profile is not None and request_profile == profiles.ISAMPLES_PROFILE) or \
             format == isb_enums.ISBFormat.CORE:
