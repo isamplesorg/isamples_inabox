@@ -288,11 +288,11 @@ def test_solr_select_get_with_slash(mock_solr_query: MagicMock, client: TestClie
 
 @patch("isb_web.isb_solr_query.solr_query")
 def test_solr_select_post(mock_solr_query: MagicMock, client: TestClient, session: Session):
-    response = client.post("/thing/select", headers={"Content-Type": "application/json; charset=utf-8"}, data=json.dumps({"foo": "bar"}))
+    response = client.post("/thing/select", headers={"Content-Type": "application/json; charset=utf-8"}, data=json.dumps({"foo": "bar"})) # type: ignore
     _assert_on_solr_response(mock_solr_query, response)
 
 
 @patch("isb_web.isb_solr_query.solr_query")
 def test_solr_select_post_with_slash(mock_solr_query: MagicMock, client: TestClient, session: Session):
-    response = client.post("/thing/select/", headers={"Content-Type": "application/json; charset=utf-8"}, data=json.dumps({"foo": "bar"}))
+    response = client.post("/thing/select/", headers={"Content-Type": "application/json; charset=utf-8"}, data=json.dumps({"foo": "bar"})) # type: ignore
     _assert_on_solr_response(mock_solr_query, response)
