@@ -58,6 +58,14 @@ tags_metadata = [
     {
         "name": "heatmaps",
         "description": "Heatmap representations of Things, suitable for consumption by mapping APIs",
+    },
+    {
+        "name": "metrics",
+        "description": "Internal metrics, suitable for consumption by a prometheus.io exporter"
+    },
+    {
+        "name": "solr",
+        "description": "Solr queries, see https://solr.apache.org/guide/8_11/common-query-parameters.html for some common query parameters."
     }
 ]
 
@@ -200,7 +208,8 @@ async def get_thing_page(request: fastapi.Request, identifier: str, session: Ses
     )
 
 
-@app.get(f"/{THING_URL_PATH}", response_model=schemas.ThingListMeta)
+@app.get(f"/{THING_URL_PATH}", response_model=schemas.ThingListMeta,
+         summary="Summary query of thing counts by authority")
 async def thing_list_metadata(
     request: fastapi.Request,
     session: Session = Depends(get_session),
@@ -211,7 +220,7 @@ async def thing_list_metadata(
     return meta
 
 
-@app.get(f"/{THING_URL_PATH}/", response_model=ThingPage)
+@app.get(f"/{THING_URL_PATH}/", response_model=ThingPage, summary="Query lists of things")
 def thing_list(
     request: fastapi.Request,
     offset: int = fastapi.Query(0, ge=0),
@@ -241,7 +250,7 @@ def thing_list(
     }
 
 
-@app.get(f"/{THING_URL_PATH}/types", response_model=typing.List[schemas.ThingType])
+@app.get(f"/{THING_URL_PATH}/types", response_model=typing.List[schemas.ThingType], summary="List of thing types")
 async def thing_list_types(
     request: fastapi.Request,
     session: Session = Depends(get_session),
@@ -329,10 +338,10 @@ async def _handle_post_solr_select(params, properties, request):
 
 
 # TODO: Don't blindly accept user input!
-@app.get(f"/{THING_URL_PATH}/select", response_model=typing.Any)
-@app.get(f"/{THING_URL_PATH}/select/", response_model=typing.Any)
-@app.post(f"/{THING_URL_PATH}/select", response_model=typing.Any)
-@app.post(f"/{THING_URL_PATH}/select/", response_model=typing.Any)
+@app.get(f"/{THING_URL_PATH}/select", response_model=typing.Any, tags=["solr"], summary="Thing query GET, query is read off query parameters")
+@app.get(f"/{THING_URL_PATH}/select/", response_model=typing.Any, tags=["solr"], summary="Thing query GET, query is read off query parameters")
+@app.post(f"/{THING_URL_PATH}/select", response_model=typing.Any, tags=["solr"], summary="Thing query POST, request body must be encoded JSON")
+@app.post(f"/{THING_URL_PATH}/select/", response_model=typing.Any, tags=["solr"], summary="Thing query POST, request body must be encoded JSON")
 async def get_solr_select(request: fastapi.Request):
     return await _get_solr_select(request)
 
@@ -375,7 +384,7 @@ async def get_solr_query(
     return isb_solr_query.solr_query(request.query_params, query=query)
 
 
-@app.get(f"/{THING_URL_PATH}/stream", response_model=typing.Any)
+@app.get(f"/{THING_URL_PATH}/stream", response_model=typing.Any, tags=["solr"], summary="Make a streaming request to the solr index")
 async def get_solr_stream(request: fastapi.Request):
     '''
     Make a streaming request to the solr index.
@@ -427,7 +436,7 @@ async def get_solr_stream(request: fastapi.Request):
     return isb_solr_query.solr_searchStream(params)
 
 
-@app.get(f"/{THING_URL_PATH}/select/info", response_model=typing.Any)
+@app.get(f"/{THING_URL_PATH}/select/info", response_model=typing.Any, tags=["solr"], summary="Retrieve information about the solr schema")
 async def get_solr_luke_info(request: fastapi.Request):
     """Retrieve information about the record schema.
 
