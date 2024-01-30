@@ -3,6 +3,7 @@ import datetime
 from json import JSONDecodeError
 from typing import Optional
 
+import term_store
 import uvicorn
 import typing
 import requests
@@ -123,6 +124,7 @@ def on_startup():
     # The main handler's startup is the guaranteed spot where we know we have a db connection.
     # User the connected db session to push in to the manage handler's orcid_ids state.
     manage.allowed_orcid_ids = orcid_ids
+    term_store.create_database(dao.engine)
 
 
 def get_session():
