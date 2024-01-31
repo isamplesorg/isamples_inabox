@@ -12,21 +12,33 @@
 """
 import functools
 import logging
-
-import sqlalchemy
+import json
 import term_store
-from sqlalchemy import JSON
 from term_store import TermRepository
 from term_store.db import Term
 
 from isb_web.sqlmodel_database import SQLModelDAO
 
 
-def _read_descendants(term: Term, repository: TermRepository):
-    print(f"looking at term {term.uri}")
+def _read_descendants(term: Term, repository: TermRepository) -> dict:
+    term_dict = {}
+    label = term.properties.get("labels")
+    if label is not None:
+        label = label[0]
+    else:
+        label = term.name
+    children = []
+    term_dict[term.uri] = {
+        "label": {
+            "en": label
+        },
+        "children": children
+    }
     descendants = repository.narrower(term.uri)
     for descendant in descendants:
-        _read_descendants(descendant, repository)
+        child_dict = _read_descendants(descendant, repository)
+        children.append(child_dict)
+    return term_dict
 
 
 @functools.lru_cache(maxsize=10)
@@ -36,11 +48,12 @@ def uijson_vocabulary_dict(top_level_uri: str, repository: TermRepository) -> di
         logging.warning(f"Expected to find root term with uri {top_level_uri}, found None instead.")
         return {}
     else:
-        _read_descendants(root_term, repository)
+        return _read_descendants(root_term, repository)
 
 
 if __name__ == "__main__":
     dao = SQLModelDAO("postgresql+psycopg2://isb_writer:isamplesinabox@localhost/isb_2")
     session = term_store.get_session(dao.engine)
     repository = term_store.get_repository(session)
-    uijson_vocabulary_dict("https://w3id.org/isample/vocabulary/specimentype/1.0/physicalspecimen", repository)
+    vocab_dict = uijson_vocabulary_dict("https://w3id.org/isample/vocabulary/specimentype/1.0/physicalspecimen", repository)
+    print(json.dumps(vocab_dict, indent=2))
