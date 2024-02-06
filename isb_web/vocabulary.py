@@ -20,16 +20,18 @@ def get_session():
 
 
 @router.get("/material_sample_type")
-def material_sample_type(session: Session  = Depends(get_session)) -> dict:
+def material_sample_type(session: Session = Depends(get_session)) -> dict:
     repository = term_store.get_repository(session)
     return vocab_adapter.uijson_vocabulary_dict("https://w3id.org/isample/vocabulary/specimentype/1.0/physicalspecimen", repository)
 
+
 @router.get("/material_type")
-def material_type(session: Session  = Depends(get_session)) -> dict:
+def material_type(session: Session = Depends(get_session)) -> dict:
     repository = term_store.get_repository(session)
     return vocab_adapter.uijson_vocabulary_dict("https://w3id.org/isample/vocabulary/material/1.0/material", repository)
 
+
 @router.get("/sampled_feature_type")
-def sampled_feature_type(session: Session  = Depends(get_session)) -> dict:
+def sampled_feature_type(session: Session = Depends(get_session)) -> dict:
     repository = term_store.get_repository(session)
     return vocab_adapter.uijson_vocabulary_dict("https://w3id.org/isample/vocabulary/sampledfeature/1.0/anysampledfeature", repository)

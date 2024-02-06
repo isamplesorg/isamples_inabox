@@ -2,9 +2,7 @@ import click
 import click_config_file
 import term_store
 from term_store import TermRepository
-from term_store import vocab_terms
 
-import isb_lib
 from isb_web.sqlmodel_database import SQLModelDAO
 
 """Loads the vocabularies used for iSamples things into the iSamples PostGreSQL database"""
