@@ -1,6 +1,7 @@
 import click
 import click_config_file
 import term_store
+import term_store.vocab_terms
 from term_store import TermRepository
 
 from isb_web.sqlmodel_database import SQLModelDAO
