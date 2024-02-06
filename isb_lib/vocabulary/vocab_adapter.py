@@ -12,12 +12,8 @@
 """
 import functools
 import logging
-import json
-import term_store
 from term_store import TermRepository
 from term_store.db import Term
-
-from isb_web.sqlmodel_database import SQLModelDAO
 
 
 def _read_descendants(term: Term, repository: TermRepository) -> dict:
@@ -49,11 +45,3 @@ def uijson_vocabulary_dict(top_level_uri: str, repository: TermRepository) -> di
         return {}
     else:
         return _read_descendants(root_term, repository)
-
-
-if __name__ == "__main__":
-    dao = SQLModelDAO("postgresql+psycopg2://isb_writer:isamplesinabox@localhost/isb_2")
-    session = term_store.get_session(dao.engine)  # type: ignore
-    repository = term_store.get_repository(session)
-    vocab_dict = uijson_vocabulary_dict("https://w3id.org/isample/vocabulary/specimentype/1.0/physicalspecimen", repository)
-    print(json.dumps(vocab_dict, indent=2))
