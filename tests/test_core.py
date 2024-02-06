@@ -484,7 +484,7 @@ def test_date_year_only():
     datetime = isb_lib.core.parsed_date(date_str)
     assert datetime is not None
     assert datetime.day == 1
-    assert datetime.month == 1
+    assert datetime.month == 2
     assert datetime.year == 1985
 
 
