@@ -1,3 +1,4 @@
+# Generated with poetry export -f requirements.txt --output requirements.txt --without-hashes
 accept-types==0.4.1 ; python_version >= "3.11" and python_version < "4.0"
 aiodns==3.1.1 ; python_version >= "3.11" and python_version < "4.0"
 aiofile==3.8.8 ; python_version >= "3.11" and python_version < "4"
