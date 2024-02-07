@@ -3,6 +3,7 @@ import datetime
 from json import JSONDecodeError
 from typing import Optional
 
+import term_store
 import uvicorn
 import typing
 import requests
@@ -24,7 +25,7 @@ from isb_lib.core import MEDIA_GEO_JSON, MEDIA_JSON, MEDIA_NQUADS, SOLR_TIME_FOR
 from isb_lib.models.thing import Thing
 from isb_lib.utilities import h3_utilities
 from isb_lib.utilities.url_utilities import full_url_from_suffix
-from isb_web import sqlmodel_database, analytics, manage, debug, metrics
+from isb_web import sqlmodel_database, analytics, manage, debug, metrics, vocabulary
 from isb_web.analytics import AnalyticsEvent
 from isb_web import schemas
 from isb_web import crud
@@ -73,6 +74,7 @@ debug_app = debug.debug_api
 manage.main_app = app
 manage.dao = dao
 metrics.dao = dao
+vocabulary.dao = dao
 
 app.add_middleware(
     fastapi.middleware.cors.CORSMiddleware,
@@ -110,6 +112,7 @@ app.mount(
 app.mount(manage.MANAGE_PREFIX, manage_app)
 app.mount(debug.DEBUG_PREFIX, debug_app)
 app.include_router(metrics.router)
+app.include_router(vocabulary.router)
 
 
 @app.on_event("startup")
@@ -123,6 +126,7 @@ def on_startup():
     # The main handler's startup is the guaranteed spot where we know we have a db connection.
     # User the connected db session to push in to the manage handler's orcid_ids state.
     manage.allowed_orcid_ids = orcid_ids
+    term_store.create_database(dao.engine)
 
 
 def get_session():
