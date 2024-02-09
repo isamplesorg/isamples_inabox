@@ -25,6 +25,7 @@ from isb_lib.core import MEDIA_GEO_JSON, MEDIA_JSON, MEDIA_NQUADS, SOLR_TIME_FOR
 from isb_lib.models.thing import Thing
 from isb_lib.utilities import h3_utilities
 from isb_lib.utilities.url_utilities import full_url_from_suffix
+from isb_lib.vocabulary import vocab_adapter
 from isb_web import sqlmodel_database, analytics, manage, debug, metrics, vocabulary
 from isb_web.analytics import AnalyticsEvent
 from isb_web import schemas
@@ -43,6 +44,7 @@ from isb_web.api_types import ThingsSitemapParams, ReliqueryResponse, ReliqueryP
 from isb_web.schemas import ThingPage
 from isb_web.sqlmodel_database import SQLModelDAO
 import isb_lib.stac
+from isb_web.vocabulary import SAMPLEDFEATURE_URI, MATERIAL_URI, PHYSICALSPECIMEN_URI
 
 THIS_PATH = os.path.dirname(os.path.abspath(__file__))
 
@@ -120,6 +122,11 @@ def on_startup():
     dao.connect_sqlmodel(isb_web.config.Settings().database_url)
     session = dao.get_session()
     orcid_ids = sqlmodel_database.all_orcid_ids(session)
+    # preload each of these into memory to avoid performance issues on hyde
+    repository = term_store.get_repository(session)
+    vocab_adapter.uijson_vocabulary_dict(SAMPLEDFEATURE_URI, repository)
+    vocab_adapter.uijson_vocabulary_dict(MATERIAL_URI, repository)
+    vocab_adapter.uijson_vocabulary_dict(PHYSICALSPECIMEN_URI, repository)
     session.close()
     # Superusers are allowed to mint identifiers as well, so make sure they're in the list.
     orcid_ids.extend(isb_web.config.Settings().orcid_superusers)

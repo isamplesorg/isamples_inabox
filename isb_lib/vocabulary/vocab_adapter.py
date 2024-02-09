@@ -10,10 +10,11 @@
     ]
 }
 """
-import functools
 import logging
 from term_store import TermRepository
 from term_store.db import Term
+
+VOCAB_CACHE = {}
 
 
 def _read_descendants(term: Term, repository: TermRepository) -> dict:
@@ -37,11 +38,15 @@ def _read_descendants(term: Term, repository: TermRepository) -> dict:
     return term_dict
 
 
-@functools.lru_cache(maxsize=10)
 def uijson_vocabulary_dict(top_level_uri: str, repository: TermRepository) -> dict:
+    cached_result = VOCAB_CACHE.get(top_level_uri)
+    if cached_result is not None:
+        return cached_result
     root_term = repository.read(top_level_uri)
     if root_term is None:
         logging.warning(f"Expected to find root term with uri {top_level_uri}, found None instead.")
         return {}
     else:
-        return _read_descendants(root_term, repository)
+        full_dict = _read_descendants(root_term, repository)
+        VOCAB_CACHE[top_level_uri] = full_dict
+        return full_dict
