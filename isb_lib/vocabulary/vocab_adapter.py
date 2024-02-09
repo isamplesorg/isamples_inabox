@@ -14,7 +14,7 @@ import logging
 from term_store import TermRepository
 from term_store.db import Term
 
-VOCAB_CACHE = {}
+VOCAB_CACHE: dict = {}
 
 
 def _read_descendants(term: Term, repository: TermRepository) -> dict:
