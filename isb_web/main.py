@@ -26,7 +26,7 @@ from isb_lib.models.thing import Thing
 from isb_lib.utilities import h3_utilities
 from isb_lib.utilities.url_utilities import full_url_from_suffix
 from isb_lib.vocabulary import vocab_adapter
-from isb_web import sqlmodel_database, analytics, manage, debug, metrics, vocabulary
+from isb_web import sqlmodel_database, analytics, manage, debug, metrics, vocabulary, download
 from isb_web.analytics import AnalyticsEvent
 from isb_web import schemas
 from isb_web import crud
@@ -115,6 +115,7 @@ app.mount(manage.MANAGE_PREFIX, manage_app)
 app.mount(debug.DEBUG_PREFIX, debug_app)
 app.include_router(metrics.router)
 app.include_router(vocabulary.router)
+app.include_router(download.router)
 
 
 @app.on_event("startup")
