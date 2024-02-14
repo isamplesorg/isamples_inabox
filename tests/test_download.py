@@ -13,6 +13,7 @@ def client_fixture():
     yield client
     # app.dependency_overrides.clear()
 
+
 def test_download(client: TestClient):
     response = client.get("/download/")
     assert response.status_code == 201

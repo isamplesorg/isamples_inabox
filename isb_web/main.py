@@ -407,7 +407,10 @@ async def get_solr_stream(request: fastapi.Request):
     params = isb_solr_query.set_default_params(params, defparams)
     # L.debug("Params: %s", params)
     analytics.attach_analytics_state_to_request(AnalyticsEvent.THING_SOLR_STREAM, request, properties)
-    return isb_solr_query.solr_searchStream(params)
+    response = isb_solr_query.solr_searchStream(params)
+    return fastapi.responses.StreamingResponse(
+        response.iter_content(chunk_size=4096), media_type=MEDIA_JSON
+    )
 
 
 @app.get(f"/{THING_URL_PATH}/select/info", response_model=typing.Any)
