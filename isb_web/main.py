@@ -263,46 +263,17 @@ async def thing_list_types(
     return sqlmodel_database.get_sample_types(session)
 
 
-def set_default_params(params, defs):
-    for k in defs.keys():
-        fnd = False
-        for row in params:
-            if k == row[0]:
-                fnd = True
-                break
-        if not fnd:
-            params.append([k, defs[k]])
-    return params
-
-
 async def _get_solr_select(request: fastapi.Request):
     """Send select request to the Solr isb_core_records collection.
 
     See https://solr.apache.org/guide/8_11/common-query-parameters.html
     """
-    # Construct a list of K,V pairs to hand on to the solr request.
-    # Can't use a standard dict here because we need to support possible
-    # duplicate keys in the request query string.
-    defparams = {
-        "wt": "json",
-        "q": "*:*",
-        "fl": "id",
-        "rows": 10,
-        "start": 0,
-    }
-    properties = {
-        "q": defparams["q"]
-    }
-    params = []
     if request.method == "POST":
+        params = []
+        properties = {"q": "*:*"}
         await _handle_post_solr_select(params, properties, request)
     else:
-        # Update params with the provided parameters
-        for k, v in request.query_params.multi_items():
-            params.append([k, v])
-            if k in properties:
-                properties[k] = v
-    params = set_default_params(params, defparams)
+        params, properties = isb_solr_query.get_solr_params_from_request(request)
     logging.warning(params)
     analytics.attach_analytics_state_to_request(AnalyticsEvent.THING_SOLR_SELECT, request, properties)
 
@@ -433,7 +404,7 @@ async def get_solr_stream(request: fastapi.Request):
         params.append([k, v])
         if k in properties:
             properties[k] = v
-    params = set_default_params(params, defparams)
+    params = isb_solr_query.set_default_params(params, defparams)
     # L.debug("Params: %s", params)
     analytics.attach_analytics_state_to_request(AnalyticsEvent.THING_SOLR_STREAM, request, properties)
     return isb_solr_query.solr_searchStream(params)

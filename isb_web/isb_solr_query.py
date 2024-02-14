@@ -86,6 +86,45 @@ def get_solr_url(path_component: str):
     return urllib.parse.urljoin(BASE_URL, path_component)
 
 
+def set_default_params(params, defs):
+    for k in defs.keys():
+        fnd = False
+        for row in params:
+            if k == row[0]:
+                fnd = True
+                break
+        if not fnd:
+            params.append([k, defs[k]])
+    return params
+
+
+def get_solr_params_from_request(request: fastapi.Request) -> list[str]:
+    """Turns a GET request into a list of parameters suitable for querying Solr."""
+    if request.method != "GET":
+        raise ValueError("get_solr_params_from_request only works with GET requests.")
+
+    # Construct a list of K,V pairs to hand on to the solr request.
+    # Can't use a standard dict here because we need to support possible
+    # duplicate keys in the request query string.
+    defparams = {
+        "wt": "json",
+        "q": "*:*",
+        "fl": "id",
+        "rows": 10,
+        "start": 0,
+    }
+    properties = {
+        "q": defparams["q"]
+    }
+    params = []
+    # Update params with the provided parameters
+    for k, v in request.query_params.multi_items():
+        params.append([k, v])
+        if k in properties:
+            properties[k] = v
+    params = set_default_params(params, defparams)
+    return params, properties
+
 def _get_heatmap(
     q: str,
     bb: typing.Dict,
