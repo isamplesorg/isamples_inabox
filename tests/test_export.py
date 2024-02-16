@@ -19,4 +19,5 @@ def client_fixture():
 @patch("isb_web.isb_solr_query.solr_searchStream")
 def test_export(mock_solr_query: MagicMock, client: TestClient):
     response = client.get("/export/")
+    assert mock_solr_query.called
     assert response.status_code == 201

@@ -129,6 +129,7 @@ def get_solr_params_from_request(request: fastapi.Request) -> list[str]:
     params = set_default_params(params, defparams)
     return params, properties
 
+
 def _get_heatmap(
     q: str,
     bb: typing.Dict,
