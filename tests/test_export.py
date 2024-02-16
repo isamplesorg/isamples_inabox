@@ -1,3 +1,5 @@
+from unittest.mock import patch, MagicMock
+
 import pytest
 from starlette.testclient import TestClient
 
@@ -14,6 +16,7 @@ def client_fixture():
     # app.dependency_overrides.clear()
 
 
-def test_download(client: TestClient):
-    response = client.get("/download/")
+@patch("isb_web.isb_solr_query.solr_searchStream")
+def test_export(mock_solr_query: MagicMock, client: TestClient):
+    response = client.get("/export/")
     assert response.status_code == 201
