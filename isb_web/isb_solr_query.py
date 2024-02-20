@@ -102,7 +102,7 @@ def set_default_params(params, defs):
     return params
 
 
-def get_solr_params_from_request(request: fastapi.Request) -> list[str]:
+def get_solr_params_from_request(request: fastapi.Request) -> Tuple[list[list[str]], dict]:
     """Turns a GET request into a list of parameters suitable for querying Solr."""
     if request.method != "GET":
         raise ValueError("get_solr_params_from_request only works with GET requests.")
@@ -498,7 +498,7 @@ def solr_searchStream(params, collection=DEFAULT_COLLECTION_NAME) -> Response:  
     # TODO: C901 -- need to examine computational complexity
 
     point_rollup = False
-    qparams = {}
+    qparams: dict = {}
     url = get_solr_url("stream")
     headers = {"Accept": MEDIA_JSON}
     selection_method = "search"

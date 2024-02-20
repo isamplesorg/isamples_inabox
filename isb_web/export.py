@@ -22,7 +22,7 @@ def get_session():
         yield session
 
 
-def write_csv(solr_params: list[str], session: Session, export_job: ExportJob):
+def write_csv(solr_params: list[list[str]], session: Session, export_job: ExportJob):
     export_job.tstarted = igsn_lib.time.dtnow()
     sqlmodel_database.save_or_update_export_job(session, export_job)
     response = isb_solr_query.solr_searchStream(solr_params)
@@ -81,4 +81,7 @@ def download(uuid: str = fastapi.Query(None), session: Session = Depends(get_ses
     if export_job is None:
         return _not_found_response()
     else:
-        return FileResponse(export_job.file_path)
+        if export_job.file_path is not None:
+            return FileResponse(export_job.file_path)
+        else:
+            return _not_found_response()

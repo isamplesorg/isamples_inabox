@@ -17,7 +17,7 @@ class TargetExportFormat(_NoValue):
 
 class AbstractExportTransformer(ABC):
     @staticmethod
-    def transform(self, docs: list[dict], fieldnames: list[str], dest_path: str):
+    def transform(docs: list[dict], fieldnames: list[str], dest_path: str):
         """Transform solr results into a target export format"""
         pass
 
