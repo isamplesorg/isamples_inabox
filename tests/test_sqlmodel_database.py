@@ -2,6 +2,8 @@ import datetime
 import random
 
 import pytest
+
+from isb_lib.models.export_job import ExportJob
 from isb_lib.models.namespace import Namespace
 from sqlalchemy.orm.attributes import flag_modified
 from sqlmodel import Session, SQLModel, create_engine
@@ -23,6 +25,7 @@ from isb_web.sqlmodel_database import (
     h3_values_without_points, h3_to_height, all_thing_primary_keys, save_draft_thing_with_id, save_person_with_orcid_id,
     all_orcid_ids, mint_identifiers_in_namespace, save_or_update_namespace, save_taxonomy_name,
     taxonomy_name_to_kingdom_map, kingdom_for_taxonomy_name, get_thing_meta, things_by_authority_count_dict,
+    save_or_update_export_job,
 )
 from test_utils import _add_some_things
 
@@ -547,3 +550,10 @@ def test_kingdom_for_taxonomy_name(session: Session):
     assert "kingdom1" == kingdom
     kingdom = kingdom_for_taxonomy_name(session, "name2")
     assert "kingdom2" == kingdom
+
+
+def test_save_export_job(session: Session):
+    export_job = ExportJob()
+    export_job.creator_id = "123456"
+    save_or_update_export_job(session, export_job)
+
