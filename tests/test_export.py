@@ -33,6 +33,7 @@ def test_export_status(mock_database: MagicMock, client: TestClient):
     response = client.get("/export/status?uuid=123456")
     assert response.status_code == 201
 
+
 @patch("isb_web.sqlmodel_database.export_job_with_uuid")
 def test_export_status_completed(mock_database: MagicMock, client: TestClient):
     job = ExportJob()

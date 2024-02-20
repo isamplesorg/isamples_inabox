@@ -575,5 +575,3 @@ def test_export_job_with_uuid(session: Session):
 def test_export_job_with_uuid_doesnt_exist(session: Session):
     shouldnt_exist = export_job_with_uuid(session, "foobar")
     assert shouldnt_exist is None
-
-

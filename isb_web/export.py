@@ -57,6 +57,7 @@ async def create(request: fastapi.Request, background_tasks: BackgroundTasks, se
 def _not_found_response() -> JSONResponse:
     return fastapi.responses.JSONResponse(content={"status": "not_found"}, status_code=HTTP_404_NOT_FOUND)
 
+
 @router.get("/status")
 def status(uuid: str = fastapi.Query(None), session: Session = Depends(get_session)) -> JSONResponse:
     """Looks up the status of the export job with the specified uuid"""
