@@ -77,6 +77,7 @@ manage.main_app = app
 manage.dao = dao
 metrics.dao = dao
 vocabulary.dao = dao
+export.dao = dao
 
 app.add_middleware(
     fastapi.middleware.cors.CORSMiddleware,

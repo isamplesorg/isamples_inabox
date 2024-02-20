@@ -555,5 +555,8 @@ def test_kingdom_for_taxonomy_name(session: Session):
 def test_save_export_job(session: Session):
     export_job = ExportJob()
     export_job.creator_id = "123456"
-    save_or_update_export_job(session, export_job)
+    export_job = save_or_update_export_job(session, export_job)
+    assert export_job.primary_key is not None
+    assert export_job.tcreated is not None
+    assert export_job.uuid is not None
 

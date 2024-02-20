@@ -1,6 +1,7 @@
 import datetime
 import typing
 import json
+import uuid
 
 import igsn_lib.time
 import sqlalchemy
@@ -612,6 +613,7 @@ def save_or_update_export_job(session: Session, export_job: ExportJob) -> Export
     now = igsn_lib.time.dtnow()
     if export_job.primary_key is None:
         export_job.tcreated = now
+        export_job.uuid = str(uuid.uuid4())
     session.add(export_job)
     session.commit()
     return export_job

@@ -39,9 +39,16 @@ class ExportJob(SQLModel, table=True):
         description="The orcid of the person that created the job.",
         index=True
     )
-    filename: Optional[str] = Field(
+    uuid: Optional[str] = Field(
         default=None,
         nullable=True,
-        description="The filename of the exported file.",
+        description="Unique identifier for this export job.",
+        unique=True,
+        index=True
+    )
+    file_path: Optional[str] = Field(
+        default=None,
+        nullable=True,
+        description="The path to the exported file.",
         index=False
     )
