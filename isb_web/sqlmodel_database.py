@@ -617,3 +617,9 @@ def save_or_update_export_job(session: Session, export_job: ExportJob) -> Export
     session.add(export_job)
     session.commit()
     return export_job
+
+
+def export_job_with_uuid(session: Session, uuid: str) -> Optional[ExportJob]:
+    export_job_select = select(ExportJob).where(ExportJob.uuid == uuid)
+    result = session.exec(export_job_select)
+    return result.first()

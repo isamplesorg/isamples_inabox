@@ -4,7 +4,8 @@ import fastapi.responses
 import igsn_lib.time
 from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlmodel import Session
-from starlette.status import HTTP_201_CREATED
+from starlette.responses import JSONResponse, FileResponse
+from starlette.status import HTTP_201_CREATED, HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_202_ACCEPTED
 
 from isb_lib.models.export_job import ExportJob
 from isb_lib.utilities.solr_result_transformer import SolrResultTransformer, TargetExportFormat
@@ -39,7 +40,7 @@ def write_csv(solr_params: list[str], session: Session, export_job: ExportJob):
 
 
 @router.get("/create")
-async def export_csv(request: fastapi.Request, background_tasks: BackgroundTasks, session: Session = Depends(get_session)) -> dict:
+async def create(request: fastapi.Request, background_tasks: BackgroundTasks, session: Session = Depends(get_session)) -> JSONResponse:
     """Creates a new export job with the specified solr query"""
     params, properties = isb_solr_query.get_solr_params_from_request(request)
     analytics.attach_analytics_state_to_request(AnalyticsEvent.THINGS_DOWNLOAD, request, properties)
@@ -50,3 +51,32 @@ async def export_csv(request: fastapi.Request, background_tasks: BackgroundTasks
     background_tasks.add_task(write_csv, params, session, export_job)
     status_dict = {"status": "created", "uuid": export_job.uuid}
     return fastapi.responses.JSONResponse(content=status_dict, status_code=HTTP_201_CREATED)
+
+
+def _not_found_response() -> JSONResponse:
+    return fastapi.responses.JSONResponse(content={"status": "not_found"}, status_code=HTTP_404_NOT_FOUND)
+
+@router.get("/status")
+def status(uuid: str = fastapi.Query(None), session: Session = Depends(get_session)) -> JSONResponse:
+    """Looks up the status of the export job with the specified uuid"""
+    export_job = sqlmodel_database.export_job_with_uuid(session, uuid)
+    if export_job is None:
+        return _not_found_response()
+    else:
+        if export_job.tcompleted is not None:
+            content = {"status": "completed", "tcompleted": str(export_job.tcompleted)}
+            return fastapi.responses.JSONResponse(content=content, status_code=HTTP_200_OK)
+        elif export_job.tstarted is not None:
+            content = {"status": "started", "tstarted": str(export_job.tstarted)}
+            return fastapi.responses.JSONResponse(content=content, status_code=HTTP_202_ACCEPTED)
+        else:
+            return fastapi.responses.JSONResponse(content={"status": "created"}, status_code=HTTP_201_CREATED)
+
+
+@router.get("/download")
+def download(uuid: str = fastapi.Query(None), session: Session = Depends(get_session)):
+    export_job = sqlmodel_database.export_job_with_uuid(session, uuid)
+    if export_job is None:
+        return _not_found_response()
+    else:
+        return FileResponse(export_job.file_path)
