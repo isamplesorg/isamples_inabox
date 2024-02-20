@@ -25,7 +25,7 @@ from isb_web.sqlmodel_database import (
     h3_values_without_points, h3_to_height, all_thing_primary_keys, save_draft_thing_with_id, save_person_with_orcid_id,
     all_orcid_ids, mint_identifiers_in_namespace, save_or_update_namespace, save_taxonomy_name,
     taxonomy_name_to_kingdom_map, kingdom_for_taxonomy_name, get_thing_meta, things_by_authority_count_dict,
-    save_or_update_export_job,
+    save_or_update_export_job, export_job_with_uuid,
 )
 from test_utils import _add_some_things
 
@@ -553,10 +553,27 @@ def test_kingdom_for_taxonomy_name(session: Session):
 
 
 def test_save_export_job(session: Session):
-    export_job = ExportJob()
-    export_job.creator_id = "123456"
-    export_job = save_or_update_export_job(session, export_job)
+    export_job = _create_test_export_job(session)
     assert export_job.primary_key is not None
     assert export_job.tcreated is not None
     assert export_job.uuid is not None
+
+
+def _create_test_export_job(session) -> ExportJob:
+    export_job = ExportJob()
+    export_job.creator_id = "123456"
+    export_job = save_or_update_export_job(session, export_job)
+    return export_job
+
+
+def test_export_job_with_uuid(session: Session):
+    export_job = _create_test_export_job(session)
+    refetched_export_job = export_job_with_uuid(session, export_job.uuid)
+    assert export_job.primary_key == refetched_export_job.primary_key
+
+
+def test_export_job_with_uuid_doesnt_exist(session: Session):
+    shouldnt_exist = export_job_with_uuid(session, "foobar")
+    assert shouldnt_exist is None
+
 

@@ -1,8 +1,10 @@
+import datetime
 from unittest.mock import patch, MagicMock
 
 import pytest
 from starlette.testclient import TestClient
 
+from isb_lib.models.export_job import ExportJob
 from isb_web.main import app
 
 
@@ -16,8 +18,32 @@ def client_fixture():
     # app.dependency_overrides.clear()
 
 
-@patch("isb_web.isb_solr_query.solr_searchStream")
-def test_export(mock_solr_query: MagicMock, client: TestClient):
-    response = client.get("/export/")
+@patch("isb_web.export.write_csv")
+@patch("isb_web.sqlmodel_database.save_or_update_export_job")
+def test_export_create(mock_solr_query: MagicMock, mock_database: MagicMock, client: TestClient):
+    response = client.get("/export/create")
     assert mock_solr_query.called
+    assert mock_database.called
     assert response.status_code == 201
+
+
+@patch("isb_web.sqlmodel_database.export_job_with_uuid")
+def test_export_status(mock_database: MagicMock, client: TestClient):
+    mock_database.return_value = ExportJob()
+    response = client.get("/export/status?uuid=123456")
+    assert response.status_code == 201
+
+@patch("isb_web.sqlmodel_database.export_job_with_uuid")
+def test_export_status_completed(mock_database: MagicMock, client: TestClient):
+    job = ExportJob()
+    job.tcompleted = datetime.datetime.now()
+    mock_database.return_value = job
+    response = client.get("/export/status?uuid=123456")
+    assert response.status_code == 200
+
+
+@patch("isb_web.sqlmodel_database.export_job_with_uuid")
+def test_export_statu_not_found(mock_database: MagicMock, client: TestClient):
+    mock_database.return_value = None
+    response = client.get("/export/status?uuid=123456")
+    assert response.status_code == 404

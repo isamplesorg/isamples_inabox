@@ -26,6 +26,7 @@ def write_csv(solr_params: list[str], session: Session, export_job: ExportJob):
     export_job.tstarted = igsn_lib.time.dtnow()
     sqlmodel_database.save_or_update_export_job(session, export_job)
     response = isb_solr_query.solr_searchStream(solr_params)
+    # TODO: what directory should we use?
     solr_response_path = f"/tmp/{export_job.uuid}_solr.json"
     with open(solr_response_path, mode="wb") as query_file:
         for chunk in response.iter_content(chunk_size=4096):
