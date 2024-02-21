@@ -2,18 +2,20 @@ from typing import Optional
 import concurrent
 import fastapi.responses
 import igsn_lib.time
-from fastapi import APIRouter, Depends
+from fastapi import Depends, FastAPI
 from sqlmodel import Session
 from starlette.responses import JSONResponse, FileResponse
 from starlette.status import HTTP_201_CREATED, HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_202_ACCEPTED
 
 from isb_lib.models.export_job import ExportJob
 from isb_lib.utilities.solr_result_transformer import SolrResultTransformer, TargetExportFormat
-from isb_web import isb_solr_query, analytics, sqlmodel_database
+from isb_web import isb_solr_query, analytics, sqlmodel_database, auth
 from isb_web.analytics import AnalyticsEvent
 from isb_web.sqlmodel_database import SQLModelDAO
 
-router = APIRouter(prefix="/export")
+EXPORT_PREFIX = "/export"
+export_app = FastAPI(prefix=EXPORT_PREFIX)
+auth.add_auth_middleware_to_app(export_app)
 dao: Optional[SQLModelDAO] = None
 
 
@@ -50,14 +52,13 @@ def search_solr_and_export_results(export_job_id: str):
             print("Finished writing query response!")
 
 
-@router.get("/create")
+@export_app.get("/create")
 async def create(request: fastapi.Request, session: Session = Depends(get_session)) -> JSONResponse:
     """Creates a new export job with the specified solr query"""
     params, properties = isb_solr_query.get_solr_params_from_request(request)
     analytics.attach_analytics_state_to_request(AnalyticsEvent.THINGS_DOWNLOAD, request, properties)
     export_job = ExportJob()
-    # TODO: hook this into orcid
-    export_job.creator_id = "ABCDEFG"
+    export_job.creator_id = auth.orcid_id_from_session_or_scope(request)
     export_job.solr_query_params = params
     sqlmodel_database.save_or_update_export_job(session, export_job)
     executor.submit(search_solr_and_export_results, export_job.uuid)  # type: ignore
@@ -69,7 +70,7 @@ def _not_found_response() -> JSONResponse:
     return fastapi.responses.JSONResponse(content={"status": "not_found"}, status_code=HTTP_404_NOT_FOUND)
 
 
-@router.get("/status")
+@export_app.get("/status")
 def status(uuid: str = fastapi.Query(None), session: Session = Depends(get_session)) -> JSONResponse:
     """Looks up the status of the export job with the specified uuid"""
     export_job = sqlmodel_database.export_job_with_uuid(session, uuid)
@@ -86,7 +87,7 @@ def status(uuid: str = fastapi.Query(None), session: Session = Depends(get_sessi
             return fastapi.responses.JSONResponse(content={"status": "created"}, status_code=HTTP_201_CREATED)
 
 
-@router.get("/download")
+@export_app.get("/download")
 def download(uuid: str = fastapi.Query(None), session: Session = Depends(get_session)):
     export_job = sqlmodel_database.export_job_with_uuid(session, uuid)
     if export_job is None:

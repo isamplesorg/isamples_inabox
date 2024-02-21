@@ -116,7 +116,7 @@ app.mount(manage.MANAGE_PREFIX, manage_app)
 app.mount(debug.DEBUG_PREFIX, debug_app)
 app.include_router(metrics.router)
 app.include_router(vocabulary.router)
-app.include_router(export.router)
+app.mount(export.EXPORT_PREFIX, export.export_app)
 
 
 @app.on_event("startup")

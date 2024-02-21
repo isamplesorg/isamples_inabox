@@ -10,12 +10,8 @@ from isb_web.main import app
 
 @pytest.fixture(name="client")
 def client_fixture():
-    # def get_repository_override():
-    #     return _mock_repository()
-    # app.dependency_overrides[get_repository] = get_repository_override
     client = TestClient(app)
     yield client
-    # app.dependency_overrides.clear()
 
 
 @patch("isb_web.export.search_solr_and_export_results")
