@@ -30,12 +30,12 @@ def search_solr_and_export_results(export_job_id: str):
 
     # note that we don't seem to be able to work with the generator on the background thread, so explicitly
     # open and close a new session for each task we execute
-    with dao.get_session() as session: # type: ignore
+    with dao.get_session() as session:  # type: ignore
         export_job = sqlmodel_database.export_job_with_uuid(session, export_job_id)
         if export_job is not None:
             export_job.tstarted = igsn_lib.time.dtnow()
             sqlmodel_database.save_or_update_export_job(session, export_job)
-            response = isb_solr_query.solr_searchStream(export_job.solr_query_params) # type: ignore
+            response = isb_solr_query.solr_searchStream(export_job.solr_query_params)  # type: ignore
             # TODO: what directory should we use?
             solr_response_path = f"/tmp/{export_job.uuid}_solr.json"
             with open(solr_response_path, mode="wb") as query_file:
@@ -60,7 +60,7 @@ async def create(request: fastapi.Request, session: Session = Depends(get_sessio
     export_job.creator_id = "ABCDEFG"
     export_job.solr_query_params = params
     sqlmodel_database.save_or_update_export_job(session, export_job)
-    executor.submit(search_solr_and_export_results, export_job.uuid) # type: ignore
+    executor.submit(search_solr_and_export_results, export_job.uuid)  # type: ignore
     status_dict = {"status": "created", "uuid": export_job.uuid}
     return fastapi.responses.JSONResponse(content=status_dict, status_code=HTTP_201_CREATED)
 
