@@ -18,7 +18,7 @@ def client_fixture():
     # app.dependency_overrides.clear()
 
 
-@patch("isb_web.export.write_csv")
+@patch("isb_web.export.search_solr_and_export_results")
 @patch("isb_web.sqlmodel_database.save_or_update_export_job")
 def test_export_create(mock_solr_query: MagicMock, mock_database: MagicMock, client: TestClient):
     response = client.get("/export/create")
