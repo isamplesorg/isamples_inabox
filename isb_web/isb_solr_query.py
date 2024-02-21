@@ -445,7 +445,7 @@ def solr_get_record(identifier):
     return 200, docs["response"]["docs"][0]
 
 
-def solr_searchStream(params, collection=DEFAULT_COLLECTION_NAME) -> Response:  # noqa: C901
+def solr_searchStream(params: list[list[str]], collection: str = DEFAULT_COLLECTION_NAME) -> Response:  # noqa: C901
     """
     Requests a streaming search response from solr.
 

@@ -557,11 +557,16 @@ def test_save_export_job(session: Session):
     assert export_job.primary_key is not None
     assert export_job.tcreated is not None
     assert export_job.uuid is not None
+    assert export_job.solr_query_params == TEST_QUERY_PARAMS
+
+
+TEST_QUERY_PARAMS = [["fq", "searchText:Tucson"], ["fl", "id"], ["fl", "searchText"], ["wt", "json"], ["q", "*:*"], ["rows", 10], ["start", 0]]
 
 
 def _create_test_export_job(session) -> ExportJob:
     export_job = ExportJob()
     export_job.creator_id = "123456"
+    export_job.solr_query_params = TEST_QUERY_PARAMS
     export_job = save_or_update_export_job(session, export_job)
     return export_job
 

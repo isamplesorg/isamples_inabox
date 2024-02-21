@@ -48,6 +48,7 @@ async def create(request: fastapi.Request, background_tasks: BackgroundTasks, se
     export_job = ExportJob()
     # TODO: hook this into orcid
     export_job.creator_id = "ABCDEFG"
+    export_job.solr_query_params = params
     sqlmodel_database.save_or_update_export_job(session, export_job)
     background_tasks.add_task(write_csv, params, session, export_job)
     status_dict = {"status": "created", "uuid": export_job.uuid}

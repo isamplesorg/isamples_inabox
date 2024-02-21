@@ -1,8 +1,10 @@
 from datetime import datetime
 from typing import Optional
-
 import sqlalchemy
 from sqlmodel import SQLModel, Field
+
+from isb_lib.models.string_list_type import StringListType
+from isb_lib.utilities.solr_result_transformer import TargetExportFormat
 
 
 class ExportJob(SQLModel, table=True):
@@ -17,7 +19,7 @@ class ExportJob(SQLModel, table=True):
     )
     tcreated: Optional[datetime] = Field(
         default=None,
-        nullable=True,
+        nullable=False,
         description="When the job was created.",
         index=False
     )
@@ -41,10 +43,24 @@ class ExportJob(SQLModel, table=True):
     )
     uuid: Optional[str] = Field(
         default=None,
-        nullable=True,
+        nullable=False,
         description="Unique identifier for this export job.",
         unique=True,
         index=True
+    )
+    solr_query_params: Optional[list] = Field(
+        sa_column=sqlalchemy.Column(
+            StringListType,
+            nullable=False,
+            default=None,
+            doc="Serialized solr query parameter for the export job.",
+        )
+    )
+    export_type: Optional[str] = Field(
+        default=TargetExportFormat.CSV.value,
+        nullable=False,
+        description="Format of the exported data.",
+        index=False
     )
     file_path: Optional[str] = Field(
         default=None,
