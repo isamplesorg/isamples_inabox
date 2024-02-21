@@ -1,8 +1,8 @@
 from typing import Optional
-
+import concurrent
 import fastapi.responses
 import igsn_lib.time
-from fastapi import APIRouter, BackgroundTasks, Depends
+from fastapi import APIRouter, Depends
 from sqlmodel import Session
 from starlette.responses import JSONResponse, FileResponse
 from starlette.status import HTTP_201_CREATED, HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_202_ACCEPTED
@@ -22,26 +22,36 @@ def get_session():
         yield session
 
 
-def write_csv(solr_params: list[list[str]], session: Session, export_job: ExportJob):
-    export_job.tstarted = igsn_lib.time.dtnow()
-    sqlmodel_database.save_or_update_export_job(session, export_job)
-    response = isb_solr_query.solr_searchStream(solr_params)
-    # TODO: what directory should we use?
-    solr_response_path = f"/tmp/{export_job.uuid}_solr.json"
-    with open(solr_response_path, mode="wb") as query_file:
-        for chunk in response.iter_content(chunk_size=4096):
-            query_file.write(chunk)
-    transformed_response_path = f"/tmp/{export_job.uuid}.csv"
-    solr_result_transformer = SolrResultTransformer(solr_response_path, TargetExportFormat.CSV, transformed_response_path)
-    solr_result_transformer.transform()
-    export_job.file_path = transformed_response_path
-    export_job.tcompleted = igsn_lib.time.dtnow()
-    sqlmodel_database.save_or_update_export_job(session, export_job)
-    print("Finished writing query response!")
+executor = concurrent.futures.ThreadPoolExecutor(max_workers=5)
+
+
+def search_solr_and_export_results(export_job_id: str):
+    """Task function that gets a queued export job from the db, executes the solr query, and writes results to disk"""
+
+    # note that we don't seem to be able to work with the generator on the background thread, so explicitly
+    # open and close a new session for each task we execute
+    with dao.get_session() as session: # type: ignore
+        export_job = sqlmodel_database.export_job_with_uuid(session, export_job_id)
+        if export_job is not None:
+            export_job.tstarted = igsn_lib.time.dtnow()
+            sqlmodel_database.save_or_update_export_job(session, export_job)
+            response = isb_solr_query.solr_searchStream(export_job.solr_query_params) # type: ignore
+            # TODO: what directory should we use?
+            solr_response_path = f"/tmp/{export_job.uuid}_solr.json"
+            with open(solr_response_path, mode="wb") as query_file:
+                for chunk in response.iter_content(chunk_size=4096):
+                    query_file.write(chunk)
+            transformed_response_path = f"/tmp/{export_job.uuid}.csv"
+            solr_result_transformer = SolrResultTransformer(solr_response_path, TargetExportFormat.CSV, transformed_response_path)
+            solr_result_transformer.transform()
+            export_job.file_path = transformed_response_path
+            export_job.tcompleted = igsn_lib.time.dtnow()
+            sqlmodel_database.save_or_update_export_job(session, export_job)
+            print("Finished writing query response!")
 
 
 @router.get("/create")
-async def create(request: fastapi.Request, background_tasks: BackgroundTasks, session: Session = Depends(get_session)) -> JSONResponse:
+async def create(request: fastapi.Request, session: Session = Depends(get_session)) -> JSONResponse:
     """Creates a new export job with the specified solr query"""
     params, properties = isb_solr_query.get_solr_params_from_request(request)
     analytics.attach_analytics_state_to_request(AnalyticsEvent.THINGS_DOWNLOAD, request, properties)
@@ -50,7 +60,7 @@ async def create(request: fastapi.Request, background_tasks: BackgroundTasks, se
     export_job.creator_id = "ABCDEFG"
     export_job.solr_query_params = params
     sqlmodel_database.save_or_update_export_job(session, export_job)
-    background_tasks.add_task(write_csv, params, session, export_job)
+    executor.submit(search_solr_and_export_results, export_job.uuid) # type: ignore
     status_dict = {"status": "created", "uuid": export_job.uuid}
     return fastapi.responses.JSONResponse(content=status_dict, status_code=HTTP_201_CREATED)
 
