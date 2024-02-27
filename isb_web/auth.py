@@ -3,6 +3,9 @@ from typing import Optional
 
 import authlib.integrations.starlette_client
 import starlette
+import starlette.middleware
+import starlette.middleware.cors
+import starlette.middleware.sessions
 import starlette_oauth2_api
 from fastapi import FastAPI
 
@@ -132,7 +135,12 @@ def add_auth_middleware_to_app(app: FastAPI, public_paths: set[str] = set()):
 
 
 def orcid_id_from_session_or_scope(request: starlette.requests.Request) -> Optional[str]:
-    user = request.session.get("user")
+    user = None
+    try:
+        user = request.session.get("user")
+    except:
+        # Don't blow up if there's no session.  Just return None.
+        return None
     if user is not None:
         return user.get("orcid", None)
     else:

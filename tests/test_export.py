@@ -2,9 +2,13 @@ import datetime
 from unittest.mock import patch, MagicMock
 
 import pytest
+from starlette.middleware import Middleware
 from starlette.testclient import TestClient
 
 from isb_lib.models.export_job import ExportJob
+import isb_web.export
+from isb_web import auth
+from isb_web.auth import AuthenticateMiddleware
 from isb_web.main import app
 
 
@@ -13,6 +17,17 @@ def client_fixture():
     client = TestClient(app)
     yield client
 
+
+@pytest.fixture(autouse=True)
+def setup():
+    export_app = isb_web.export.export_app
+    # Overridden to disable authentication during unit testing.
+    new_middlewares: list[Middleware] = []
+    for middleware in app.user_middleware:
+        if not middleware.cls.__name__ == AuthenticateMiddleware:
+            new_middlewares.append(middleware)
+    export_app.user_middleware = new_middlewares
+    export_app.middleware_stack = export_app.build_middleware_stack()
 
 @patch("isb_web.export.search_solr_and_export_results")
 @patch("isb_web.sqlmodel_database.save_or_update_export_job")
