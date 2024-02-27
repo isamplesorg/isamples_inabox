@@ -3,7 +3,7 @@ from typing import Optional, Any
 import isamples_frictionless
 from fastapi import FastAPI, HTTPException, Depends
 from sqlmodel import Session
-from starlette.responses import Response
+from starlette.responses import Response, PlainTextResponse
 
 from isb_lib.identifiers import datacite
 import json
@@ -21,7 +21,7 @@ import datetime
 from isb_lib.models.namespace import Namespace
 from isb_lib.utilities import url_utilities
 from isb_lib.utilities.url_utilities import full_url_from_suffix
-from isb_web import config, sqlmodel_database, auth
+from isb_web import config, sqlmodel_database, auth as isbweb_auth
 from isb_web.api_types import MintDataciteIdentifierParams, MintDraftIdentifierParams, ManageOrcidForNamespaceParams, \
     AddNamespaceParams, MintNoidyIdentifierParams
 from isb_web.sqlmodel_database import SQLModelDAO
@@ -40,8 +40,7 @@ def get_session():
         yield session
 
 
-allowed_orcid_ids: list = []
-auth.add_auth_middleware_to_app(manage_api)
+isbweb_auth.add_auth_middleware_to_app(manage_api, {"/login", "/auth", "/logout", "/hypothesis_jwt"})
 
 
 @manage_api.post("/mint_datacite_identifier", include_in_schema=False)
@@ -96,7 +95,9 @@ async def login(request: starlette.requests.Request):
         redirect_uri += "?annotation=true"
     elif "thing" in request.query_params:
         redirect_uri += f"?thing={request.query_params['thing']}"
-    orcid_auth_uri = await auth.oauth.orcid.authorize_redirect(request, redirect_uri)
+    elif "raw_jwt" in request.query_params and request.query_params["raw_jwt"] == "true":
+        redirect_uri += "?raw_jwt=true"
+    orcid_auth_uri = await isbweb_auth.oauth.orcid.authorize_redirect(request, redirect_uri)
     return orcid_auth_uri
 
 
@@ -106,11 +107,15 @@ async def auth(request: starlette.requests.Request):
     This method is called back by ORCID oauth. It needs to be in the
     registered callbacks of the ORCID Oauth configuration.
     """
-    token = await auth.oauth.orcid.authorize_access_token(request)
-    request.session["user"] = dict(token)
+
+    token = await isbweb_auth.oauth.orcid.authorize_access_token(request)
+    token_dict = dict(token)
+    request.session["user"] = token_dict
     redirect_url = url_utilities.joined_url(str(request.url), config.Settings().auth_response_redirect_fragment)
     # redirect_url = "http://localhost:3000/#/dois"
-    if "annotation" in request.query_params and request.query_params["annotation"] == "true":
+    if "raw_jwt" in request.query_params and request.query_params["raw_jwt"] == "true":
+        return PlainTextResponse(content=token_dict["id_token"])
+    elif "annotation" in request.query_params and request.query_params["annotation"] == "true":
         # if login is for annotation purpose, add access token as query param
         redirect_url += "?access_token=" + token["access_token"]
         return starlette.responses.RedirectResponse(url=redirect_url)
@@ -166,7 +171,7 @@ def add_orcid_id(request: starlette.requests.Request, session: Session = Depends
         if orcid_id is None:
             raise HTTPException(401, "orcid_id is a required parameter")
         person = sqlmodel_database.save_person_with_orcid_id(session, orcid_id)
-        allowed_orcid_ids.append(orcid_id)
+        isbweb_auth.allowed_orcid_ids.append(orcid_id)
         return person.primary_key
     else:
         # I think the middleware should prevent this, but just in case…
@@ -175,7 +180,7 @@ def add_orcid_id(request: starlette.requests.Request, session: Session = Depends
 
 @manage_api.post("/add_namespace")
 def add_namespace(params: AddNamespaceParams, request: starlette.requests.Request, session: Session = Depends(get_session)):
-    orcid_id = auth._orcid_id_from_session_or_scope(request)
+    orcid_id = isbweb_auth.orcid_id_from_session_or_scope(request)
     if orcid_id is None:
         raise HTTPException(401, "no session")
     elif orcid_id not in config.Settings().orcid_superusers:
@@ -221,7 +226,7 @@ def mint_noidy_identifiers(params: MintNoidyIdentifierParams, request: starlette
         params: Class that contains the shoulder and number of identifiers to mint
     Return: A list of all the minted identifiers, or a 404 if the namespace doesn't exist.
     """
-    orcid_id = auth.orcid_id_from_session_or_scope(request)
+    orcid_id = isbweb_auth.orcid_id_from_session_or_scope(request)
     if orcid_id is None:
         raise HTTPException(401, "no session")
     namespace = sqlmodel_database.namespace_with_shoulder(session, params.shoulder)
@@ -243,7 +248,7 @@ def mint_noidy_identifiers(params: MintNoidyIdentifierParams, request: starlette
 
 @manage_api.post("/hypothesis_jwt", include_in_schema=False)
 def hypothesis_jwt(request: starlette.requests.Request, session: Session = Depends(get_session)) -> Optional[str]:
-    orcid_id = auth.orcid_id_from_session_or_scope(request)
+    orcid_id = isbweb_auth.orcid_id_from_session_or_scope(request)
     if orcid_id is None:
         raise HTTPException(401, "no session")
     else:

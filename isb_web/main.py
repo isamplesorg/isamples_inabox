@@ -26,7 +26,7 @@ from isb_lib.models.thing import Thing
 from isb_lib.utilities import h3_utilities
 from isb_lib.utilities.url_utilities import full_url_from_suffix
 from isb_lib.vocabulary import vocab_adapter
-from isb_web import sqlmodel_database, analytics, manage, debug, metrics, vocabulary, export
+from isb_web import sqlmodel_database, analytics, manage, debug, metrics, vocabulary, export, auth
 from isb_web.analytics import AnalyticsEvent
 from isb_web import schemas
 from isb_web import crud
@@ -133,8 +133,8 @@ def on_startup():
     # Superusers are allowed to mint identifiers as well, so make sure they're in the list.
     orcid_ids.extend(isb_web.config.Settings().orcid_superusers)
     # The main handler's startup is the guaranteed spot where we know we have a db connection.
-    # User the connected db session to push in to the manage handler's orcid_ids state.
-    manage.allowed_orcid_ids = orcid_ids
+    # User the connected db session to push in to the auth module's orcid_ids state.
+    auth.allowed_orcid_ids = orcid_ids
     term_store.create_database(dao.engine)
 
 

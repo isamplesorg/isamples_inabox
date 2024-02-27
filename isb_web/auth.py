@@ -12,6 +12,8 @@ from isb_web import config
 logging.basicConfig(level=logging.DEBUG)
 _L = logging.getLogger("auth")
 
+allowed_orcid_ids: list = []
+
 
 class AuthenticateMiddleware(starlette_oauth2_api.AuthenticateMiddleware):
     """
@@ -32,22 +34,20 @@ class AuthenticateMiddleware(starlette_oauth2_api.AuthenticateMiddleware):
             return await self._app(scope, receive, send)
 
         token = None
-        # user = request.session.get("user")
+        user = request.session.get("user")
 
         # Cookie set with auth info
-        if False:  # user is not None:
-            print("TODO: FIXME")
-            # token = user.get("id_token", None)
-            # orcid_id = user.get("orcid", None)
-            # TODO: figure this part out
-            # if orcid_id not in allowed_orcid_ids:
-            #     return await self._prepare_error_response(
-            #         "orcid id is not authorized to manage identifiers",
-            #         401,
-            #         scope,
-            #         receive,
-            #         send,
-            #     )
+        if user is not None:
+            token = user.get("id_token", None)
+            orcid_id = user.get("orcid", None)
+            if orcid_id not in allowed_orcid_ids:
+                return await self._prepare_error_response(
+                    "orcid id is not authorized",
+                    401,
+                    scope,
+                    receive,
+                    send,
+                )
 
         # check for authorization header and token on it.
         elif "authorization" in request.headers and request.headers[
@@ -102,7 +102,7 @@ oauth.register(
 )
 
 
-def add_auth_middleware_to_app(app: FastAPI):
+def add_auth_middleware_to_app(app: FastAPI, public_paths: set[str] = set()):
     # https://gitlab.com/jorgecarleitao/starlette-oauth2-api#how-to-use
     app.add_middleware(
         AuthenticateMiddleware,
@@ -113,8 +113,8 @@ def add_auth_middleware_to_app(app: FastAPI):
                 "audience": config.Settings().orcid_client_id,
             }
         },
-        # TODO: this should be a parameter
-        public_paths={"/login", "/auth", "/logout", "/hypothesis_jwt"},
+
+        public_paths=public_paths,
     )
 
     app.add_middleware(
