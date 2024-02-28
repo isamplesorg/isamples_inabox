@@ -138,7 +138,7 @@ def orcid_id_from_session_or_scope(request: starlette.requests.Request) -> Optio
     user = None
     try:
         user = request.session.get("user")
-    except:
+    except AssertionError:
         # Don't blow up if there's no session.  Just return None.
         return None
     if user is not None:

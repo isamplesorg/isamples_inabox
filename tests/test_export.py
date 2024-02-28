@@ -7,7 +7,6 @@ from starlette.testclient import TestClient
 
 from isb_lib.models.export_job import ExportJob
 import isb_web.export
-from isb_web import auth
 from isb_web.auth import AuthenticateMiddleware
 from isb_web.main import app
 
@@ -28,6 +27,7 @@ def setup():
             new_middlewares.append(middleware)
     export_app.user_middleware = new_middlewares
     export_app.middleware_stack = export_app.build_middleware_stack()
+
 
 @patch("isb_web.export.search_solr_and_export_results")
 @patch("isb_web.sqlmodel_database.save_or_update_export_job")
