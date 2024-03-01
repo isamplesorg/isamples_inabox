@@ -9,6 +9,9 @@ from sqlmodel import Session
 from starlette.responses import JSONResponse, FileResponse
 from starlette.status import HTTP_201_CREATED, HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_202_ACCEPTED
 
+from isamples_metadata.solr_field_constants import SOLR_ID, SOLR_LABEL, SOLR_HAS_CONTEXT_CATEGORY, \
+    SOLR_HAS_MATERIAL_CATEGORY, SOLR_HAS_SPECIMEN_CATEGORY, SOLR_KEYWORDS, SOLR_INFORMAL_CLASSIFICATION, \
+    SOLR_REGISTRANT, SOLR_PRODUCED_BY_RESPONSIBILITY, SOLR_PRODUCED_BY_DESCRIPTION, SOLR_PRODUCED_BY_RESULT_TIME
 from isb_lib.models.export_job import ExportJob
 from isb_lib.utilities.solr_result_transformer import SolrResultTransformer, TargetExportFormat
 from isb_web import isb_solr_query, analytics, sqlmodel_database, auth
@@ -19,7 +22,10 @@ EXPORT_PREFIX = "/export"
 export_app = FastAPI(prefix=EXPORT_PREFIX)
 auth.add_auth_middleware_to_app(export_app)
 dao: Optional[SQLModelDAO] = None
-
+DEFAULT_SOLR_FIELDS_FOR_EXPORT = [SOLR_ID, SOLR_LABEL, SOLR_HAS_CONTEXT_CATEGORY, SOLR_HAS_MATERIAL_CATEGORY,
+                                  SOLR_HAS_SPECIMEN_CATEGORY, SOLR_KEYWORDS, SOLR_INFORMAL_CLASSIFICATION,
+                                  SOLR_REGISTRANT, SOLR_PRODUCED_BY_RESPONSIBILITY, SOLR_PRODUCED_BY_DESCRIPTION,
+                                  SOLR_PRODUCED_BY_RESULT_TIME]
 
 def get_session():
     with dao.get_session() as session:
@@ -57,7 +63,16 @@ def search_solr_and_export_results(export_job_id: str):
 @export_app.get("/create")
 async def create(request: fastapi.Request, session: Session = Depends(get_session)) -> JSONResponse:
     """Creates a new export job with the specified solr query"""
-    params, properties = isb_solr_query.get_solr_params_from_request(request)
+
+    # These will be inserted into the solr request if not present on the API call
+    solr_api_defparams = {
+        "wt": "json",
+        "q": "*:*",
+        "fl": DEFAULT_SOLR_FIELDS_FOR_EXPORT,
+        "rows": 10000,
+        "start": 0,
+    }
+    params, properties = isb_solr_query.get_solr_params_from_request(request, solr_api_defparams)
     analytics.attach_analytics_state_to_request(AnalyticsEvent.THINGS_DOWNLOAD, request, properties)
     export_job = ExportJob()
     export_job.creator_id = auth.orcid_id_from_session_or_scope(request)
