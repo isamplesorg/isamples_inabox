@@ -5,7 +5,7 @@ import isb_lib.core
 import json
 import requests
 
-from isamples_metadata.metadata_constants import KEYWORDS
+from isamples_metadata.metadata_constants import METADATA_KEYWORDS
 from isb_lib.core import things_main
 
 TEST_LIVE_SERVER = 0
@@ -410,7 +410,7 @@ def test_core_record_as_solr_doc_3():
 }
 """
     solr_dict = _try_to_add_solr_doc(core_doc_str)
-    assert "fossils" in solr_dict.get(KEYWORDS)
+    assert "fossils" in solr_dict.get(METADATA_KEYWORDS)
 
 
 def _load_test_file_into_solr_doc(file_path: str) -> dict:

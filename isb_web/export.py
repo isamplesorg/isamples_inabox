@@ -4,7 +4,6 @@ import fastapi.responses
 import igsn_lib.time
 import json_stream.requests
 import petl
-import csv
 from fastapi import Depends, FastAPI
 from sqlmodel import Session
 from starlette.responses import JSONResponse, FileResponse
@@ -33,7 +32,7 @@ executor = concurrent.futures.ThreadPoolExecutor(max_workers=5)
 def search_solr_and_export_results(export_job_id: str):
     """Task function that gets a queued export job from the db, executes the solr query, and writes results to disk"""
 
-    # note that we don't seem to be able to work with the generator on the background thread, so explicitly
+    # note that we don't seem to be able to work with the session generator on the background thread, so explicitly
     # open and close a new session for each task we execute
     with dao.get_session() as session:  # type: ignore
         export_job = sqlmodel_database.export_job_with_uuid(session, export_job_id)
@@ -43,19 +42,11 @@ def search_solr_and_export_results(export_job_id: str):
             response = isb_solr_query.solr_searchStream(export_job.solr_query_params)  # type: ignore
             data = json_stream.requests.load(response)
             # TODO: what directory should we use?
-            solr_response_path = f"/tmp/{export_job.uuid}_solr.json"
             docs = data["result-set"]["docs"]
             generator_docs = (json_stream.to_standard_types(doc) for doc in docs)
-            table1 = petl.fromdicts(generator_docs, header=["searchText", "id"])
+            table = petl.fromdicts(generator_docs, header=["searchText", "id"])
             transformed_response_path = f"/tmp/{export_job.uuid}.csv"
-            with open(transformed_response_path, "w") as f:
-                writer = csv.writer(f)
-                writer.writerows(table1)
-            print(table1)
-            # with open(solr_response_path, mode="wb") as query_file:
-            #     for doc in data["result-set"]["docs"]:
-            #         print(json.dumps(json_stream.to_standard_types(doc)))
-            solr_result_transformer = SolrResultTransformer(solr_response_path, TargetExportFormat.CSV, transformed_response_path)
+            solr_result_transformer = SolrResultTransformer(table, TargetExportFormat.CSV, transformed_response_path)
             solr_result_transformer.transform()
             export_job.file_path = transformed_response_path
             export_job.tcompleted = igsn_lib.time.dtnow()

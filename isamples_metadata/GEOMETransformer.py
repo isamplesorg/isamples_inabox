@@ -11,7 +11,7 @@ import isamples_metadata
 from isamples_metadata.Transformer import (
     Transformer, Keyword,
 )
-from isamples_metadata.metadata_constants import LABEL, AUTHORIZED_BY, COMPLIES_WITH, RELATIONSHIP, TARGET
+from isamples_metadata.metadata_constants import METADATA_LABEL, METADATA_AUTHORIZED_BY, METADATA_COMPLIES_WITH, METADATA_RELATIONSHIP, METADATA_TARGET
 from isamples_metadata.vocabularies import vocabulary_mapper
 
 PERMIT_STRINGS_TO_IGNORE = ['nan', 'na', 'no data', 'unknown', 'none_required']
@@ -435,9 +435,9 @@ class GEOMETransformer(Transformer):
             child_resource = {}
             entity = child["entity"]
             if entity == TISSUE_ENTITY:
-                child_resource[LABEL] = "Tissue"
-                child_resource[RELATIONSHIP] = "tissue extract"
-                child_resource[TARGET] = child["bcid"]
+                child_resource[METADATA_LABEL] = "Tissue"
+                child_resource[METADATA_RELATIONSHIP] = "tissue extract"
+                child_resource[METADATA_TARGET] = child["bcid"]
                 related_resources.append(child_resource)
         return related_resources
 
@@ -460,7 +460,7 @@ class GEOMETransformer(Transformer):
         permit_information = self._parent_permit_information()
         if permit_information is not None:
             parsed_permit_information = GEOMETransformer.parse_permit_freetext(permit_information)
-            return parsed_permit_information[AUTHORIZED_BY]
+            return parsed_permit_information[METADATA_AUTHORIZED_BY]
         return []
 
     def complies_with(self) -> typing.List[str]:
@@ -469,7 +469,7 @@ class GEOMETransformer(Transformer):
 
     @staticmethod
     def _format_result_object(authorized_by: list[str]) -> dict[str, list[str]]:
-        return {AUTHORIZED_BY: authorized_by, COMPLIES_WITH: []}
+        return {METADATA_AUTHORIZED_BY: authorized_by, METADATA_COMPLIES_WITH: []}
 
     @staticmethod
     def parse_permit_text(text: str) -> dict[str, list[str]]:
@@ -499,10 +499,10 @@ class GEOMETransformer(Transformer):
                 authorized_by_str = match.group(3)
         if authorized_by_str is not None:
             authorized_by_list = GEOMETransformer._split_delimited_text(authorized_by_str)
-            result[AUTHORIZED_BY] = authorized_by_list
+            result[METADATA_AUTHORIZED_BY] = authorized_by_list
         if complies_with_str is not None:
             complies_with_list = GEOMETransformer._split_delimited_text(complies_with_str)
-            result[COMPLIES_WITH] = complies_with_list
+            result[METADATA_COMPLIES_WITH] = complies_with_list
         return result
 
     @staticmethod
@@ -617,9 +617,9 @@ class GEOMEChildTransformer(GEOMETransformer):
     def related_resources(self) -> typing.List[typing.Dict]:
         parent_dict = {}
         main_record = self._source_record_main_record()
-        parent_dict[LABEL] = f"parent sample {main_record.get('materialSampleID')}"
-        parent_dict[TARGET] = main_record.get("bcid", "")
-        parent_dict[RELATIONSHIP] = "derived_from"
+        parent_dict[METADATA_LABEL] = f"parent sample {main_record.get('materialSampleID')}"
+        parent_dict[METADATA_TARGET] = main_record.get("bcid", "")
+        parent_dict[METADATA_RELATIONSHIP] = "derived_from"
         return [parent_dict]
 
     def authorized_by(self) -> typing.List[str]:
