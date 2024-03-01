@@ -20,7 +20,7 @@ def test_solr_result_transformer(solr_file_path: str):
         result_set: dict = solr_result_dict.get("result-set", {})
         if result_set is not None:
             docs: list[dict] = result_set.get("docs", {})
-            table = petl.fromdicts(docs, header=["searchText", "id"])
+            table = petl.fromdicts(docs)
             dest_path = f"./test_data/solr_results/solr_results_{new_uuid}.csv"
             solr_result_transformer = SolrResultTransformer(table, TargetExportFormat.CSV, dest_path)
             solr_result_transformer.transform()

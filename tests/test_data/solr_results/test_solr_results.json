@@ -30,9 +30,6 @@
     },{
       "searchText":["NMNH 47561-00 (MIN)","Individual Sample","Not Provided","Adam Mansur","Adam Mansur,,Sample Owner","Mine","Matched to the GeoNames record for Tucson, Pima Co., Arizona, United States (http://geonames.org/5318313) based on feature name, district/county, state/province, and country using the situate.py script. Another place name mentioned in the EMu record (Mammoth-St. Anthony Mine) could not be matched and was ignored when determining the coordinates given here. Bounding box coordinates were rounded to 2 decimal places from the values given by GeoNames. An arbitrary error radius of 10 km was assigned to all featureCode=PPLA2 records matched using the script.","Mammoth-St. Anthony Mine","Arizona","Pima Co.","SESAR"],
       "id":"IGSN:NHB0002K2"
-    },{
-      "EOF":true,
-      "RESPONSE_TIME":227
     }]
   }
 }

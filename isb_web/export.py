@@ -44,7 +44,7 @@ def search_solr_and_export_results(export_job_id: str):
             # TODO: what directory should we use?
             docs = data["result-set"]["docs"]
             generator_docs = (json_stream.to_standard_types(doc) for doc in docs)
-            table = petl.fromdicts(generator_docs, header=["searchText", "id"])
+            table = petl.fromdicts(generator_docs)
             transformed_response_path = f"/tmp/{export_job.uuid}.csv"
             solr_result_transformer = SolrResultTransformer(table, TargetExportFormat.CSV, transformed_response_path)
             solr_result_transformer.transform()
