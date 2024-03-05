@@ -1,14 +1,27 @@
 import csv
-import logging
 from abc import ABC
 from enum import StrEnum
 
 import petl
 from petl import Table
 
-from isamples_metadata.metadata_constants import METADATA_PLACE_NAME
-from isamples_metadata.solr_field_constants import SOLR_PRODUCED_BY_SAMPLING_SITE_PLACE_NAME
-from isb_lib.utilities.enums import _NoValue
+from isamples_metadata.metadata_constants import METADATA_PLACE_NAME, METADATA_AUTHORIZED_BY, METADATA_COMPLIES_WITH, \
+    METADATA_LONGITUDE, METADATA_LATITUDE, METADATA_RELATED_RESOURCE, \
+    METADATA_CURATION_LOCATION, METADATA_ACCESS_CONSTRAINTS, METADATA_CURATION, METADATA_SAMPLING_PURPOSE, \
+    METADATA_REGISTRANT, METADATA_SAMPLE_LOCATION, METADATA_ELEVATION, METADATA_SAMPLING_SITE, METADATA_IDENTIFIER, \
+    METADATA_RESULT_TIME, METADATA_HAS_FEATURE_OF_INTEREST, METADATA_DESCRIPTION, METADATA_INFORMAL_CLASSIFICATION, \
+    METADATA_KEYWORDS, METADATA_HAS_SPECIMEN_CATEGORY, METADATA_HAS_MATERIAL_CATEGORY, METADATA_HAS_CONTEXT_CATEGORY, \
+    METADATA_LABEL
+from isamples_metadata.solr_field_constants import SOLR_PRODUCED_BY_SAMPLING_SITE_PLACE_NAME, SOLR_AUTHORIZED_BY, \
+    SOLR_COMPLIES_WITH, SOLR_PRODUCED_BY_SAMPLING_SITE_LOCATION_LONGITUDE, \
+    SOLR_PRODUCED_BY_SAMPLING_SITE_LOCATION_LATITUDE, SOLR_RELATED_RESOURCE_ISB_CORE_ID, SOLR_CURATION_RESPONSIBILITY, \
+    SOLR_CURATION_LOCATION, SOLR_CURATION_ACCESS_CONSTRAINTS, SOLR_CURATION_DESCRIPTION, SOLR_CURATION_LABEL, \
+    SOLR_SAMPLING_PURPOSE, SOLR_REGISTRANT, SOLR_PRODUCED_BY_SAMPLING_SITE_ELEVATION_IN_METERS, \
+    SOLR_PRODUCED_BY_SAMPLING_SITE_LABEL, SOLR_PRODUCED_BY_SAMPLING_SITE_DESCRIPTION, SOLR_ID, \
+    SOLR_PRODUCED_BY_RESULT_TIME, SOLR_PRODUCED_BY_RESPONSIBILITY, SOLR_PRODUCED_BY_FEATURE_OF_INTEREST, \
+    SOLR_PRODUCED_BY_DESCRIPTION, SOLR_PRODUCED_BY_LABEL, SOLR_PRODUCED_BY_ISB_CORE_ID, SOLR_INFORMAL_CLASSIFICATION, \
+    SOLR_KEYWORDS, SOLR_HAS_SPECIMEN_CATEGORY, SOLR_HAS_MATERIAL_CATEGORY, SOLR_HAS_CONTEXT_CATEGORY, SOLR_DESCRIPTION, \
+    SOLR_LABEL, SOLR_SOURCE
 
 
 class ExportTransformException(Exception):
@@ -60,20 +73,48 @@ class SolrResultTransformer:
     def _rename_table_columns(self):
         """Renames the solr columns to the public names as specified in the JSON schema"""
 
-        # TODO: fill out the rest of these fields
         renaming_map = {
-            SOLR_PRODUCED_BY_SAMPLING_SITE_PLACE_NAME: METADATA_PLACE_NAME
+            SOLR_ID: METADATA_IDENTIFIER,
+            SOLR_AUTHORIZED_BY: METADATA_AUTHORIZED_BY,
+            SOLR_COMPLIES_WITH: METADATA_COMPLIES_WITH,
+            SOLR_PRODUCED_BY_SAMPLING_SITE_LOCATION_LONGITUDE: METADATA_LONGITUDE,
+            SOLR_PRODUCED_BY_SAMPLING_SITE_LOCATION_LATITUDE: METADATA_LATITUDE,
+            SOLR_RELATED_RESOURCE_ISB_CORE_ID: METADATA_RELATED_RESOURCE,
+            SOLR_CURATION_RESPONSIBILITY: "curation_responsibility",  # Note that in the metadata this is just "responsibility", but this is a flat export format so we can't use that key by itself
+            SOLR_CURATION_LOCATION: METADATA_CURATION_LOCATION,
+            SOLR_CURATION_ACCESS_CONSTRAINTS: METADATA_ACCESS_CONSTRAINTS,
+            SOLR_CURATION_DESCRIPTION: METADATA_CURATION,
+            SOLR_CURATION_LABEL: "curation_label",  # Note that in the metadata this is just "label", but this is a flat export format so we can't use that key by itself
+            SOLR_SAMPLING_PURPOSE: METADATA_SAMPLING_PURPOSE,
+            SOLR_REGISTRANT: METADATA_REGISTRANT,
+            SOLR_PRODUCED_BY_SAMPLING_SITE_PLACE_NAME: METADATA_PLACE_NAME,
+            SOLR_PRODUCED_BY_SAMPLING_SITE_ELEVATION_IN_METERS: METADATA_ELEVATION,
+            SOLR_PRODUCED_BY_SAMPLING_SITE_LABEL: METADATA_SAMPLE_LOCATION,
+            SOLR_PRODUCED_BY_SAMPLING_SITE_DESCRIPTION: METADATA_SAMPLING_SITE,
+            SOLR_PRODUCED_BY_RESULT_TIME: METADATA_RESULT_TIME,
+            SOLR_PRODUCED_BY_RESPONSIBILITY: "produced_by_responsibility",  # Note that in the metadata this is just "responsibility", but this is a flat export format so we can't use that key by itself
+            SOLR_PRODUCED_BY_FEATURE_OF_INTEREST: METADATA_HAS_FEATURE_OF_INTEREST,
+            SOLR_PRODUCED_BY_DESCRIPTION: "produced_by_description",  # Note that in the metadata this is just "description", but this is a flat export format so we can't use that key by itself
+            SOLR_PRODUCED_BY_LABEL: "produced_by_label",  # Note that in the metadata this is just "label", but this is a flat export format so we can't use that key by itself
+            SOLR_PRODUCED_BY_ISB_CORE_ID: "produced_by_id",  # Note that in the metadata this is just "produced_by", but this is a flat export format so we can't use that key by itself
+            SOLR_INFORMAL_CLASSIFICATION: METADATA_INFORMAL_CLASSIFICATION,
+            SOLR_KEYWORDS: METADATA_KEYWORDS,
+            SOLR_HAS_SPECIMEN_CATEGORY: METADATA_HAS_SPECIMEN_CATEGORY,
+            SOLR_HAS_MATERIAL_CATEGORY: METADATA_HAS_MATERIAL_CATEGORY,
+            SOLR_HAS_CONTEXT_CATEGORY: METADATA_HAS_CONTEXT_CATEGORY,
+            SOLR_DESCRIPTION: METADATA_DESCRIPTION,
+            SOLR_LABEL: METADATA_LABEL,
+            SOLR_SOURCE: "source_collection",  # this isn't present in the exported metadata
         }
-        petl.rename(self._table, renaming_map, strict=False)
+
+        self._table = petl.transform.headers.rename(self._table, renaming_map, strict=False)
+        self._table = petl.rename(self._table, renaming_map, strict=False)
 
     def transform(self):
-        try:
-            self._rename_table_columns()
-            if self._format == TargetExportFormat.CSV:
-                CSVExportTransformer.transform(self._table, self._result_uuid)
-            elif self._format == TargetExportFormat.JSON:
-                JSONExportTransformer.transform(self._table, self._result_uuid)
-            else:
-                raise ExportTransformException(f"Unsupported export format: {self._format}")
-        except Exception as e:
-            logging.error(f"Error transforming for export: {e}")
+        self._rename_table_columns()
+        if self._format == TargetExportFormat.CSV:
+            CSVExportTransformer.transform(self._table, self._result_uuid)
+        elif self._format == TargetExportFormat.JSON:
+            JSONExportTransformer.transform(self._table, self._result_uuid)
+        else:
+            raise ExportTransformException(f"Unsupported export format: {self._format}")
