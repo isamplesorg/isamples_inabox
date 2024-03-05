@@ -87,7 +87,7 @@ async def create(request: fastapi.Request, export_format: TargetExportFormat = T
         "wt": "json",
         "q": "*:*",
         "fl": DEFAULT_SOLR_FIELDS_FOR_EXPORT,
-        "rows": 10000,
+        "rows": 50000,
         "start": 0,
     }
     params, properties = isb_solr_query.get_solr_params_from_request(request, solr_api_defparams, ["q", "fq", "start", "rows", "fl"])

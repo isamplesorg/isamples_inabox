@@ -32,6 +32,7 @@ class TargetExportFormat(StrEnum):
     """Valid target export formats"""
     CSV = "CSV"
     JSON = "JSON"
+    JSONL = "JSONL"
 
     # overridden to allow for case insensitivity in query parameter formatting
     @classmethod
@@ -60,8 +61,9 @@ class CSVExportTransformer(AbstractExportTransformer):
 
 class JSONExportTransformer(AbstractExportTransformer):
     @staticmethod
-    def transform(table: Table, dest_path_no_extension: str):
-        petl.tojson(table, f"{dest_path_no_extension}.json", sort_keys=True)
+    def transform(table: Table, dest_path_no_extension: str, is_lines: bool):
+        extension = "jsonl" if is_lines else "json"
+        petl.tojson(table, f"{dest_path_no_extension}.{extension}", sort_keys=True, lines=is_lines)
 
 
 class SolrResultTransformer:
@@ -114,7 +116,7 @@ class SolrResultTransformer:
         self._rename_table_columns()
         if self._format == TargetExportFormat.CSV:
             CSVExportTransformer.transform(self._table, self._result_uuid)
-        elif self._format == TargetExportFormat.JSON:
-            JSONExportTransformer.transform(self._table, self._result_uuid)
+        elif self._format == TargetExportFormat.JSON or self._format == TargetExportFormat.JSONL:
+            JSONExportTransformer.transform(self._table, self._result_uuid, self._format == TargetExportFormat.JSONL)
         else:
             raise ExportTransformException(f"Unsupported export format: {self._format}")
