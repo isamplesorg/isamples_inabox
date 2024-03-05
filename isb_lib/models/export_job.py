@@ -56,7 +56,7 @@ class ExportJob(SQLModel, table=True):
             doc="Serialized solr query parameter for the export job.",
         )
     )
-    export_type: Optional[str] = Field(
+    export_format: Optional[str] = Field(
         default=TargetExportFormat.CSV.value,
         nullable=False,
         description="Format of the exported data.",

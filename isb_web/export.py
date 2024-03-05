@@ -27,6 +27,7 @@ DEFAULT_SOLR_FIELDS_FOR_EXPORT = [SOLR_ID, SOLR_LABEL, SOLR_HAS_CONTEXT_CATEGORY
                                   SOLR_REGISTRANT, SOLR_PRODUCED_BY_RESPONSIBILITY, SOLR_PRODUCED_BY_DESCRIPTION,
                                   SOLR_PRODUCED_BY_RESULT_TIME]
 
+
 def get_session():
     with dao.get_session() as session:
         yield session
@@ -52,7 +53,7 @@ def search_solr_and_export_results(export_job_id: str):
             generator_docs = (json_stream.to_standard_types(doc) for doc in docs)
             table = petl.fromdicts(generator_docs)
             transformed_response_path = f"/tmp/{export_job.uuid}.csv"
-            solr_result_transformer = SolrResultTransformer(table, TargetExportFormat.CSV, transformed_response_path)
+            solr_result_transformer = SolrResultTransformer(table, TargetExportFormat[export_job.export_format], transformed_response_path) # type: ignore
             solr_result_transformer.transform()
             export_job.file_path = transformed_response_path
             export_job.tcompleted = igsn_lib.time.dtnow()
@@ -61,8 +62,11 @@ def search_solr_and_export_results(export_job_id: str):
 
 
 @export_app.get("/create")
-async def create(request: fastapi.Request, session: Session = Depends(get_session)) -> JSONResponse:
+async def create(request: fastapi.Request, session: Session = Depends(get_session),
+                 export_format: TargetExportFormat = TargetExportFormat.CSV) -> JSONResponse:
     """Creates a new export job with the specified solr query"""
+
+    # supported parameters are: q, fq, start, rows, format (right now format should be either CSV or JSON)
 
     # These will be inserted into the solr request if not present on the API call
     solr_api_defparams = {
@@ -72,11 +76,12 @@ async def create(request: fastapi.Request, session: Session = Depends(get_sessio
         "rows": 10000,
         "start": 0,
     }
-    params, properties = isb_solr_query.get_solr_params_from_request(request, solr_api_defparams)
+    params, properties = isb_solr_query.get_solr_params_from_request(request, solr_api_defparams, ["q", "fq", "start", "rows"])
     analytics.attach_analytics_state_to_request(AnalyticsEvent.THINGS_DOWNLOAD, request, properties)
     export_job = ExportJob()
     export_job.creator_id = auth.orcid_id_from_session_or_scope(request)
     export_job.solr_query_params = params
+    export_job.export_format = export_format.value
     sqlmodel_database.save_or_update_export_job(session, export_job)
     executor.submit(search_solr_and_export_results, export_job.uuid)  # type: ignore
     status_dict = {"status": "created", "uuid": export_job.uuid}

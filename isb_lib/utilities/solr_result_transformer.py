@@ -16,6 +16,7 @@ class ExportTransformException(Exception):
 class TargetExportFormat(_NoValue):
     """Valid target export formats"""
     CSV = "csv"
+    JSON = "json"
 
 
 class AbstractExportTransformer(ABC):

@@ -101,6 +101,7 @@ def set_default_params(params, defs):
             params.append([k, defs[k]])
     return params
 
+
 solr_api_defparams = {
     "wt": "json",
     "q": "*:*",
@@ -109,10 +110,11 @@ solr_api_defparams = {
     "start": 0,
 }
 
-def get_solr_params_from_request(request: fastapi.Request, defparams: dict = solr_api_defparams) -> Tuple[list[list[str]], dict]:
+
+def get_solr_params_from_request(request: fastapi.Request, defparams: dict = solr_api_defparams, supported_params: Optional[list[str]] = None) -> Tuple[list[list[str]], dict]:
     """Turns a GET request into a list of parameters suitable for querying Solr."""
-if request.method != "GET":
-    raise ValueError("get_solr_params_from_request only works with GET requests.")
+    if request.method != "GET":
+        raise ValueError("get_solr_params_from_request only works with GET requests.")
 
     # Construct a list of K,V pairs to hand on to the solr request.
     # Can't use a standard dict here because we need to support possible
@@ -123,9 +125,10 @@ if request.method != "GET":
     params = []
     # Update params with the provided parameters
     for k, v in request.query_params.multi_items():
-        params.append([k, v])
-        if k in properties:
-            properties[k] = v
+        if supported_params is None or k in supported_params:
+            params.append([k, v])
+            if k in properties:
+                properties[k] = v
     params = set_default_params(params, defparams)
     return params, properties
 
