@@ -1,5 +1,7 @@
 import csv
+import logging
 from abc import ABC
+from enum import StrEnum
 
 import petl
 from petl import Table
@@ -13,32 +15,47 @@ class ExportTransformException(Exception):
     """Exception subclass for when an error occurs during export transform"""
 
 
-class TargetExportFormat(_NoValue):
+class TargetExportFormat(StrEnum):
     """Valid target export formats"""
-    CSV = "csv"
-    JSON = "json"
+    CSV = "CSV"
+    JSON = "JSON"
+
+    # overridden to allow for case insensitivity in query parameter formatting
+    @classmethod
+    def _missing_(cls, value):
+        value = value.upper()
+        for member in cls:
+            if member.upper() == value:
+                return member
+        return None
 
 
 class AbstractExportTransformer(ABC):
     @staticmethod
-    def transform(table: Table, dest_path: str):
+    def transform(table: Table, dest_path_no_extension: str):
         """Transform solr results into a target export format"""
         pass
 
 
 class CSVExportTransformer(AbstractExportTransformer):
     @staticmethod
-    def transform(table: Table, dest_path: str):
-        with open(dest_path, "w", newline="") as file:
+    def transform(table: Table, dest_path_no_extension: str):
+        with open(f"{dest_path_no_extension}.csv", "w", newline="") as file:
             writer = csv.writer(file)
             writer.writerows(table)
 
 
+class JSONExportTransformer(AbstractExportTransformer):
+    @staticmethod
+    def transform(table: Table, dest_path_no_extension: str):
+        petl.tojson(table, f"{dest_path_no_extension}.json", sort_keys=True)
+
+
 class SolrResultTransformer:
-    def __init__(self, table: Table, format: TargetExportFormat, transformed_result_path: str):
+    def __init__(self, table: Table, format: TargetExportFormat, result_uuid: str):
         self._table = table
         self._format = format
-        self._transformed_result_path = transformed_result_path
+        self._result_uuid = result_uuid
 
     def _rename_table_columns(self):
         """Renames the solr columns to the public names as specified in the JSON schema"""
@@ -50,8 +67,13 @@ class SolrResultTransformer:
         petl.rename(self._table, renaming_map, strict=False)
 
     def transform(self):
-        self._rename_table_columns()
-        if self._format == TargetExportFormat.CSV:
-            CSVExportTransformer.transform(self._table, self._transformed_result_path)
-        else:
-            raise ExportTransformException(f"Unsupported export format: {self._format}")
+        try:
+            self._rename_table_columns()
+            if self._format == TargetExportFormat.CSV:
+                CSVExportTransformer.transform(self._table, self._result_uuid)
+            elif self._format == TargetExportFormat.JSON:
+                JSONExportTransformer.transform(self._table, self._result_uuid)
+            else:
+                raise ExportTransformException(f"Unsupported export format: {self._format}")
+        except Exception as e:
+            logging.error(f"Error transforming for export: {e}")
