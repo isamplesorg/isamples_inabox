@@ -102,6 +102,14 @@ def set_default_params(params, defs):
     return params
 
 
+def replace_param_value(params: list, replacement: dict) -> list:
+    for k in replacement.keys():
+        for row in params:
+            if k == row[0]:
+                row[1] = replacement[k]
+    return params
+
+
 solr_api_defparams = {
     "wt": "json",
     "q": "*:*",
