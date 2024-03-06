@@ -1,5 +1,5 @@
 import typing
-from typing import Optional, Tuple, Mapping
+from typing import Optional, Tuple, Mapping, Any
 
 import requests
 import geojson
@@ -108,6 +108,13 @@ def replace_param_value(params: list, replacement: dict) -> list:
             if k == row[0]:
                 row[1] = replacement[k]
     return params
+
+
+def read_param_value(params: list, key: str) -> Optional[Any]:
+    for row in params:
+        if key == row[0]:
+            return row[1]
+    return None
 
 
 solr_api_defparams = {

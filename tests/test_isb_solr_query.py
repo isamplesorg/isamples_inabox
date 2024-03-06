@@ -1,5 +1,5 @@
 from isb_web.isb_solr_query import _solr_heatmap_geom_params_str, MIN_LAT, MAX_LAT, MIN_LON, MAX_LON, \
-    replace_param_value
+    replace_param_value, read_param_value
 
 
 def test_solr_heat_geom_params_str():
@@ -30,9 +30,5 @@ def test_replace_parameter_value():
     start_key = "start"
     start_value = 10000
     replaced_params = replace_param_value(params, {start_key: start_value})
-    replaced_start_value = None
-    for pairs in replaced_params:
-        if pairs[0] == start_key:
-            replaced_start_value = pairs[1]
-    assert replaced_start_value is not None
+    replaced_start_value = read_param_value(replaced_params, start_key)
     assert replaced_start_value == start_value
