@@ -46,31 +46,39 @@ class TargetExportFormat(StrEnum):
 
 class AbstractExportTransformer(ABC):
     @staticmethod
-    def transform(table: Table, dest_path_no_extension: str):
+    def transform(table: Table, dest_path_no_extension: str, append: bool) -> str:
         """Transform solr results into a target export format"""
         pass
 
 
 class CSVExportTransformer(AbstractExportTransformer):
     @staticmethod
-    def transform(table: Table, dest_path_no_extension: str):
-        with open(f"{dest_path_no_extension}.csv", "w", newline="") as file:
-            writer = csv.writer(file)
-            writer.writerows(table)
+    def transform(table: Table, dest_path_no_extension: str, append: bool) -> str:
+        dest_path = f"{dest_path_no_extension}.csv"
+        if append:
+            petl.io.csv.appendcsv(table, dest_path)
+        else:
+            petl.io.csv.tocsv(table, dest_path)
+        return dest_path
 
 
 class JSONExportTransformer(AbstractExportTransformer):
     @staticmethod
-    def transform(table: Table, dest_path_no_extension: str, is_lines: bool):
+    def transform(table: Table, dest_path_no_extension: str, append: bool, is_lines: bool) -> str:
+        if append:
+            raise ValueError("JSON Export doesn't support appending")
         extension = "jsonl" if is_lines else "json"
-        petl.tojson(table, f"{dest_path_no_extension}.{extension}", sort_keys=True, lines=is_lines)
+        dest_path = f"{dest_path_no_extension}.{extension}"
+        petl.tojson(table, dest_path, sort_keys=True, lines=is_lines)
+        return dest_path
 
 
 class SolrResultTransformer:
-    def __init__(self, table: Table, format: TargetExportFormat, result_uuid: str):
+    def __init__(self, table: Table, format: TargetExportFormat, result_uuid: str, append: bool):
         self._table = table
         self._format = format
         self._result_uuid = result_uuid
+        self._append = append
 
     def _rename_table_columns(self):
         """Renames the solr columns to the public names as specified in the JSON schema"""
@@ -112,11 +120,12 @@ class SolrResultTransformer:
         self._table = petl.transform.headers.rename(self._table, renaming_map, strict=False)
         self._table = petl.rename(self._table, renaming_map, strict=False)
 
-    def transform(self):
+    def transform(self) -> str:
+        """Transforms the table to the destination format.  Return value is the path the output file was written to."""
         self._rename_table_columns()
         if self._format == TargetExportFormat.CSV:
-            CSVExportTransformer.transform(self._table, self._result_uuid)
+            return CSVExportTransformer.transform(self._table, self._result_uuid, self._append)
         elif self._format == TargetExportFormat.JSON or self._format == TargetExportFormat.JSONL:
-            JSONExportTransformer.transform(self._table, self._result_uuid, self._format == TargetExportFormat.JSONL)
+            return JSONExportTransformer.transform(self._table, self._result_uuid, self._append, self._format == TargetExportFormat.JSONL)
         else:
             raise ExportTransformException(f"Unsupported export format: {self._format}")
