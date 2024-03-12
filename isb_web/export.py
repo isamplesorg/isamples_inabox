@@ -1,11 +1,14 @@
 import logging
 import traceback
+import urllib
 from typing import Optional
 import concurrent
+from urllib.request import urlopen
+
 import fastapi.responses
 import igsn_lib.time
-import json_stream.requests
 import petl
+import ijson
 import time
 from fastapi import Depends, FastAPI
 from sqlmodel import Session
@@ -26,14 +29,15 @@ from isb_lib.models.export_job import ExportJob
 from isb_lib.utilities.solr_result_transformer import SolrResultTransformer, TargetExportFormat
 from isb_web import isb_solr_query, analytics, sqlmodel_database, auth
 from isb_web.analytics import AnalyticsEvent
-from isb_web.isb_solr_query import replace_param_value, read_param_value
 from isb_web.sqlmodel_database import SQLModelDAO
 
 EXPORT_PREFIX = "/export"
 export_app = FastAPI(prefix=EXPORT_PREFIX)
-auth.add_auth_middleware_to_app(export_app)
+# auth.add_auth_middleware_to_app(export_app)
 dao: Optional[SQLModelDAO] = None
 DEFAULT_SOLR_FIELDS_FOR_EXPORT = [SOLR_ID, SOLR_AUTHORIZED_BY, SOLR_COMPLIES_WITH, SOLR_PRODUCED_BY_SAMPLING_SITE_LOCATION_LONGITUDE, SOLR_PRODUCED_BY_SAMPLING_SITE_LOCATION_LATITUDE, SOLR_RELATED_RESOURCE_ISB_CORE_ID, SOLR_CURATION_RESPONSIBILITY, SOLR_CURATION_LOCATION, SOLR_CURATION_ACCESS_CONSTRAINTS, SOLR_CURATION_DESCRIPTION, SOLR_CURATION_LABEL, SOLR_SAMPLING_PURPOSE, SOLR_REGISTRANT, SOLR_PRODUCED_BY_SAMPLING_SITE_PLACE_NAME, SOLR_PRODUCED_BY_SAMPLING_SITE_ELEVATION_IN_METERS, SOLR_PRODUCED_BY_SAMPLING_SITE_LABEL, SOLR_PRODUCED_BY_SAMPLING_SITE_DESCRIPTION, SOLR_PRODUCED_BY_RESULT_TIME, SOLR_PRODUCED_BY_RESPONSIBILITY, SOLR_PRODUCED_BY_FEATURE_OF_INTEREST, SOLR_PRODUCED_BY_DESCRIPTION, SOLR_PRODUCED_BY_LABEL, SOLR_PRODUCED_BY_ISB_CORE_ID, SOLR_INFORMAL_CLASSIFICATION, SOLR_KEYWORDS, SOLR_HAS_SPECIMEN_CATEGORY, SOLR_HAS_MATERIAL_CATEGORY, SOLR_HAS_CONTEXT_CATEGORY, SOLR_DESCRIPTION, SOLR_LABEL, SOLR_SOURCE]
+MINIMAL_SOLR_FIELDS_FOR_EXPORT = [SOLR_ID, SOLR_PRODUCED_BY_SAMPLING_SITE_LOCATION_LATITUDE, SOLR_PRODUCED_BY_SAMPLING_SITE_LOCATION_LONGITUDE, SOLR_SOURCE]
+INITIAL_CURSOR_MARK = "*"
 
 
 def get_session():
@@ -62,33 +66,23 @@ def _search_solr_and_export_results(export_job_id: str):
         if export_job is not None:
             export_job.tstarted = igsn_lib.time.dtnow()
             sqlmodel_database.save_or_update_export_job(session, export_job)
-            executed_once = False
-            start_index = read_param_value(export_job.solr_query_params, "start")
-            while True:
-                start_time = time.time()
-                solr_query_params = export_job.solr_query_params
-                if executed_once:
-                    solr_query_params = replace_param_value(solr_query_params, {"start": start_index})
-                export_job.solr_query_params = solr_query_params
-                response = isb_solr_query.solr_searchStream(solr_query_params)  # type: ignore
-                data = json_stream.requests.load(response)
-                docs = data["result-set"]["docs"]
-                generator_docs = (json_stream.to_standard_types(doc) for doc in docs)
-                table = petl.fromdicts(generator_docs)
-                transformed_response_path = f"/tmp/{export_job.uuid}"
-                solr_result_transformer = SolrResultTransformer(table, TargetExportFormat[export_job.export_format], transformed_response_path, executed_once)  # type: ignore
-                solr_result_transformer.transform()
-                export_job.file_path = transformed_response_path
-                export_job.tstarted = igsn_lib.time.dtnow()
-                sqlmodel_database.save_or_update_export_job(session, export_job)
-                print("Finished writing query response!")
-                executed_once = True
-                table_length = petl.util.counting.nrows(table)
-                if (table_length) == 0:
-                    break
-                start_index += table_length
-                finish_time = time.time()
-                logging.info(f"Chunk of {table_length} rows starting at index {start_index} completed fetching and writing in {finish_time - start_time} seconds")
+            start_time = time.time()
+            solr_query_params = export_job.solr_query_params
+            encoded_params = urllib.parse.urlencode(solr_query_params)
+            export_handler = isb_solr_query.get_solr_url("export")
+            full_url = f"{export_handler}?{encoded_params}"
+            src = urlopen(full_url)
+            docs = ijson.items(src, "response.docs.item", use_float=True)
+            generator_docs = (doc for doc in docs)
+            transformed_response_path = f"/tmp/{export_job.uuid}"
+            table = petl.fromdicts(generator_docs)
+            solr_result_transformer = SolrResultTransformer(table, TargetExportFormat[export_job.export_format], transformed_response_path, False)  # type: ignore
+            solr_result_transformer.transform()
+            export_job.file_path = transformed_response_path
+            print("Finished writing query response!")
+            table_length = petl.util.counting.nrows(table)
+            finish_time = time.time()
+            logging.info(f"Chunk of {table_length} rows starting at index 0 completed fetching and writing in {finish_time - start_time} seconds")
             export_job.tcompleted = igsn_lib.time.dtnow()
             sqlmodel_database.save_or_update_export_job(session, export_job)
 
@@ -104,11 +98,10 @@ async def create(request: fastapi.Request, export_format: TargetExportFormat = T
     solr_api_defparams = {
         "wt": "json",
         "q": "*:*",
-        "fl": DEFAULT_SOLR_FIELDS_FOR_EXPORT,
-        "rows": 5000,
-        "start": 0,
+        "fl": ",".join(DEFAULT_SOLR_FIELDS_FOR_EXPORT),
+        "sort": "id asc"
     }
-    params, properties = isb_solr_query.get_solr_params_from_request(request, solr_api_defparams, ["q", "fq", "start", "rows", "fl"])
+    params, properties = isb_solr_query.get_solr_params_from_request_as_dict(request, solr_api_defparams, ["q", "fq", "start", "rows", "fl"])
     analytics.attach_analytics_state_to_request(AnalyticsEvent.THINGS_DOWNLOAD, request, properties)
     export_job = ExportJob()
     export_job.creator_id = auth.orcid_id_from_session_or_scope(request)

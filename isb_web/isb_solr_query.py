@@ -90,7 +90,7 @@ def get_solr_url(path_component: str):
     return urllib.parse.urljoin(BASE_URL, path_component)
 
 
-def set_default_params(params, defs):
+def set_default_params(params, defs, dict: bool = False):
     for k in defs.keys():
         fnd = False
         for row in params:
@@ -98,7 +98,10 @@ def set_default_params(params, defs):
                 fnd = True
                 break
         if not fnd:
-            params.append([k, defs[k]])
+            if not dict:
+                params.append([k, defs[k]])
+            else:
+                params[k] = defs[k]
     return params
 
 
@@ -145,6 +148,28 @@ def get_solr_params_from_request(request: fastapi.Request, defparams: dict = sol
             if k in properties:
                 properties[k] = v
     params = set_default_params(params, defparams)
+    return params, properties
+
+
+def get_solr_params_from_request_as_dict(request: fastapi.Request, defparams: dict = solr_api_defparams, supported_params: Optional[list[str]] = None) -> Tuple[dict, dict]:
+    """Turns a GET request into a list of parameters suitable for querying Solr."""
+    if request.method != "GET":
+        raise ValueError("get_solr_params_from_request only works with GET requests.")
+
+    # Construct a list of K,V pairs to hand on to the solr request.
+    # Can't use a standard dict here because we need to support possible
+    # duplicate keys in the request query string.
+    properties = {
+        "q": defparams["q"]
+    }
+    params = {}
+    # Update params with the provided parameters
+    for k, v in request.query_params.multi_items():
+        if supported_params is None or k in supported_params:
+            params[k] = v
+            if k in properties:
+                properties[k] = v
+    params = set_default_params(params, defparams, True)
     return params, properties
 
 
@@ -375,7 +400,7 @@ def solr_leaflet_heatmap(q, bb, fq=None, grid_level=None):
     }
 
 
-def solr_query(params, query=None):
+def solr_query(params, query=None, handler: str="select", wrap_response: bool = True):
     """
     Issue a request against the solr select endpoint.
 
@@ -388,7 +413,7 @@ def solr_query(params, query=None):
     Returns:
         Iterator for the solr response.
     """
-    url = get_solr_url("select")
+    url = get_solr_url(handler)
     headers = {"Accept": MEDIA_JSON}
     content_type = MEDIA_JSON
     wt_map = {
@@ -398,9 +423,10 @@ def solr_query(params, query=None):
         "smile": "application/x-jackson-smile",
         "json": "application/json",
     }
-    for k, v in params:
-        if k == "wt":
-            content_type = wt_map.get(v.lower(), "json")
+    if type(params) is list:
+        for k, v in params:
+            if k == "wt":
+                content_type = wt_map.get(v.lower(), "json")
 
     if query is None:
         response = requests.get(url, headers=headers, params=params, stream=True)
