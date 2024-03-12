@@ -1,3 +1,4 @@
+import json
 from abc import ABC
 from enum import StrEnum
 
@@ -68,7 +69,10 @@ class JSONExportTransformer(AbstractExportTransformer):
             raise ValueError("JSON Export doesn't support appending")
         extension = "jsonl" if is_lines else "json"
         dest_path = f"{dest_path_no_extension}.{extension}"
-        petl.tojson(table, dest_path, sort_keys=True, lines=is_lines)
+        with open(dest_path, "w") as file:
+            for row in petl.util.base.dicts(table):
+                json.dump(row, file)
+                file.write("\n")
         return dest_path
 
 
