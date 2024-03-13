@@ -1,5 +1,5 @@
 import json
-from abc import ABC, abstractstaticmethod, abstractmethod
+from abc import ABC, abstractmethod
 from collections import OrderedDict
 from enum import StrEnum
 
