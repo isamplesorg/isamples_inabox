@@ -1,6 +1,7 @@
 import json
 from abc import ABC, abstractmethod
 from collections import OrderedDict
+from enum import Enum
 
 import petl
 from petl import Table
@@ -30,18 +31,17 @@ class ExportTransformException(Exception):
     """Exception subclass for when an error occurs during export transform"""
 
 
-class TargetExportFormat(_NoValue):
+class TargetExportFormat(Enum):
     """Valid target export formats"""
     CSV = "CSV"
     JSON = "JSON"
-    JSONL = "JSONL"
 
     # overridden to allow for case insensitivity in query parameter formatting
     @classmethod
     def _missing_(cls, value):
         value = value.upper()
         for member in cls:
-            if member.upper() == value:
+            if member.value.upper() == value:
                 return member
         return None
 
