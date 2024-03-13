@@ -68,7 +68,7 @@ def _search_solr_and_export_results(export_job_id: str):
             sqlmodel_database.save_or_update_export_job(session, export_job)
             start_time = time.time()
             solr_query_params = export_job.solr_query_params
-            encoded_params = urllib.parse.urlencode(solr_query_params)
+            encoded_params = urllib.parse.urlencode(solr_query_params)  # type: ignore
             export_handler = isb_solr_query.get_solr_url("export")
             full_url = f"{export_handler}?{encoded_params}"
             src = urlopen(full_url)
@@ -105,7 +105,7 @@ async def create(request: fastapi.Request, export_format: TargetExportFormat = T
     analytics.attach_analytics_state_to_request(AnalyticsEvent.THINGS_DOWNLOAD, request, properties)
     export_job = ExportJob()
     export_job.creator_id = auth.orcid_id_from_session_or_scope(request)
-    export_job.solr_query_params = params
+    export_job.solr_query_params = params  # type: ignore
     export_job.export_format = export_format
     sqlmodel_database.save_or_update_export_job(session, export_job)
     executor.submit(search_solr_and_export_results, export_job.uuid)  # type: ignore

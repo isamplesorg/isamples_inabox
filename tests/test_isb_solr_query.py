@@ -1,5 +1,4 @@
-from isb_web.isb_solr_query import _solr_heatmap_geom_params_str, MIN_LAT, MAX_LAT, MIN_LON, MAX_LON, \
-    replace_param_value, read_param_value
+from isb_web.isb_solr_query import _solr_heatmap_geom_params_str, MIN_LAT, MAX_LAT, MIN_LON, MAX_LON
 
 
 def test_solr_heat_geom_params_str():

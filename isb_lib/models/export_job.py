@@ -57,7 +57,7 @@ class ExportJob(SQLModel, table=True):
         )
     )
     export_format: Optional[str] = Field(
-        default=TargetExportFormat.CSV.value,
+        default=TargetExportFormat.CSV,
         nullable=False,
         description="Format of the exported data.",
         index=False

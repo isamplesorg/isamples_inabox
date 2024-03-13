@@ -400,7 +400,7 @@ def solr_leaflet_heatmap(q, bb, fq=None, grid_level=None):
     }
 
 
-def solr_query(params, query=None, handler: str="select", wrap_response: bool = True):
+def solr_query(params, query=None, handler: str = "select", wrap_response: bool = True):
     """
     Issue a request against the solr select endpoint.
 
