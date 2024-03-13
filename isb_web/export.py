@@ -106,7 +106,7 @@ async def create(request: fastapi.Request, export_format: TargetExportFormat = T
     export_job = ExportJob()
     export_job.creator_id = auth.orcid_id_from_session_or_scope(request)
     export_job.solr_query_params = params  # type: ignore
-    export_job.export_format = export_format
+    export_job.export_format = export_format.value
     sqlmodel_database.save_or_update_export_job(session, export_job)
     executor.submit(search_solr_and_export_results, export_job.uuid)  # type: ignore
     status_dict = {"status": "created", "uuid": export_job.uuid}

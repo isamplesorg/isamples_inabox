@@ -1,7 +1,6 @@
 import json
 from abc import ABC, abstractmethod
 from collections import OrderedDict
-from enum import StrEnum
 
 import petl
 from petl import Table
@@ -24,13 +23,14 @@ from isamples_metadata.solr_field_constants import SOLR_PRODUCED_BY_SAMPLING_SIT
     SOLR_PRODUCED_BY_DESCRIPTION, SOLR_PRODUCED_BY_LABEL, SOLR_PRODUCED_BY_ISB_CORE_ID, SOLR_INFORMAL_CLASSIFICATION, \
     SOLR_KEYWORDS, SOLR_HAS_SPECIMEN_CATEGORY, SOLR_HAS_MATERIAL_CATEGORY, SOLR_HAS_CONTEXT_CATEGORY, SOLR_DESCRIPTION, \
     SOLR_LABEL, SOLR_SOURCE
+from isb_lib.utilities.enums import _NoValue
 
 
 class ExportTransformException(Exception):
     """Exception subclass for when an error occurs during export transform"""
 
 
-class TargetExportFormat(StrEnum):
+class TargetExportFormat(_NoValue):
     """Valid target export formats"""
     CSV = "CSV"
     JSON = "JSON"
