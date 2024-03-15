@@ -160,7 +160,6 @@ class SolrResultTransformer:
         self._table = petl.transform.headers.rename(self._table, renaming_map, strict=False)
         self._table = petl.rename(self._table, renaming_map, strict=False)
 
-
     def _rename_table_columns_jsonl(self):
         """Transforms the solr columns to structured json conforming to the public JSON metadata schema"""
 

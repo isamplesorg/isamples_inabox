@@ -17,6 +17,7 @@ SOLR_items = [
 def _test_path() -> str:
     return f"./test_data/solr_results/solr_results_{uuid.uuid4()}"
 
+
 def _solr_result_table(solr_file_path: str) -> Table:
     with open(solr_file_path, "r") as file:
         solr_result_dict: dict = json.load(file)
