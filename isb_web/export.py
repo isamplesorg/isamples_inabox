@@ -77,7 +77,7 @@ def _search_solr_and_export_results(export_job_id: str):
             transformed_response_path = f"/tmp/{export_job.uuid}"
             table = petl.fromdicts(generator_docs)
             solr_result_transformer = SolrResultTransformer(table, TargetExportFormat[export_job.export_format], transformed_response_path, False)  # type: ignore
-            solr_result_transformer.transform()
+            transformed_response_path = solr_result_transformer.transform()
             export_job.file_path = transformed_response_path
             print("Finished writing query response!")
             table_length = petl.util.counting.nrows(table)
