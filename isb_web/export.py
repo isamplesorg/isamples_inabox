@@ -92,6 +92,11 @@ async def create(request: fastapi.Request, export_format: TargetExportFormat = T
                  session: Session = Depends(get_session)) -> JSONResponse:
     """Creates a new export job with the specified solr query"""
 
+    if request.query_params.get("sort") is not None:
+        raise fastapi.HTTPException(
+            status_code=415, detail="Sort field not supported for export"
+        )
+
     # supported parameters are: q, fq, start, rows, format (right now format should be either CSV or JSON)
 
     # These will be inserted into the solr request if not present on the API call

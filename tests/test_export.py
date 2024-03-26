@@ -38,6 +38,11 @@ def test_export_create(mock_solr_query: MagicMock, mock_database: MagicMock, cli
     assert response.status_code == 201
 
 
+def test_export_create_sort_unsupported(client: TestClient):
+    response = client.get("/export/create?sort=foobar")
+    assert response.status_code == 415
+
+
 @patch("isb_web.sqlmodel_database.export_job_with_uuid")
 def test_export_status(mock_database: MagicMock, client: TestClient):
     mock_database.return_value = ExportJob()
