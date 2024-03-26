@@ -26,7 +26,7 @@ from isb_lib.models.thing import Thing
 from isb_lib.utilities import h3_utilities
 from isb_lib.utilities.url_utilities import full_url_from_suffix
 from isb_lib.vocabulary import vocab_adapter
-from isb_web import sqlmodel_database, analytics, manage, debug, metrics, vocabulary
+from isb_web import sqlmodel_database, analytics, manage, debug, metrics, vocabulary, export, auth
 from isb_web.analytics import AnalyticsEvent
 from isb_web import schemas
 from isb_web import crud
@@ -77,6 +77,7 @@ manage.main_app = app
 manage.dao = dao
 metrics.dao = dao
 vocabulary.dao = dao
+export.dao = dao
 
 app.add_middleware(
     fastapi.middleware.cors.CORSMiddleware,
@@ -115,6 +116,7 @@ app.mount(manage.MANAGE_PREFIX, manage_app)
 app.mount(debug.DEBUG_PREFIX, debug_app)
 app.include_router(metrics.router)
 app.include_router(vocabulary.router)
+app.mount(export.EXPORT_PREFIX, export.export_app)
 
 
 @app.on_event("startup")
@@ -131,8 +133,8 @@ def on_startup():
     # Superusers are allowed to mint identifiers as well, so make sure they're in the list.
     orcid_ids.extend(isb_web.config.Settings().orcid_superusers)
     # The main handler's startup is the guaranteed spot where we know we have a db connection.
-    # User the connected db session to push in to the manage handler's orcid_ids state.
-    manage.allowed_orcid_ids = orcid_ids
+    # User the connected db session to push in to the auth module's orcid_ids state.
+    auth.allowed_orcid_ids = orcid_ids
     term_store.create_database(dao.engine)
 
 
@@ -262,46 +264,17 @@ async def thing_list_types(
     return sqlmodel_database.get_sample_types(session)
 
 
-def set_default_params(params, defs):
-    for k in defs.keys():
-        fnd = False
-        for row in params:
-            if k == row[0]:
-                fnd = True
-                break
-        if not fnd:
-            params.append([k, defs[k]])
-    return params
-
-
 async def _get_solr_select(request: fastapi.Request):
     """Send select request to the Solr isb_core_records collection.
 
     See https://solr.apache.org/guide/8_11/common-query-parameters.html
     """
-    # Construct a list of K,V pairs to hand on to the solr request.
-    # Can't use a standard dict here because we need to support possible
-    # duplicate keys in the request query string.
-    defparams = {
-        "wt": "json",
-        "q": "*:*",
-        "fl": "id",
-        "rows": 10,
-        "start": 0,
-    }
-    properties = {
-        "q": defparams["q"]
-    }
-    params = []
     if request.method == "POST":
+        params = []
+        properties = {"q": "*:*"}
         await _handle_post_solr_select(params, properties, request)
     else:
-        # Update params with the provided parameters
-        for k, v in request.query_params.multi_items():
-            params.append([k, v])
-            if k in properties:
-                properties[k] = v
-    params = set_default_params(params, defparams)
+        params, properties = isb_solr_query.get_solr_params_from_request(request)
     logging.warning(params)
     analytics.attach_analytics_state_to_request(AnalyticsEvent.THING_SOLR_SELECT, request, properties)
 
@@ -432,10 +405,13 @@ async def get_solr_stream(request: fastapi.Request):
         params.append([k, v])
         if k in properties:
             properties[k] = v
-    params = set_default_params(params, defparams)
+    params = isb_solr_query.set_default_params(params, defparams)
     # L.debug("Params: %s", params)
     analytics.attach_analytics_state_to_request(AnalyticsEvent.THING_SOLR_STREAM, request, properties)
-    return isb_solr_query.solr_searchStream(params)
+    response = isb_solr_query.solr_searchStream(params)
+    return fastapi.responses.StreamingResponse(
+        response.iter_content(chunk_size=4096), media_type=MEDIA_JSON
+    )
 
 
 @app.get(f"/{THING_URL_PATH}/select/info", response_model=typing.Any)

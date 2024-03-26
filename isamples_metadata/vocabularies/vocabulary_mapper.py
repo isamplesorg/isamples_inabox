@@ -3,7 +3,7 @@ import csv
 from pathlib import Path
 from typing import Optional
 
-from isamples_metadata.metadata_constants import LABEL, IDENTIFIER
+from isamples_metadata.metadata_constants import METADATA_LABEL, METADATA_IDENTIFIER
 
 """
 Note that this module operates on a CSV-derived form of the vocabulary sourced at
@@ -21,10 +21,10 @@ class VocabularyTerm(dict):
 
     def metadata_dict(self) -> dict[str, str]:
         metadata_dict = {
-            LABEL: self.label
+            METADATA_LABEL: self.label
         }
         if self.uri is not None:
-            metadata_dict[IDENTIFIER] = self.uri
+            metadata_dict[METADATA_IDENTIFIER] = self.uri
         return metadata_dict
 
 

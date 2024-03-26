@@ -4,12 +4,12 @@ from typing import Optional
 
 import h3
 
-from isamples_metadata.metadata_constants import SAMPLE_IDENTIFIER, SCHEMA, AT_ID, LABEL, DESCRIPTION, \
-    HAS_CONTEXT_CATEGORY, HAS_CONTEXT_CATEGORY_CONFIDENCE, HAS_MATERIAL_CATEGORY, HAS_MATERIAL_CATEGORY_CONFIDENCE, \
-    HAS_SPECIMEN_CATEGORY, HAS_SPECIMEN_CATEGORY_CONFIDENCE, KEYWORDS, KEYWORD, KEYWORD_URI, SCHEME_NAME, PRODUCED_BY, \
-    RESPONSIBILITY, HAS_FEATURE_OF_INTEREST, RESULT_TIME, SAMPLING_SITE, ELEVATION, LATITUDE, LONGITUDE, \
-    REGISTRANT, SAMPLING_PURPOSE, CURATION, ACCESS_CONSTRAINTS, CURATION_LOCATION, RELATED_RESOURCE, AUTHORIZED_BY, \
-    COMPLIES_WITH, INFORMAL_CLASSIFICATION, PLACE_NAME, ROLE, NAME, SAMPLE_LOCATION
+from isamples_metadata.metadata_constants import METADATA_SAMPLE_IDENTIFIER, METADATA_SCHEMA, METADATA_AT_ID, METADATA_LABEL, METADATA_DESCRIPTION, \
+    METADATA_HAS_CONTEXT_CATEGORY, METADATA_HAS_CONTEXT_CATEGORY_CONFIDENCE, METADATA_HAS_MATERIAL_CATEGORY, METADATA_HAS_MATERIAL_CATEGORY_CONFIDENCE, \
+    METADATA_HAS_SPECIMEN_CATEGORY, METADATA_HAS_SPECIMEN_CATEGORY_CONFIDENCE, METADATA_KEYWORDS, METADATA_KEYWORD, METADATA_KEYWORD_URI, METADATA_SCHEME_NAME, METADATA_PRODUCED_BY, \
+    METADATA_RESPONSIBILITY, METADATA_HAS_FEATURE_OF_INTEREST, METADATA_RESULT_TIME, METADATA_SAMPLING_SITE, METADATA_ELEVATION, METADATA_LATITUDE, METADATA_LONGITUDE, \
+    METADATA_REGISTRANT, METADATA_SAMPLING_PURPOSE, METADATA_CURATION, METADATA_ACCESS_CONSTRAINTS, METADATA_CURATION_LOCATION, METADATA_RELATED_RESOURCE, METADATA_AUTHORIZED_BY, \
+    METADATA_COMPLIES_WITH, METADATA_INFORMAL_CLASSIFICATION, METADATA_PLACE_NAME, METADATA_ROLE, METADATA_NAME, METADATA_SAMPLE_LOCATION
 from isamples_metadata.vocabularies.vocabulary_mapper import ControlledVocabulary, VocabularyTerm
 
 NOT_PROVIDED = "Not Provided"
@@ -77,7 +77,7 @@ class Transformer(ABC):
     def _responsibility_dict(
         role: str, name: str
     ):
-        return {ROLE: role, NAME: name}
+        return {METADATA_ROLE: role, METADATA_NAME: name}
 
     def __init__(self, source_record: typing.Dict):
         self.source_record = source_record
@@ -94,51 +94,51 @@ class Transformer(ABC):
         material_categories = self.has_material_categories()
         specimen_categories = self.has_specimen_categories()
         transformed_record = {
-            SCHEMA: "iSamplesSchemaCore1.0.json",
-            AT_ID: self.id_string(),
-            LABEL: self.sample_label(),
-            SAMPLE_IDENTIFIER: self.sample_identifier_string(),
-            DESCRIPTION: self.sample_description(),
-            HAS_CONTEXT_CATEGORY: context_categories,
-            HAS_CONTEXT_CATEGORY_CONFIDENCE: self.has_context_category_confidences(context_categories),
-            HAS_MATERIAL_CATEGORY: material_categories,
-            HAS_MATERIAL_CATEGORY_CONFIDENCE: self.has_material_category_confidences(material_categories),
-            HAS_SPECIMEN_CATEGORY: specimen_categories,
-            HAS_SPECIMEN_CATEGORY_CONFIDENCE: self.has_specimen_category_confidences(specimen_categories),
-            INFORMAL_CLASSIFICATION: self.informal_classification(),
-            KEYWORDS: self.keywords(),
-            PRODUCED_BY: {
-                AT_ID: self.produced_by_id_string(),
-                LABEL: self.produced_by_label(),
-                DESCRIPTION: self.produced_by_description(),
-                HAS_FEATURE_OF_INTEREST: self.produced_by_feature_of_interest(),
-                RESPONSIBILITY: self.produced_by_responsibilities(),
-                RESULT_TIME: self.produced_by_result_time(),
-                SAMPLING_SITE: {
-                    DESCRIPTION: self.sampling_site_description(),
-                    LABEL: self.sampling_site_label(),
-                    SAMPLE_LOCATION: {
-                        ELEVATION: self.sampling_site_elevation(),
-                        LATITUDE: self.sampling_site_latitude(),
-                        LONGITUDE: self.sampling_site_longitude(),
+            METADATA_SCHEMA: "iSamplesSchemaCore1.0.json",
+            METADATA_AT_ID: self.id_string(),
+            METADATA_LABEL: self.sample_label(),
+            METADATA_SAMPLE_IDENTIFIER: self.sample_identifier_string(),
+            METADATA_DESCRIPTION: self.sample_description(),
+            METADATA_HAS_CONTEXT_CATEGORY: context_categories,
+            METADATA_HAS_CONTEXT_CATEGORY_CONFIDENCE: self.has_context_category_confidences(context_categories),
+            METADATA_HAS_MATERIAL_CATEGORY: material_categories,
+            METADATA_HAS_MATERIAL_CATEGORY_CONFIDENCE: self.has_material_category_confidences(material_categories),
+            METADATA_HAS_SPECIMEN_CATEGORY: specimen_categories,
+            METADATA_HAS_SPECIMEN_CATEGORY_CONFIDENCE: self.has_specimen_category_confidences(specimen_categories),
+            METADATA_INFORMAL_CLASSIFICATION: self.informal_classification(),
+            METADATA_KEYWORDS: self.keywords(),
+            METADATA_PRODUCED_BY: {
+                METADATA_AT_ID: self.produced_by_id_string(),
+                METADATA_LABEL: self.produced_by_label(),
+                METADATA_DESCRIPTION: self.produced_by_description(),
+                METADATA_HAS_FEATURE_OF_INTEREST: self.produced_by_feature_of_interest(),
+                METADATA_RESPONSIBILITY: self.produced_by_responsibilities(),
+                METADATA_RESULT_TIME: self.produced_by_result_time(),
+                METADATA_SAMPLING_SITE: {
+                    METADATA_DESCRIPTION: self.sampling_site_description(),
+                    METADATA_LABEL: self.sampling_site_label(),
+                    METADATA_SAMPLE_LOCATION: {
+                        METADATA_ELEVATION: self.sampling_site_elevation(),
+                        METADATA_LATITUDE: self.sampling_site_latitude(),
+                        METADATA_LONGITUDE: self.sampling_site_longitude(),
                     },
-                    PLACE_NAME: self.sampling_site_place_names(),
+                    METADATA_PLACE_NAME: self.sampling_site_place_names(),
                 },
             },
-            REGISTRANT: {
-                NAME: self.sample_registrant()
+            METADATA_REGISTRANT: {
+                METADATA_NAME: self.sample_registrant()
             },
-            SAMPLING_PURPOSE: self.sample_sampling_purpose(),
-            CURATION: {
-                LABEL: self.curation_label(),
-                DESCRIPTION: self.curation_description(),
-                ACCESS_CONSTRAINTS: self.curation_access_constraints(),
-                CURATION_LOCATION: self.curation_location(),
-                RESPONSIBILITY: self.curation_responsibility(),
+            METADATA_SAMPLING_PURPOSE: self.sample_sampling_purpose(),
+            METADATA_CURATION: {
+                METADATA_LABEL: self.curation_label(),
+                METADATA_DESCRIPTION: self.curation_description(),
+                METADATA_ACCESS_CONSTRAINTS: self.curation_access_constraints(),
+                METADATA_CURATION_LOCATION: self.curation_location(),
+                METADATA_RESPONSIBILITY: self.curation_responsibility(),
             },
-            RELATED_RESOURCE: self.related_resources(),
-            AUTHORIZED_BY: self.authorized_by(),
-            COMPLIES_WITH: self.complies_with(),
+            METADATA_RELATED_RESOURCE: self.related_resources(),
+            METADATA_AUTHORIZED_BY: self.authorized_by(),
+            METADATA_COMPLIES_WITH: self.complies_with(),
         }
         for index in range(0, 15):
             h3_at_resolution = self.h3_function()(self.source_record, index)
@@ -508,12 +508,12 @@ class Keyword(dict):
 
     def metadata_dict(self) -> dict[str, str]:
         metadata_dict = {
-            KEYWORD: self.value
+            METADATA_KEYWORD: self.value
         }
         if self.uri is not None:
-            metadata_dict[KEYWORD_URI] = self.uri
+            metadata_dict[METADATA_KEYWORD_URI] = self.uri
         if self.scheme is not None:
-            metadata_dict[SCHEME_NAME] = self.scheme
+            metadata_dict[METADATA_SCHEME_NAME] = self.scheme
         return metadata_dict
 
 
