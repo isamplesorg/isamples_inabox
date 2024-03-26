@@ -1,4 +1,5 @@
 import logging
+import os.path
 import traceback
 import urllib
 from typing import Optional
@@ -145,7 +146,8 @@ def download(uuid: str = fastapi.Query(None), session: Session = Depends(get_ses
     if export_job is None:
         return _not_found_response()
     else:
-        if export_job.file_path is not None:
-            return FileResponse(export_job.file_path)
+        if export_job.file_path is not None and os.path.exists(export_job.file_path):
+            status_code = 200 if os.path.getsize(export_job.file_path) > 0 else 204
+            return FileResponse(export_job.file_path, status_code=status_code)
         else:
             return _not_found_response()
